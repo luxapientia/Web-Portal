@@ -102,8 +102,11 @@ export async function PUT(request: Request) {
       );
     }
 
-    // Delete the code from Redis after successful verification
+    // Delete the verification code from Redis after successful verification
     await redis.del(`email_verification:${email}`);
+
+    // Store email verified status in Redis (keep for 1 hour)
+    await redis.set(`email_verified:${email}`, 'true', 'EX', 3600);
 
     return NextResponse.json(
       { message: 'Email verified successfully' },
