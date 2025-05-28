@@ -5,14 +5,20 @@ import { Box, Container, Typography, Button, Paper, Stack } from '@mui/material'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
+import { fetchWithAuth } from '@/lib/api';
 
 export default function WelcomePage() {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (isAuthenticated) {
-      router.push('/dashboard');
+      // Verify authentication status with server
+      const response = await fetchWithAuth('/api/auth/me', { requireAuth: true });
+      if (response) {
+        router.push('/dashboard');
+      }
+      // If response is null, fetchWithAuth has already handled the redirect
     } else {
       router.push('/login');
     }
