@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { getTokenFromHeader, verifyJWT } from '@/lib/auth';
+import { getTokenFromHeader, verifyJWT, signJWT } from '@/lib/auth';
+import type { JWTPayload } from '@/lib/auth';
 
 // List of public API routes that don't require authentication
 const publicApiRoutes = [
@@ -11,7 +12,6 @@ const publicApiRoutes = [
   '/api/auth/refresh-token',
   '/api/auth/me',
   '/api/auth/forgot-password',
-  
 ];
 
 export async function middleware(request: NextRequest) {
@@ -25,7 +25,6 @@ export async function middleware(request: NextRequest) {
   // Only apply to /api routes
   if (pathname.startsWith('/api')) {
     try {
-      // Get token from header
       const token = await getTokenFromHeader(request);
       if (!token) {
         return NextResponse.json(
@@ -34,7 +33,6 @@ export async function middleware(request: NextRequest) {
         );
       }
 
-      // Verify token
       const payload = await verifyJWT(token);
       if (!payload) {
         return NextResponse.json(
@@ -43,20 +41,37 @@ export async function middleware(request: NextRequest) {
         );
       }
 
-      // Add user info to request headers for downstream use
-      const requestHeaders = new Headers(request.headers);
-      requestHeaders.set('x-user-id', payload.userId as string);
-      requestHeaders.set('x-user-email', payload.email as string);
-      if (payload.role) {
-        requestHeaders.set('x-user-role', payload.role as string);
-      }
+      // Generate new token with extended expiration
+      const newToken = await signJWT({
+        userId: payload.userId,
+        email: payload.email,
+        role: payload.role,
+      });
 
-      // Return response with modified headers
-      return NextResponse.next({
+      // Add user data as a single JSON object in headers
+      const requestHeaders = new Headers(request.headers);
+      const userData = {
+        id: payload.userId,
+        email: payload.email,
+        role: payload.role || 'user',
+        lastActive: new Date().toISOString(),
+      };
+      requestHeaders.set('x-user-data', JSON.stringify(userData));
+
+      // Create response with modified headers
+      const response = NextResponse.next({
         request: {
           headers: requestHeaders,
         },
       });
+
+      // Set the new token in cookie with security flags
+      response.headers.set(
+        'Set-Cookie',
+        `token=${newToken}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${60 * 60 * 24 * 7}`
+      );
+
+      return response;
     } catch (error) {
       console.error('Authentication error:', error);
       return NextResponse.json(
