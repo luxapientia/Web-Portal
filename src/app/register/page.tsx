@@ -6,11 +6,12 @@ import AuthCard from '@/components/auth/AuthCard';
 import { registrationSchema, emailVerificationSchema, type RegistrationFormData } from '@/schemas/auth.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
 
 export default function RegisterPage() {
   const [isVerifying, setIsVerifying] = useState(false);
   const [isEmailVerified, setIsEmailVerified] = useState(false);
-  const [verificationMessage, setVerificationMessage] = useState('');
+  const [isVerifyingCode, setIsVerifyingCode] = useState(false);
 
   const {
     register,
@@ -19,6 +20,7 @@ export default function RegisterPage() {
     setError,
     watch,
     trigger,
+    getValues,
   } = useForm<RegistrationFormData>({
     resolver: zodResolver(registrationSchema),
   });
@@ -30,44 +32,100 @@ export default function RegisterPage() {
   });
 
   const email = watch('email');
+  const otp = watch('otp');
 
   const handleEmailVerification = async () => {
     try {
       // Validate email field specifically
       const isEmailValid = await trigger('email');
-      if (!isEmailValid) return;
+      if (!isEmailValid) {
+        toast.error('Please enter a valid email address');
+        return;
+      }
 
       setIsVerifying(true);
-      setVerificationMessage('');
+      const toastId = toast.loading('Sending verification code...');
 
       // Validate using email verification schema
       const validationResult = emailVerificationSchema.safeParse({ email });
       if (!validationResult.success) {
-        setVerificationMessage('Please enter a valid email address');
+        toast.error('Please enter a valid email address', { id: toastId });
         return;
       }
 
-      // TODO: Replace with your actual API call
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulating API call
-      
-      // Simulate successful verification
-      setIsEmailVerified(true);
-      setVerificationMessage('Email verification code has been sent!');
+      // Call the email verification API
+      const response = await fetch('/api/auth/verify-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send verification code');
+      }
+
+      toast.success('Verification code sent successfully!', { id: toastId });
     } catch (error) {
       setIsEmailVerified(false);
-      setVerificationMessage('Failed to send verification code. Please try again.');
+      toast.error(error instanceof Error ? error.message : 'Failed to send verification code');
     } finally {
       setIsVerifying(false);
     }
   };
 
+  const handleVerifyCode = async () => {
+    try {
+      setIsVerifyingCode(true);
+      const toastId = toast.loading('Verifying code...');
+
+      const response = await fetch('/api/auth/verify-email', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: getValues('email'),
+          code: getValues('otp'),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Invalid verification code');
+      }
+
+      setIsEmailVerified(true);
+      toast.success('Email verified successfully!', { id: toastId });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to verify code');
+    } finally {
+      setIsVerifyingCode(false);
+    }
+  };
+
   const onSubmit = async (data: RegistrationFormData) => {
     try {
+      if (!isEmailVerified) {
+        toast.error('Please verify your email first');
+        return;
+      }
+
+      const toastId = toast.loading('Processing registration...');
       console.log('Registration form submitted:', data);
       console.log('Files:', files);
       // Add your API call here
+      
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      toast.success('Registration successful!', { id: toastId });
     } catch (error) {
       console.error('Registration error:', error);
+      toast.error('Registration failed. Please try again.');
       setError('root', {
         type: 'manual',
         message: 'Registration failed. Please try again.',
@@ -285,31 +343,37 @@ export default function RegisterPage() {
             ) : isEmailVerified ? (
               'Verified'
             ) : (
-              'Email verification'
+              'Send Verification Code'
             )}
           </Button>
-
-          {verificationMessage && (
-            <Typography 
-              color={isEmailVerified ? 'success.main' : 'error'} 
-              textAlign="center"
-            >
-              {verificationMessage}
-            </Typography>
-          )}
 
           <Box>
             <TextField
               fullWidth
               {...register('otp')}
-              placeholder="OTP"
+              placeholder="Enter verification code"
               variant="outlined"
               error={!!errors.otp}
               helperText={errors.otp?.message}
               sx={inputStyle}
-              disabled={!isEmailVerified}
+              disabled={isEmailVerified}
             />
           </Box>
+
+          {!isEmailVerified && otp && (
+            <Button
+              variant="contained"
+              onClick={handleVerifyCode}
+              disabled={isVerifyingCode || !otp}
+              sx={buttonStyle}
+            >
+              {isVerifyingCode ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                'Verify Code'
+              )}
+            </Button>
+          )}
 
           {errors.root && (
             <Typography color="error" textAlign="center">
