@@ -125,8 +125,14 @@ export const fileUploadSchema = z.object({
   }
 );
 
+export const loginSchema = z.object({
+  email: emailSchema,
+  password: z.string().min(1, 'Password is required'),
+});
+
 // ============= Types =============
 export type RegistrationFormData = z.infer<typeof registrationSchema>;
+export type LoginFormData = z.infer<typeof loginSchema>;
 export type EmailVerificationData = z.infer<typeof emailVerificationSchema>;
 export type OtpVerificationData = z.infer<typeof otpVerificationSchema>;
 export type FileUploadData = z.infer<typeof fileUploadSchema>; 
