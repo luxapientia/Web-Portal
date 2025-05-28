@@ -5,6 +5,13 @@ import { getTokenFromHeader, verifyJWT } from '@/lib/auth';
 // List of public API routes that don't require authentication
 const publicApiRoutes = [
   '/api/auth/verify-email',
+  '/api/auth/register',
+  '/api/auth/login',
+  '/api/auth/logout',
+  '/api/auth/refresh-token',
+  '/api/auth/me',
+  '/api/auth/forgot-password',
+  
 ];
 
 export async function middleware(request: NextRequest) {
