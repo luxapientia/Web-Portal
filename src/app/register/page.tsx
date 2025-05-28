@@ -1,31 +1,51 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { TextField, Button, Stack, Box, Typography, CircularProgress } from '@mui/material';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import AuthCard from '@/components/auth/AuthCard';
-import { registrationSchema, emailVerificationSchema, type RegistrationFormData } from '@/schemas/auth.schema';
+import { registrationSchema, type RegistrationFormData } from '@/schemas/auth.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [isVerifying, setIsVerifying] = useState(false);
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const [isVerifyingCode, setIsVerifyingCode] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [timer, setTimer] = useState(0);
+  const [hasCodeBeenSent, setHasCodeBeenSent] = useState(false);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [timer]);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    setError,
     watch,
     trigger,
     getValues,
   } = useForm<RegistrationFormData>({
     resolver: zodResolver(registrationSchema),
+    mode: 'onChange'
   });
 
-  const [files, setFiles] = useState({
+  const [files, setFiles] = useState<{
+    idFront: File | null;
+    idBack: File | null;
+    selfie: File | null;
+  }>({
     idFront: null,
     idBack: null,
     selfie: null,
@@ -46,13 +66,6 @@ export default function RegisterPage() {
       setIsVerifying(true);
       const toastId = toast.loading('Sending verification code...');
 
-      // Validate using email verification schema
-      const validationResult = emailVerificationSchema.safeParse({ email });
-      if (!validationResult.success) {
-        toast.error('Please enter a valid email address', { id: toastId });
-        return;
-      }
-
       // Call the email verification API
       const response = await fetch('/api/auth/verify-email', {
         method: 'POST',
@@ -68,6 +81,8 @@ export default function RegisterPage() {
         throw new Error(data.error || 'Failed to send verification code');
       }
 
+      setTimer(30); // Start 30 second countdown
+      setHasCodeBeenSent(true); // Mark that code has been sent
       toast.success('Verification code sent successfully!', { id: toastId });
     } catch (error) {
       setIsEmailVerified(false);
@@ -115,30 +130,61 @@ export default function RegisterPage() {
         return;
       }
 
+      // Check if all required files are selected
+      if (!files.idFront || !files.idBack || !files.selfie) {
+        toast.error('Please upload all required documents');
+        return;
+      }
+
+      setIsSubmitting(true);
       const toastId = toast.loading('Processing registration...');
-      console.log('Registration form submitted:', data);
-      console.log('Files:', files);
-      // Add your API call here
+
+      // Create FormData for multipart form data
+      const formData = new FormData();
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Append form fields
+      formData.append('fullName', data.fullName);
+      formData.append('email', data.email);
+      formData.append('phone', data.phone);
+      formData.append('password', data.password);
+      formData.append('idPassport', data.idPassport);
+      formData.append('invitationCode', data.invitationCode);
+      formData.append('otp', data.otp);
+
+      // Append files with specific names
+      formData.append('idFront', files.idFront);
+      formData.append('idBack', files.idBack);
+      formData.append('selfie', files.selfie);
+
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        body: formData, // FormData will automatically set the correct Content-Type header
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Registration failed');
+      }
+
       toast.success('Registration successful!', { id: toastId });
+      router.push('/login');
     } catch (error) {
       console.error('Registration error:', error);
-      toast.error('Registration failed. Please try again.');
-      setError('root', {
-        type: 'manual',
-        message: 'Registration failed. Please try again.',
-      });
+      toast.error(error instanceof Error ? error.message : 'Registration failed');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: string) => {
-    if (e.target.files?.[0]) {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'idFront' | 'idBack' | 'selfie') => {
+    const file = e.target.files?.[0];
+    if (file) {
       setFiles(prev => ({
         ...prev,
-        [type]: e.target.files?.[0],
+        [type]: file
       }));
+      trigger(type as keyof RegistrationFormData);
     }
   };
 
@@ -189,7 +235,7 @@ export default function RegisterPage() {
 
   return (
     <AuthCard title="Registration">
-      <form onSubmit={handleSubmit(onSubmit)} noValidate>
+      <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
         <Stack spacing={2.5}>
           <Box>
             <Typography sx={labelStyle}>
@@ -198,8 +244,7 @@ export default function RegisterPage() {
             <TextField
               fullWidth
               {...register('fullName')}
-              placeholder="username"
-              variant="outlined"
+              placeholder="John Doe"
               error={!!errors.fullName}
               helperText={errors.fullName?.message}
               sx={inputStyle}
@@ -213,8 +258,7 @@ export default function RegisterPage() {
             <TextField
               fullWidth
               {...register('phone')}
-              placeholder="+9607781378"
-              variant="outlined"
+              placeholder="+1234567890"
               error={!!errors.phone}
               helperText={errors.phone?.message}
               sx={inputStyle}
@@ -229,8 +273,7 @@ export default function RegisterPage() {
               fullWidth
               {...register('email')}
               type="email"
-              placeholder="username"
-              variant="outlined"
+              placeholder="email@example.com"
               error={!!errors.email}
               helperText={errors.email?.message}
               sx={inputStyle}
@@ -246,8 +289,7 @@ export default function RegisterPage() {
               fullWidth
               {...register('password')}
               type="password"
-              placeholder="password"
-              variant="outlined"
+              placeholder="••••••••"
               error={!!errors.password}
               helperText={errors.password?.message}
               sx={inputStyle}
@@ -256,13 +298,12 @@ export default function RegisterPage() {
 
           <Box>
             <Typography sx={labelStyle}>
-              ID / Passport
+              ID/Passport Number
             </Typography>
             <TextField
               fullWidth
               {...register('idPassport')}
-              placeholder="ID"
-              variant="outlined"
+              placeholder="ID123456"
               error={!!errors.idPassport}
               helperText={errors.idPassport?.message}
               sx={inputStyle}
@@ -276,8 +317,7 @@ export default function RegisterPage() {
             <TextField
               fullWidth
               {...register('invitationCode')}
-              placeholder="Code"
-              variant="outlined"
+              placeholder="ABC123"
               error={!!errors.invitationCode}
               helperText={errors.invitationCode?.message}
               sx={inputStyle}
@@ -295,9 +335,21 @@ export default function RegisterPage() {
             component="label"
             htmlFor="idFront"
             variant="contained"
-            sx={buttonStyle}
+            sx={{
+              ...buttonStyle,
+              display: 'flex',
+              gap: 1,
+              alignItems: 'center',
+            }}
           >
-            Attach ID Copy
+            {files.idFront ? (
+              <>
+                <CheckCircleIcon sx={{ color: 'success.main' }} />
+                ID Front Selected
+              </>
+            ) : (
+              'Attach ID Front Copy'
+            )}
           </Button>
 
           <input
@@ -311,9 +363,21 @@ export default function RegisterPage() {
             component="label"
             htmlFor="idBack"
             variant="contained"
-            sx={buttonStyle}
+            sx={{
+              ...buttonStyle,
+              display: 'flex',
+              gap: 1,
+              alignItems: 'center',
+            }}
           >
-            Attach ID Back Copy
+            {files.idBack ? (
+              <>
+                <CheckCircleIcon sx={{ color: 'success.main' }} />
+                ID Back Selected
+              </>
+            ) : (
+              'Attach ID Back Copy'
+            )}
           </Button>
 
           <input
@@ -327,21 +391,37 @@ export default function RegisterPage() {
             component="label"
             htmlFor="selfie"
             variant="contained"
-            sx={buttonStyle}
+            sx={{
+              ...buttonStyle,
+              display: 'flex',
+              gap: 1,
+              alignItems: 'center',
+            }}
           >
-            Upload selfie with ID card
+            {files.selfie ? (
+              <>
+                <CheckCircleIcon sx={{ color: 'success.main' }} />
+                Selfie Selected
+              </>
+            ) : (
+              'Upload Selfie with ID'
+            )}
           </Button>
 
           <Button
             variant="contained"
             onClick={handleEmailVerification}
-            disabled={isVerifying || isEmailVerified || !email}
+            disabled={isVerifying || isEmailVerified || !email || timer > 0}
             sx={buttonStyle}
           >
             {isVerifying ? (
               <CircularProgress size={24} color="inherit" />
             ) : isEmailVerified ? (
               'Verified'
+            ) : timer > 0 ? (
+              `Resend in ${timer}s`
+            ) : hasCodeBeenSent ? (
+              'Resend Verification Code'
             ) : (
               'Send Verification Code'
             )}
@@ -352,7 +432,6 @@ export default function RegisterPage() {
               fullWidth
               {...register('otp')}
               placeholder="Enter verification code"
-              variant="outlined"
               error={!!errors.otp}
               helperText={errors.otp?.message}
               sx={inputStyle}
@@ -384,12 +463,17 @@ export default function RegisterPage() {
           <Button
             type="submit"
             variant="contained"
+            disabled={isSubmitting || !isEmailVerified}
             sx={buttonStyle}
           >
-            Submit
+            {isSubmitting ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              'Complete Registration'
+            )}
           </Button>
         </Stack>
-      </form>
+      </Box>
     </AuthCard>
   );
 } 
