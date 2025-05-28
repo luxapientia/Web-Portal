@@ -1,18 +1,24 @@
 'use client';
 
 import { useState } from 'react';
-import { TextField, Button, Stack, Box, Typography } from '@mui/material';
+import { TextField, Button, Stack, Box, Typography, CircularProgress } from '@mui/material';
 import AuthCard from '@/components/auth/AuthCard';
-import { registrationSchema, type RegistrationFormData } from '@/schemas/auth.schema';
+import { registrationSchema, emailVerificationSchema, type RegistrationFormData } from '@/schemas/auth.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
 export default function RegisterPage() {
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
+  const [verificationMessage, setVerificationMessage] = useState('');
+
   const {
     register,
     handleSubmit,
     formState: { errors },
     setError,
+    watch,
+    trigger,
   } = useForm<RegistrationFormData>({
     resolver: zodResolver(registrationSchema),
   });
@@ -22,6 +28,38 @@ export default function RegisterPage() {
     idBack: null,
     selfie: null,
   });
+
+  const email = watch('email');
+
+  const handleEmailVerification = async () => {
+    try {
+      // Validate email field specifically
+      const isEmailValid = await trigger('email');
+      if (!isEmailValid) return;
+
+      setIsVerifying(true);
+      setVerificationMessage('');
+
+      // Validate using email verification schema
+      const validationResult = emailVerificationSchema.safeParse({ email });
+      if (!validationResult.success) {
+        setVerificationMessage('Please enter a valid email address');
+        return;
+      }
+
+      // TODO: Replace with your actual API call
+      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulating API call
+      
+      // Simulate successful verification
+      setIsEmailVerified(true);
+      setVerificationMessage('Email verification code has been sent!');
+    } catch (error) {
+      setIsEmailVerified(false);
+      setVerificationMessage('Failed to send verification code. Please try again.');
+    } finally {
+      setIsVerifying(false);
+    }
+  };
 
   const onSubmit = async (data: RegistrationFormData) => {
     try {
@@ -127,7 +165,7 @@ export default function RegisterPage() {
 
           <Box>
             <Typography sx={labelStyle}>
-              Email
+              Email {isEmailVerified && '✓'}
             </Typography>
             <TextField
               fullWidth
@@ -138,6 +176,7 @@ export default function RegisterPage() {
               error={!!errors.email}
               helperText={errors.email?.message}
               sx={inputStyle}
+              disabled={isEmailVerified}
             />
           </Box>
 
@@ -237,10 +276,27 @@ export default function RegisterPage() {
 
           <Button
             variant="contained"
+            onClick={handleEmailVerification}
+            disabled={isVerifying || isEmailVerified || !email}
             sx={buttonStyle}
           >
-            Email verification
+            {isVerifying ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : isEmailVerified ? (
+              'Verified'
+            ) : (
+              'Email verification'
+            )}
           </Button>
+
+          {verificationMessage && (
+            <Typography 
+              color={isEmailVerified ? 'success.main' : 'error'} 
+              textAlign="center"
+            >
+              {verificationMessage}
+            </Typography>
+          )}
 
           <Box>
             <TextField
@@ -251,6 +307,7 @@ export default function RegisterPage() {
               error={!!errors.otp}
               helperText={errors.otp?.message}
               sx={inputStyle}
+              disabled={!isEmailVerified}
             />
           </Box>
 
