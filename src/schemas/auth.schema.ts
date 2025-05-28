@@ -19,9 +19,11 @@ export const authErrors = {
     invalid: 'Please enter a valid email address',
   },
   password: {
-    min: 'Password must be at least 8 characters',
-    max: 'Password cannot exceed 50 characters',
-    requirements: 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
+    min: 'At least 8 characters',
+    uppercase: 'At least 1 uppercase letter',
+    lowercase: 'At least 1 lowercase letter',
+    number: 'At least 1 number',
+    special: 'At least 1 special character (!@#$%^&*)',
   },
   idPassport: {
     min: 'ID/Passport number must be at least 5 characters',
@@ -71,11 +73,10 @@ export const emailSchema = z.string()
 
 export const passwordSchema = z.string()
   .min(8, authErrors.password.min)
-  .max(50, authErrors.password.max)
-  .regex(
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/,
-    authErrors.password.requirements
-  );
+  .regex(/[A-Z]/, authErrors.password.uppercase)
+  .regex(/[a-z]/, authErrors.password.lowercase)
+  .regex(/\d/, authErrors.password.number)
+  .regex(/[!@#$%^&*]/, authErrors.password.special);
 
 export const idPassportSchema = z.string()
   .min(5, authErrors.idPassport.min)
@@ -99,10 +100,6 @@ export const registrationSchema = z.object({
   idPassport: idPassportSchema,
   invitationCode: invitationCodeSchema,
   otp: otpSchema,
-  // File uploads
-  idFront: fileSchema.nullable(),
-  idBack: fileSchema.nullable(),
-  selfie: fileSchema.nullable(),
 });
 
 export const emailVerificationSchema = z.object({
@@ -113,6 +110,7 @@ export const otpVerificationSchema = z.object({
   otp: otpSchema,
 });
 
+// Separate schema for file uploads
 export const fileUploadSchema = z.object({
   idFront: fileSchema,
   idBack: fileSchema,
@@ -122,7 +120,7 @@ export const fileUploadSchema = z.object({
     return data.idFront && data.idBack && data.selfie;
   },
   {
-    message: authErrors.files.required,
+    message: 'All ID documents and selfie are required',
     path: ['files'],
   }
 );
