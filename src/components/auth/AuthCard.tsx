@@ -1,6 +1,6 @@
 'use client';
 
-import { Paper, Box, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import Image from 'next/image';
 import { ReactNode } from 'react';
 
@@ -21,14 +21,12 @@ export default function AuthCard({ title, subtitle, children }: AuthCardProps) {
                 justifyContent: 'center',
                 py: { xs: 3, sm: 4, md: 6 },
                 px: { xs: 2, sm: 3 },
-                background: '#f5f5f5',
             }}
         >
-            <Paper
-                elevation={2}
+            <Box
                 sx={{
                     width: '100%',
-                    maxWidth: { xs: '340px', sm: '380px', md: '400px' },
+                    maxWidth: { xs: '300px', sm: '500px', md: '800px' },
                     p: { xs: 2.5, sm: 3, md: 4 },
                     textAlign: 'center',
                     borderRadius: { xs: '20px', sm: '24px' },
@@ -53,7 +51,7 @@ export default function AuthCard({ title, subtitle, children }: AuthCardProps) {
                         alt="Double Bubble Logo"
                         fill
                         sizes="(max-width: 600px) 100px, (max-width: 900px) 120px, 140px"
-                        style={{ 
+                        style={{
                             objectFit: 'contain',
                             width: '100%',
                             height: '100%'
@@ -91,7 +89,7 @@ export default function AuthCard({ title, subtitle, children }: AuthCardProps) {
                 )}
 
                 {children}
-            </Paper>
+            </Box>
         </Box>
     );
 } 

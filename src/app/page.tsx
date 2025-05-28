@@ -1,7 +1,7 @@
 'use client';
 
 import Image from "next/image";
-import { Box, Container, Typography, Button, Paper, Stack } from '@mui/material';
+import { Box, Container, Typography, Button, Stack } from '@mui/material';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { fetchWithAuth } from '@/lib/api';
@@ -33,16 +33,7 @@ export default function WelcomePage() {
         py: 4,
       }}
     >
-      <Container maxWidth="sm">
-        <Paper
-          elevation={24}
-          sx={{
-            p: 4,
-            backdropFilter: 'blur(10px)',
-            backgroundColor: 'rgba(255, 255, 255, 0.9)',
-            textAlign: 'center',
-          }}
-        >
+      <Container>
           <Stack spacing={4} alignItems="center">
             {/* Logo */}
             <Box
@@ -151,11 +142,13 @@ export default function WelcomePage() {
 
             {/* Action Buttons */}
             <Stack 
-              spacing={{ xs: 2, sm: 3 }} 
+              direction={{ xs: 'column', sm: 'row' }}
+              spacing={2}
               width="100%"
               sx={{
-                maxWidth: { xs: '100%', sm: '400px' },
-                mx: 'auto'
+                maxWidth: { xs: '100%', sm: '600px' },
+                mx: 'auto',
+                mt: { xs: 2, sm: 4 }
               }}
             >
               <Button
@@ -163,10 +156,12 @@ export default function WelcomePage() {
                 color="secondary"
                 size="large"
                 href="/register"
+                fullWidth
                 sx={{
-                  py: { xs: 1.25, sm: 1.5 },
+                  py: { xs: 1.5, sm: 1.75 },
                   fontSize: { xs: '1.1rem', sm: '1.25rem' },
                   fontWeight: 'bold',
+                  flex: { sm: 1 }
                 }}
               >
                 Join
@@ -177,17 +172,18 @@ export default function WelcomePage() {
                 color="secondary"
                 size="large"
                 onClick={handleContinue}
+                fullWidth
                 sx={{
-                  py: { xs: 1.25, sm: 1.5 },
+                  py: { xs: 1.5, sm: 1.75 },
                   fontSize: { xs: '1.1rem', sm: '1.25rem' },
                   fontWeight: 'bold',
+                  flex: { sm: 1 }
                 }}
               >
                 Continue
               </Button>
             </Stack>
           </Stack>
-        </Paper>
       </Container>
     </Box>
   );
