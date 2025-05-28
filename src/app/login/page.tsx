@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { TextField, Button, Stack, Link as MuiLink, Typography, Box } from '@mui/material';
+import { TextField, Button, Stack, Typography, Box } from '@mui/material';
 import Link from 'next/link';
 import AuthCard from '@/components/auth/AuthCard';
 import { loginSchema, type LoginFormData } from '@/schemas/auth.schema';
@@ -15,15 +15,20 @@ export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSendingCode, setIsSendingCode] = useState(false);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
+    trigger,
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     mode: 'onChange'
   });
+
+  const email = watch('email');
 
   const onSubmit = async (data: LoginFormData) => {
     try {
@@ -54,6 +59,42 @@ export default function LoginPage() {
       toast.error(error instanceof Error ? error.message : 'Login failed');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    try {
+      // Validate email first
+      const emailValid = await trigger('email');
+      if (!emailValid) {
+        toast.error('Please enter a valid email address');
+        return;
+      }
+
+      setIsSendingCode(true);
+      const toastId = toast.loading('Sending verification code...');
+
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to send verification code');
+      }
+
+      toast.success('Verification code sent!', { id: toastId });
+      router.push(`/reset-password?email=${encodeURIComponent(email)}`);
+    } catch (error) {
+      console.error('Forgot password error:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to send verification code');
+    } finally {
+      setIsSendingCode(false);
     }
   };
 
@@ -144,23 +185,22 @@ export default function LoginPage() {
             />
           </Box>
 
-          <MuiLink
-            component={Link}
-            href="/forgot-password"
+          <Button
+            onClick={handleForgotPassword}
+            disabled={isSendingCode}
             sx={{
               textAlign: 'right',
               color: '#333',
-              textDecoration: 'none',
+              textTransform: 'none',
               fontWeight: 500,
-              display: 'block',
-              mb: 1,
               '&:hover': {
+                backgroundColor: 'transparent',
                 textDecoration: 'underline',
               },
             }}
           >
-            Forgot your password?
-          </MuiLink>
+            {isSendingCode ? 'Sending...' : 'Forgot your password?'}
+          </Button>
 
           <Button
             type="submit"
