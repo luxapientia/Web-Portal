@@ -11,6 +11,8 @@ const publicApiRoutes = [
   '/api/auth/refresh-token',
   '/api/auth/me',
   '/api/auth/forgot-password',
+  '/api/auth/verify-reset-code',
+  '/api/auth/reset-password',
 ];
 
 export async function middleware(request: NextRequest) {
