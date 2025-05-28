@@ -4,32 +4,65 @@ import { useState } from 'react';
 import { TextField, Button, Stack, Link as MuiLink, Typography, Box } from '@mui/material';
 import Link from 'next/link';
 import AuthCard from '@/components/auth/AuthCard';
+import { loginSchema, type LoginFormData } from '@/schemas/auth.schema';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginPage() {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+  const router = useRouter();
+  const { login } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    mode: 'onChange'
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Login form submitted:', formData);
-  };
+  const onSubmit = async (data: LoginFormData) => {
+    try {
+      setIsSubmitting(true);
+      const toastId = toast.loading('Logging in...');
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Login failed');
+      }
+
+      // Store auth token and user data
+      login(result.token, result.user);
+      
+      toast.success('Login successful!', { id: toastId });
+      router.push('/dashboard');
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error(error instanceof Error ? error.message : 'Login failed');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <AuthCard 
-      title="Double Bubble" 
-      subtitle="Your account is suspended"
+      title="Double Bubble"
+      subtitle="Welcome back"
     >
-      <form onSubmit={handleSubmit} noValidate>
+      <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <Stack spacing={3}>
           <Box>
             <Typography
@@ -47,11 +80,11 @@ export default function LoginPage() {
             </Typography>
             <TextField
               fullWidth
-              id="email"
-              name="email"
+              {...register('email')}
+              type="email"
               placeholder="username"
-              value={formData.email}
-              onChange={handleChange}
+              error={!!errors.email}
+              helperText={errors.email?.message}
               variant="outlined"
               sx={{
                 '& .MuiOutlinedInput-root': {
@@ -87,12 +120,11 @@ export default function LoginPage() {
             </Typography>
             <TextField
               fullWidth
-              id="password"
-              name="password"
+              {...register('password')}
               type="password"
               placeholder="password"
-              value={formData.password}
-              onChange={handleChange}
+              error={!!errors.password}
+              helperText={errors.password?.message}
               variant="outlined"
               sx={{
                 '& .MuiOutlinedInput-root': {
@@ -134,6 +166,7 @@ export default function LoginPage() {
             type="submit"
             variant="contained"
             size="large"
+            disabled={isSubmitting}
             sx={{
               py: 1.5,
               fontSize: '1.1rem',
@@ -147,7 +180,7 @@ export default function LoginPage() {
               textTransform: 'none',
             }}
           >
-            Enter
+            {isSubmitting ? 'Logging in...' : 'Enter'}
           </Button>
 
           <Button
