@@ -3,8 +3,21 @@
 import Image from "next/image";
 import { Box, Container, Typography, Button, Paper, Stack } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
 
 export default function WelcomePage() {
+  const { isAuthenticated } = useAuth();
+  const router = useRouter();
+
+  const handleContinue = () => {
+    if (isAuthenticated) {
+      router.push('/dashboard');
+    } else {
+      router.push('/login');
+    }
+  };
+
   return (
     <Box
       component="main"
@@ -158,7 +171,7 @@ export default function WelcomePage() {
                 variant="contained"
                 color="secondary"
                 size="large"
-                href="/login"
+                onClick={handleContinue}
                 sx={{
                   py: { xs: 1.25, sm: 1.5 },
                   fontSize: { xs: '1.1rem', sm: '1.25rem' },
