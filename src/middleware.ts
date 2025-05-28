@@ -2,18 +2,16 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getTokenFromHeader, verifyJWT } from '@/lib/auth';
 
-// Define paths that don't require authentication
-const PUBLIC_PATHS = [
-  '/api/auth/login',
-  '/api/auth/register',
-  '/api/health'
+// List of public API routes that don't require authentication
+const publicApiRoutes = [
+  '/api/auth/verify-email',
 ];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Skip authentication for public paths
-  if (PUBLIC_PATHS.includes(pathname)) {
+  if (publicApiRoutes.some(route => pathname.startsWith(route))) {
     return NextResponse.next();
   }
 
@@ -64,9 +62,10 @@ export async function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
-// Configure which paths the middleware applies to
+// Configure the paths that middleware will run on
 export const config = {
   matcher: [
+    // Apply to all API routes
     '/api/:path*',
   ],
 }; 
