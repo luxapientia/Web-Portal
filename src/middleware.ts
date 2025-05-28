@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getTokenFromHeader, verifyJWT, signJWT } from '@/lib/auth';
-import type { JWTPayload } from '@/lib/auth';
 
 // List of public API routes that don't require authentication
 const publicApiRoutes = [

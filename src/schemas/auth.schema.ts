@@ -50,7 +50,7 @@ export const fileSchema = z.object({
   name: z.string(),
   size: z.number().max(MAX_FILE_SIZE, authErrors.files.size),
   type: z.string().refine(
-    (type) => ALLOWED_FILE_TYPES.includes(type as any),
+    (type) => ALLOWED_FILE_TYPES.includes(type as (typeof ALLOWED_FILE_TYPES)[number]),
     authErrors.files.type
   ),
 });

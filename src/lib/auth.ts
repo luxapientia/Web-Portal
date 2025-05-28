@@ -4,7 +4,14 @@ import { NextRequest } from 'next/server';
 
 const secretKey = new TextEncoder().encode(AUTH_CONFIG.jwtSecret);
 
-export async function signJWT(payload: any) {
+interface JWTPayloadData {
+  userId: string;
+  email: string;
+  role?: string;
+  [key: string]: unknown;
+}
+
+export async function signJWT(payload: JWTPayloadData) {
   try {
     const token = await new SignJWT(payload)
       .setProtectedHeader({ alg: 'HS256' })
@@ -20,7 +27,7 @@ export async function signJWT(payload: any) {
 export async function verifyJWT(token: string) {
   try {
     const { payload } = await jwtVerify(token, secretKey);
-    return payload;
+    return payload as JWTPayloadData;
   } catch (error) {
     console.error('Error verifying JWT:', error);
     return null;
@@ -35,8 +42,4 @@ export async function getTokenFromHeader(request: NextRequest) {
   return authHeader.split(' ')[1];
 }
 
-export interface JWTPayload {
-  userId: string;
-  email: string;
-  role?: string;
-} 
+export type { JWTPayloadData as JWTPayload }; 

@@ -1,16 +1,29 @@
 import { ObjectId } from 'mongodb'
 
-export interface IUser {
+export const UserCollection = 'users'
+
+export interface User {
   _id?: ObjectId
-  name: string
+  fullName: string
   email: string
+  phone: string
   password: string
+  idPassport: string
+  invitationCode?: string
+  isEmailVerified: boolean
+  isPhoneVerified: boolean
+  isIdVerified: boolean
+  role: 'user' | 'admin'
+  status: 'pending' | 'active' | 'suspended'
+  idDocuments: {
+    idFront: string
+    idBack: string
+    selfie: string
+  }
   createdAt: Date
   updatedAt: Date
 }
 
-export type CreateUserInput = Pick<IUser, 'name' | 'email' | 'password'>
+export type CreateUserInput = Pick<User, 'fullName' | 'email' | 'password'>
 
-export interface IUserWithoutPassword extends Omit<IUser, 'password'> {}
-
-export const UserCollection = 'users' 
+export type UserWithoutPassword = Omit<User, 'password'> 

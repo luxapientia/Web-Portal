@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const user = await userService.create({ name, email, password })
+    const user = await userService.create({ fullName: name, email, password })
     
     // Validate response data
     const validatedUser = userResponseSchema.parse(user)

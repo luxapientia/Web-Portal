@@ -5,9 +5,6 @@ import { UserCollection } from '@/models/User';
 import { signJWT } from '@/lib/auth';
 import { loginSchema } from '@/schemas/auth.schema';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
-const JWT_EXPIRES_IN = '7d'; // Token expires in 7 days
-
 export async function POST(request: Request) {
   try {
     const body = await request.json();

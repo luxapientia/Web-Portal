@@ -132,7 +132,7 @@ export async function POST(request: Request) {
     await redis.del(`email_verified:${email}`);
 
     // Return success response (excluding password)
-    const { password: _, ...userWithoutPassword } = newUser;
+    const {...userWithoutPassword } = newUser;
     return NextResponse.json(
       {
         message: 'Registration successful',

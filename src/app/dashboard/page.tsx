@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { Box, Container, Typography, Paper, Card, CardContent, Button } from '@mui/material';
 import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'next/navigation';
 import { fetchWithAuth } from '@/lib/api';
 
 interface UserData {
@@ -14,7 +13,6 @@ interface UserData {
 
 export default function DashboardPage() {
   const { user, logout } = useAuth();
-  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState<UserData | null>(null);
 

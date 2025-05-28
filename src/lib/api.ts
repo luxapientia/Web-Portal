@@ -1,5 +1,3 @@
-import { useAuth } from '@/contexts/AuthContext';
-
 interface FetchOptions extends RequestInit {
   requireAuth?: boolean;
 }

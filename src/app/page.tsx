@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { Box, Container, Typography, Button, Paper, Stack } from '@mui/material';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { fetchWithAuth } from '@/lib/api';
