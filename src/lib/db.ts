@@ -1,5 +1,6 @@
 import { MongoClient, Db } from 'mongodb';
 import { DATABASE_CONFIG, validateDBConfig } from './config';
+import { AppConfigCollection } from '@/models/AppConfig';
 
 validateDBConfig();
 
@@ -16,6 +17,14 @@ export async function connectToDatabase() {
     // Connect to cluster
     const client = await MongoClient.connect(DATABASE_CONFIG.uri!, DATABASE_CONFIG.options);
     const db = client.db(DATABASE_CONFIG.name);
+
+    const appConfig = await db.collection(AppConfigCollection).findOne({});
+    if (!appConfig) {
+      await db.collection(AppConfigCollection).insertOne({
+        registration_max_img_upload_size: 2,
+        image_upload_types: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'],
+      });
+    }
 
     // Set cache
     cachedClient = client;
