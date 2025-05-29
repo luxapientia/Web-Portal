@@ -96,7 +96,7 @@ export async function POST(request: Request) {
       const filepath = join(uploadDir, filename);
     
       // Validate allowed MIME types
-      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      if (!['image/jpeg', 'image/png', 'image/webp', 'image/jpg'].includes(file.type)) {
         return NextResponse.json({ error: `Unsupported file type: ${file.type}` }, { status: 400 });
       }
     
@@ -121,6 +121,12 @@ export async function POST(request: Request) {
         case 'image/webp':
           compressedBuffer = await sharp(buffer)
             .webp({ quality: 90, lossless: true }) // Lossless WebP
+            .toBuffer();
+          break;
+
+        case 'image/jpg':
+          compressedBuffer = await sharp(buffer)
+            .jpeg({ quality: 90, mozjpeg: true }) // Near-lossless JPEG
             .toBuffer();
           break;
     
