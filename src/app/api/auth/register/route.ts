@@ -7,6 +7,7 @@ import redis from '@/lib/redis';
 import { writeFile } from 'fs/promises';
 import { join } from 'path';
 import sharp from 'sharp';
+import { AppConfigCollection } from '@/models/AppConfig';
 
 // Configure upload directory
 const uploadDir = join(process.cwd(), 'public', 'uploads');
@@ -89,14 +90,19 @@ export async function POST(request: Request) {
 
     // Save files
     const savedFiles: Record<string, string> = {};
+
+    const appConfig = await db.collection(AppConfigCollection).findOne({});
+    const maxImgUploadSize = appConfig?.registration_max_img_upload_size;
+    const allowedImgUploadTypes = appConfig?.image_upload_types;
+
     for (const [key, file] of Object.entries(files)) {
       const timestamp = Date.now();
       const extension = file.name.split('.').pop();
       const filename = `${key}_${timestamp}.${extension}`;
       const filepath = join(uploadDir, filename);
-    
+
       // Validate allowed MIME types
-      if (!['image/jpeg', 'image/png', 'image/webp', 'image/jpg'].includes(file.type)) {
+      if (!allowedImgUploadTypes.includes(file.type)) {
         return NextResponse.json({ error: `Unsupported file type: ${file.type}` }, { status: 400 });
       }
     
