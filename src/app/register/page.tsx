@@ -9,9 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
-
 export default function RegisterPage() {
-  const fileMaxSize = process.env.NEXT_PUBLIC_FILE_MAX_SIZE ? parseInt(process.env.NEXT_PUBLIC_FILE_MAX_SIZE) * 1024 * 1024 : 2 * 1024 * 1024; // 2MB
 
   const router = useRouter();
   const [isVerifying, setIsVerifying] = useState(false);
@@ -21,6 +19,7 @@ export default function RegisterPage() {
   const [timer, setTimer] = useState(0);
   const [hasCodeBeenSent, setHasCodeBeenSent] = useState(false);
   const [invitationCode, setInvitationCode] = useState('');
+  const [fileMaxSize, setFileMaxSize] = useState(2 * 1024 * 1024); // 2MB
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -37,7 +36,9 @@ export default function RegisterPage() {
     if(invitationCode === '') {
       getInvitationCode();
     }
-  }, [invitationCode]);
+
+    getAppConfig();
+  }, []);
 
   const {
     register,
@@ -77,6 +78,22 @@ export default function RegisterPage() {
       setInvitationCode(data.invitationCode);
     } catch (error) {
       toast.error('Error generating invitation code');
+    }
+  };
+
+  const getAppConfig = async () => {
+    try {
+      const response = await fetch('/api/app-config', {
+        method: 'GET',
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        toast.error(data.error || 'Failed to get app config');
+        return;
+      }
+      setFileMaxSize(data.registration_max_img_upload_size * 1024 * 1024);
+    } catch (error) {
+      toast.error('Error getting app config');
     }
   };
 
