@@ -4,11 +4,7 @@ import { UserCollection } from '@/models/User';
 import redis from '@/lib/redis';
 import { sendEmail } from '@/lib/mailgun';
 import { emailSchema } from '@/schemas/auth.schema';
-
-// Generate a random 6-digit code
-function generateVerificationCode(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-}
+import { generateVerificationCode } from '@/utils/generate-code';
 
 export async function POST(req: Request) {
   try {

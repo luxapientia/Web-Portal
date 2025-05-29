@@ -58,10 +58,6 @@ export async function sendEmail({ to, subject, text, html }: EmailData) {
   }
 }
 
-export function generateVerificationCode(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-}
-
 export function generateVerificationEmailContent(code: string, expirySeconds: number = 30) {
   const text = `Your verification code is: ${code}. This code will expire in ${expirySeconds} seconds.`;
   const html = `

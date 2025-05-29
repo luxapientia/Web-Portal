@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
-import { generateVerificationCode, generateVerificationEmailContent, sendEmail } from '@/lib/mailgun';
+import { generateVerificationEmailContent, sendEmail } from '@/lib/mailgun';
 import { emailVerificationSchema } from '@/schemas/auth.schema';
 import redis from '@/lib/redis';
+import { generateVerificationCode } from '@/utils/generate-code';
 
 const VERIFICATION_CODE_EXPIRY = 30; // 30 seconds
 
