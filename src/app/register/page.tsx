@@ -11,6 +11,7 @@ import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 
 export default function RegisterPage() {
+  const fileMaxSize = process.env.NEXT_PUBLIC_FILE_MAX_SIZE ? parseInt(process.env.NEXT_PUBLIC_FILE_MAX_SIZE) * 1024 * 1024 : 2 * 1024 * 1024; // 2MB
   const router = useRouter();
   const [isVerifying, setIsVerifying] = useState(false);
   const [isEmailVerified, setIsEmailVerified] = useState(false);
@@ -133,6 +134,12 @@ export default function RegisterPage() {
       // Check if all required files are selected
       if (!files.idFront || !files.idBack || !files.selfie) {
         toast.error('Please upload all required documents');
+        return;
+      }
+
+      // Check file size
+      if (files.idFront.size > fileMaxSize || files.idBack.size > fileMaxSize || files.selfie.size > fileMaxSize) {
+        toast.error('File size exceeds the maximum limit');
         return;
       }
 
@@ -327,7 +334,7 @@ export default function RegisterPage() {
           <input
             type="file"
             id="idFront"
-            accept="image/*"
+            accept="image/png, image/jpeg, image/webp"
             onChange={(e) => handleFileChange(e, 'idFront')}
             style={{ display: 'none' }}
           />
@@ -355,7 +362,7 @@ export default function RegisterPage() {
           <input
             type="file"
             id="idBack"
-            accept="image/*"
+            accept="image/png, image/jpeg, image/webp"
             onChange={(e) => handleFileChange(e, 'idBack')}
             style={{ display: 'none' }}
           />
@@ -383,7 +390,7 @@ export default function RegisterPage() {
           <input
             type="file"
             id="selfie"
-            accept="image/*"
+            accept="image/png, image/jpeg, image/webp"
             onChange={(e) => handleFileChange(e, 'selfie')}
             style={{ display: 'none' }}
           />
