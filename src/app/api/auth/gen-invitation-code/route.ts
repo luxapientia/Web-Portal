@@ -3,9 +3,9 @@ import { getDb } from '@/lib/db';
 import { UserCollection } from '@/models/User';
 import { generateRandomInvitationCode } from '@/utils/generate-code';
 
-export async function POST(req: Request) {
+export async function POST() {
     const db = await getDb();
-    let invitationCode = generateRandomInvitationCode();
+    const invitationCode = generateRandomInvitationCode();
     let exists = true;
     while (exists) {
         const existingInvitationCode = await db.collection(UserCollection).findOne({

@@ -38,7 +38,7 @@ export default function RegisterPage() {
     }
 
     getAppConfig();
-  }, []);
+  }, [invitationCode, fileMaxSize]);
 
   const {
     register,
@@ -77,6 +77,7 @@ export default function RegisterPage() {
       }
       setInvitationCode(data.invitationCode);
     } catch (error) {
+      console.error('Error generating invitation code:', error);
       toast.error('Error generating invitation code');
     }
   };
@@ -93,6 +94,7 @@ export default function RegisterPage() {
       }
       setFileMaxSize(data.registration_max_img_upload_size * 1024 * 1024);
     } catch (error) {
+      console.error('Error getting app config:', error);
       toast.error('Error getting app config');
     }
   };

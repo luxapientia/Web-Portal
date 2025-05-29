@@ -92,7 +92,6 @@ export async function POST(request: Request) {
     const savedFiles: Record<string, string> = {};
 
     const appConfig = await db.collection(AppConfigCollection).findOne({});
-    const maxImgUploadSize = appConfig?.registration_max_img_upload_size;
     const allowedImgUploadTypes = appConfig?.image_upload_types;
 
     for (const [key, file] of Object.entries(files)) {

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
 import { AppConfigCollection } from '@/models/AppConfig';
 
-export async function GET(req: Request) {
+export async function GET() {
     try {
         const db = await getDb();
         const appConfig = await db.collection(AppConfigCollection).findOne({});
@@ -11,6 +11,7 @@ export async function GET(req: Request) {
             image_upload_types: appConfig?.image_upload_types,
         });
     } catch (error) {
-        return NextResponse.json({ error: 'Failed to get app config' }, { status: 500 });
+        console.error('Error getting app config:', error);
+        return NextResponse.json({ error: 'Failed to get app config'  }, { status: 500 });
     }
 } 
