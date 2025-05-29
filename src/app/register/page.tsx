@@ -20,6 +20,7 @@ export default function RegisterPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [timer, setTimer] = useState(0);
   const [hasCodeBeenSent, setHasCodeBeenSent] = useState(false);
+  const [invitationCode, setInvitationCode] = useState('');
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -28,8 +29,15 @@ export default function RegisterPage() {
         setTimer((prev) => prev - 1);
       }, 1000);
     }
+    
     return () => clearInterval(interval);
   }, [timer]);
+
+  useEffect(() => {
+    if(invitationCode === '') {
+      getInvitationCode();
+    }
+  }, [invitationCode]);
 
   const {
     register,
@@ -55,6 +63,22 @@ export default function RegisterPage() {
 
   const email = watch('email');
   const otp = watch('otp');
+
+  const getInvitationCode = async () => {
+    try {
+      const response = await fetch('/api/auth/gen-invitation-code', {
+        method: 'POST',
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        toast.error(data.error || 'Failed to generate invitation code');
+        return;
+      }
+      setInvitationCode(data.invitationCode);
+    } catch (error) {
+      toast.error('Error generating invitation code');
+    }
+  };
 
   const handleEmailVerification = async () => {
     try {
@@ -325,7 +349,8 @@ export default function RegisterPage() {
             <TextField
               fullWidth
               {...register('invitationCode')}
-              placeholder="ABC123"
+              disabled={true}
+              value={invitationCode}
               error={!!errors.invitationCode}
               helperText={errors.invitationCode?.message}
               sx={inputStyle}

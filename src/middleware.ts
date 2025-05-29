@@ -13,6 +13,7 @@ const publicApiRoutes = [
   '/api/auth/forgot-password',
   '/api/auth/verify-reset-code',
   '/api/auth/reset-password',
+  '/api/auth/gen-invitation-code',
 ];
 
 export async function middleware(request: NextRequest) {
