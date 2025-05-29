@@ -6,6 +6,7 @@ import { UserCollection } from '@/models/User';
 import redis from '@/lib/redis';
 import { writeFile } from 'fs/promises';
 import { join } from 'path';
+import sharp from 'sharp';
 
 // Configure upload directory
 const uploadDir = join(process.cwd(), 'public', 'uploads');
@@ -83,21 +84,66 @@ export async function POST(request: Request) {
       );
     }
 
+
+    
+
     // Save files
     const savedFiles: Record<string, string> = {};
     for (const [key, file] of Object.entries(files)) {
       const timestamp = Date.now();
-      const filename = `${key}_${timestamp}_${file.name}`;
+      const extension = file.name.split('.').pop();
+      const filename = `${key}_${timestamp}.${extension}`;
       const filepath = join(uploadDir, filename);
-
-      // Convert File to Buffer and save
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      await writeFile(filepath, buffer);
-
-      // Store relative path
+    
+      // Validate allowed MIME types
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+        return NextResponse.json({ error: `Unsupported file type: ${file.type}` }, { status: 400 });
+      }
+    
+      const arrayBuffer = await file.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+    
+      let compressedBuffer: Buffer;
+    
+      switch (file.type) {
+        case 'image/png':
+          compressedBuffer = await sharp(buffer)
+            .png({ compressionLevel: 9 }) // Lossless PNG
+            .toBuffer();
+          break;
+    
+        case 'image/jpeg':
+          compressedBuffer = await sharp(buffer)
+            .jpeg({ quality: 90, mozjpeg: true }) // Near-lossless JPEG
+            .toBuffer();
+          break;
+    
+        case 'image/webp':
+          compressedBuffer = await sharp(buffer)
+            .webp({ quality: 90, lossless: true }) // Lossless WebP
+            .toBuffer();
+          break;
+    
+        default:
+          compressedBuffer = buffer; // Fallback (shouldn't happen due to MIME check)
+      }
+    
+      await writeFile(filepath, compressedBuffer);
       savedFiles[key] = `/uploads/${filename}`;
     }
+    // for (const [key, file] of Object.entries(files)) {
+    //   const timestamp = Date.now();
+    //   const filename = `${key}_${timestamp}_${file.name}`;
+    //   const filepath = join(uploadDir, filename);
+
+    //   // Convert File to Buffer and save
+    //   const bytes = await file.arrayBuffer();
+    //   const buffer = Buffer.from(bytes);
+    //   await writeFile(filepath, buffer);
+
+    //   // Store relative path
+    //   savedFiles[key] = `/uploads/${filename}`;
+    // }
 
     // Hash password
     const salt = await bcrypt.genSalt(10);
