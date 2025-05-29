@@ -335,7 +335,7 @@ export default function RegisterPage() {
           <input
             type="file"
             id="idFront"
-            accept="image/png, image/jpeg, image/webp"
+            accept="image/*"
             onChange={(e) => handleFileChange(e, 'idFront')}
             style={{ display: 'none' }}
           />
@@ -363,7 +363,7 @@ export default function RegisterPage() {
           <input
             type="file"
             id="idBack"
-            accept="image/png, image/jpeg, image/webp"
+            accept="image/*"
             onChange={(e) => handleFileChange(e, 'idBack')}
             style={{ display: 'none' }}
           />
@@ -391,7 +391,7 @@ export default function RegisterPage() {
           <input
             type="file"
             id="selfie"
-            accept="image/png, image/jpeg, image/webp"
+            accept="image/*"
             onChange={(e) => handleFileChange(e, 'selfie')}
             style={{ display: 'none' }}
           />
