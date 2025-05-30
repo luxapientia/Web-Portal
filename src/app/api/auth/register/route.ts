@@ -4,16 +4,14 @@ import { registrationSchema } from '@/schemas/auth.schema';
 import bcrypt from 'bcryptjs';
 import { UserCollection } from '@/models/User';
 import redis from '@/lib/redis';
-import { writeFile, mkdir } from 'fs/promises';
-import { join, dirname } from 'path';
-import { existsSync } from 'fs';
+import { writeFile } from 'fs/promises';
+import { join } from 'path';
 import sharp from 'sharp';
 import { AppConfigCollection } from '@/models/AppConfig';
 import { generateRandomInvitationCode } from '@/utils/generate-code';
 
-
-// Configure base upload directory
-const baseUploadDir = join(process.cwd(), 'public');
+// Configure upload directory
+const uploadDir = join(process.cwd(), 'public');
 
 export async function POST(request: Request) {
   try {
@@ -109,22 +107,11 @@ export async function POST(request: Request) {
     const appConfig = await db.collection(AppConfigCollection).findOne({});
     const allowedImgUploadTypes = appConfig?.image_upload_types;
 
-    // Create structured directory based on current date
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
-    const structuredDir = join(baseUploadDir, 'images', String(year), month);
-    
-    // Ensure directory exists
-    if (!existsSync(structuredDir)) {
-      await mkdir(structuredDir, { recursive: true });
-    }
-
     for (const [key, file] of Object.entries(files)) {
       const timestamp = Date.now();
       const extension = file.name.split('.').pop();
       const filename = `${key}_${timestamp}.${extension}`;
-      const filepath = join(structuredDir, filename);
+      const filepath = join(uploadDir, filename);
 
       // Validate allowed MIME types
       if (!allowedImgUploadTypes.includes(file.type)) {
@@ -166,8 +153,7 @@ export async function POST(request: Request) {
       }
     
       await writeFile(filepath, compressedBuffer);
-      // Store relative path with the structured format
-      savedFiles[key] = `/images/${year}/${month}/${filename}`;
+      savedFiles[key] = `/uploads/${filename}`;
     }
     // for (const [key, file] of Object.entries(files)) {
     //   const timestamp = Date.now();
