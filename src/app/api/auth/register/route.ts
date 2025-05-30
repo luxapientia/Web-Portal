@@ -52,9 +52,9 @@ export async function POST(request: Request) {
     }
 
     //Check if user with the invitation code is existed
-    const invitingUser = await db.collection(UserCollection).findOne({
-      myInvitationCode: invitationCode
-    })
+    // const invitingUser = await db.collection(UserCollection).findOne({
+    //   myInvitationCode: invitationCode
+    // })
 
     // if(!invitingUser) {
     //   return NextResponse.json(
