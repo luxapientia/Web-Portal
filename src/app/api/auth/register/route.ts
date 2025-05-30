@@ -56,12 +56,12 @@ export async function POST(request: Request) {
       myInvitationCode: invitationCode
     })
 
-    if(!invitingUser) {
-      return NextResponse.json(
-        { error: 'No user with the invitation code' },
-        { status: 400 }
-      );
-    }
+    // if(!invitingUser) {
+    //   return NextResponse.json(
+    //     { error: 'No user with the invitation code' },
+    //     { status: 400 }
+    //   );
+    // }
 
     // Check if user already exists
     const existingUser = await db.collection(UserCollection).findOne({
