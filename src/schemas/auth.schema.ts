@@ -31,7 +31,7 @@ export const authErrors = {
     format: 'Only letters, numbers, and hyphens are allowed',
   },
   invitationCode: {
-    length: 'Invitation code must be exactly 6 characters',
+    length: 'Invitation code must be exactly 8 characters',
     format: 'Only letters and numbers are allowed',
   },
   otp: {
@@ -84,7 +84,7 @@ export const idPassportSchema = z.string()
   .regex(/^[A-Za-z0-9-]*$/, authErrors.idPassport.format);
 
 export const invitationCodeSchema = z.string()
-  .length(6, authErrors.invitationCode.length)
+  .length(8, authErrors.invitationCode.length)
   .regex(/^[A-Za-z0-9]*$/, authErrors.invitationCode.format);
 
 export const otpSchema = z.string()
