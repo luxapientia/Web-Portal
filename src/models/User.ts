@@ -10,6 +10,7 @@ export interface User {
   password: string
   idPassport: string
   invitationCode?: string
+  myInvitationCode: string
   isEmailVerified: boolean
   isPhoneVerified: boolean
   isIdVerified: boolean

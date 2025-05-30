@@ -8,6 +8,8 @@ import { writeFile } from 'fs/promises';
 import { join } from 'path';
 import sharp from 'sharp';
 import { AppConfigCollection } from '@/models/AppConfig';
+import { generateRandomInvitationCode } from '@/utils/generate-code';
+
 
 // Configure upload directory
 const uploadDir = join(process.cwd(), 'public', 'uploads');
@@ -49,12 +51,24 @@ export async function POST(request: Request) {
       );
     }
 
+    //Check if user with the invitation code is existed
+    const invitingUser = await db.collection(UserCollection).findOne({
+      myInvitationCode: invitationCode
+    })
+
+    if(!invitingUser) {
+      return NextResponse.json(
+        { error: 'No user with the invitation code' },
+        { status: 400 }
+      );
+    }
+
     // Check if user already exists
     const existingUser = await db.collection(UserCollection).findOne({
       $or: [
         { email },
         { phone },
-        { idPassport }
+        { idPassport },
       ]
     });
 
@@ -160,6 +174,18 @@ export async function POST(request: Request) {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
+    let myInvitationCode = "";
+    let invitationCodeExists = true;
+    while (invitationCodeExists) {
+      myInvitationCode = generateRandomInvitationCode();
+        const existingInvitationCode = await db.collection(UserCollection).findOne({
+            myInvitationCode
+        });
+        if (!existingInvitationCode) {
+          invitationCodeExists = false;
+        }
+    }
+
     // Create user document
     const newUser = {
       fullName,
@@ -176,6 +202,7 @@ export async function POST(request: Request) {
       idDocuments: savedFiles,
       createdAt: new Date(),
       updatedAt: new Date(),
+      myInvitationCode
     };
 
     // Insert user into database

@@ -18,7 +18,7 @@ export default function RegisterPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [timer, setTimer] = useState(0);
   const [hasCodeBeenSent, setHasCodeBeenSent] = useState(false);
-  const [invitationCode, setInvitationCode] = useState('');
+  // const [invitationCode, setInvitationCode] = useState('');
   const [fileMaxSize, setFileMaxSize] = useState(2 * 1024 * 1024); // 2MB
 
   useEffect(() => {
@@ -33,12 +33,8 @@ export default function RegisterPage() {
   }, [timer]);
 
   useEffect(() => {
-    if(invitationCode === '') {
-      getInvitationCode();
-    }
-
     getAppConfig();
-  }, [invitationCode, fileMaxSize]);
+  }, [ fileMaxSize]);
 
   const {
     register,
@@ -65,22 +61,22 @@ export default function RegisterPage() {
   const email = watch('email');
   const otp = watch('otp');
 
-  const getInvitationCode = async () => {
-    try {
-      const response = await fetch('/api/auth/gen-invitation-code', {
-        method: 'POST',
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        toast.error(data.error || 'Failed to generate invitation code');
-        return;
-      }
-      setInvitationCode(data.invitationCode);
-    } catch (error) {
-      console.error('Error generating invitation code:', error);
-      toast.error('Error generating invitation code');
-    }
-  };
+  // const getInvitationCode = async () => {
+  //   try {
+  //     const response = await fetch('/api/auth/gen-invitation-code', {
+  //       method: 'POST',
+  //     });
+  //     const data = await response.json();
+  //     if (!response.ok) {
+  //       toast.error(data.error || 'Failed to generate invitation code');
+  //       return;
+  //     }
+  //     setInvitationCode(data.invitationCode);
+  //   } catch (error) {
+  //     console.error('Error generating invitation code:', error);
+  //     toast.error('Error generating invitation code');
+  //   }
+  // };
 
   const getAppConfig = async () => {
     try {
@@ -368,8 +364,7 @@ export default function RegisterPage() {
             <TextField
               fullWidth
               {...register('invitationCode')}
-              disabled={true}
-              value={invitationCode}
+              placeholder="ABCD1234"
               error={!!errors.invitationCode}
               helperText={errors.invitationCode?.message}
               sx={inputStyle}
