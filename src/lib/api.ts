@@ -13,7 +13,7 @@ export async function fetchWithAuth(url: string, options: FetchOptions = {}) {
     if (options.requireAuth && !token) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.href = '/login';
+      window.location.href = '/auth/login';
       return null;
     }
 
@@ -34,7 +34,7 @@ export async function fetchWithAuth(url: string, options: FetchOptions = {}) {
       localStorage.removeItem('user');
       
       // Redirect to login page
-      window.location.href = '/login';
+      window.location.href = '/auth/login';
       return null;
     }
 
