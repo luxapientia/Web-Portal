@@ -90,7 +90,7 @@ export default function Header({ className }: HeaderProps) {
             </ListItem>
             <ListItem
               disablePadding
-              onClick={() => handleNavigation("/register")}
+              onClick={() => handleNavigation("/auth/register")}
             >
               <ListItemText primary="Join" sx={{ textAlign: "center" }} />
             </ListItem>
@@ -170,7 +170,7 @@ export default function Header({ className }: HeaderProps) {
                 <>
                   <Button
                     color="inherit"
-                    onClick={() => router.push("/login")}
+                    onClick={() => router.push("/auth/login")}
                     sx={{ mr: 1 }}
                   >
                     Login
@@ -178,7 +178,7 @@ export default function Header({ className }: HeaderProps) {
                   <Button
                     variant="contained"
                     color="secondary"
-                    onClick={() => router.push("/register")}
+                    onClick={() => router.push("/auth/register")}
                     sx={{
                       fontWeight: "bold",
                     }}

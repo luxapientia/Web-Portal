@@ -19,7 +19,7 @@ export default function WelcomePage() {
       }
       // If response is null, fetchWithAuth has already handled the redirect
     } else {
-      router.push('/login');
+      router.push('/auth/login');
     }
   };
 
@@ -155,7 +155,7 @@ export default function WelcomePage() {
                 variant="contained"
                 color="secondary"
                 size="large"
-                href="/register"
+                href="/auth/register"
                 fullWidth
                 sx={{
                   py: { xs: 1.5, sm: 1.75 },

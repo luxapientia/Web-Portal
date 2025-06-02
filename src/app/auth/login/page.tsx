@@ -89,7 +89,7 @@ export default function LoginPage() {
       }
 
       toast.success('Verification code sent!', { id: toastId });
-      router.push(`/reset-password?email=${encodeURIComponent(email)}`);
+      router.push(`/auth/reset-password?email=${encodeURIComponent(email)}`);
     } catch (error) {
       console.error('Forgot password error:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to send verification code');
@@ -225,7 +225,7 @@ export default function LoginPage() {
 
           <Button
             component={Link}
-            href="/register"
+            href="/auth/register"
             variant="contained"
             size="large"
             sx={{

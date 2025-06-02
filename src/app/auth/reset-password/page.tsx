@@ -29,7 +29,7 @@ function ResetPasswordContent() {
     } else if (timeLeft === 0 && !isCodeVerified) {
       // Redirect to login if time expires
       toast.error('Verification code expired. Please try again.');
-      router.push('/login');
+      router.push('/auth/login');
     }
     return () => clearInterval(timer);
   }, [timeLeft, isCodeVerified, router]);
@@ -110,7 +110,7 @@ function ResetPasswordContent() {
       }
 
       toast.success('Password reset successful!', { id: toastId });
-      router.push('/login?message=password-reset-success');
+      router.push('/auth/login?message=password-reset-success');
     } catch (error) {
       console.error('Password reset error:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to reset password');
