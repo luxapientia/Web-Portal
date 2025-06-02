@@ -3,7 +3,8 @@ import { getDb } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import { UserCollection } from '@/models/User';
 import { signJWT } from '@/lib/auth';
-import { loginSchema } from '@/schemas/auth.schema';
+import { loginSchema, userSchema } from '@/schemas/auth.schema';
+
 
 export async function POST(request: Request) {
   try {
@@ -45,6 +46,29 @@ export async function POST(request: Request) {
       email: user.email,
       role: user.role || 'user',
     });
+
+    // Create a user object without the password field for security
+    const userWithoutPassword = { ...user };
+    delete userWithoutPassword.password;
+    
+    // Prepare user data according to our schema
+    const userData = {
+      ...userWithoutPassword,
+      id: user._id.toString(), // Add id field for frontend compatibility
+      _id: user._id.toString(), // Convert MongoDB ObjectId to string
+      role: user.role || 'user', // Ensure role has a default value
+      status: user.status || 'pending', // Ensure status has a default value
+      isEmailVerified: user.isEmailVerified || false,
+      isPhoneVerified: user.isPhoneVerified || false,
+      isIdVerified: user.isIdVerified || false,
+    };
+
+    // Validate the user data against our schema (optional but recommended)
+    const validatedUserResult = userSchema.safeParse(userData);
+    if (!validatedUserResult.success) {
+      console.error('User data validation failed:', validatedUserResult.error);
+      // We still proceed but log the error for debugging
+    }
 
     // Return success response with token
     return NextResponse.json(
