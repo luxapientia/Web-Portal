@@ -1,5 +1,4 @@
 import { ObjectId } from 'mongodb'
-
 export const UserCollection = 'users'
 
 export interface User {
@@ -20,6 +19,10 @@ export interface User {
     idFront: string
     idBack: string
     selfie: string
+  }
+  withdrawalWallet?: {
+    type: string
+    id: string
   }
   createdAt: Date
   updatedAt: Date
