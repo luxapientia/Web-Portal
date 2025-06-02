@@ -130,9 +130,50 @@ export const loginSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 });
 
+export const walletInfoSchema = z.object({
+  id: z.string(),
+  type: z.string()
+});
+
+// ============= Auth Context Schemas =============
+export const userSchema = z.object({
+  id: z.string(),
+  _id: z.string().optional(),
+  fullName: fullNameSchema,
+  email: emailSchema,
+  phone: phoneSchema.optional(),
+  idPassport: idPassportSchema.optional(),
+  invitationCode: invitationCodeSchema.optional(),
+  myInvitationCode: z.string().optional(),
+  isEmailVerified: z.boolean().default(false),
+  isPhoneVerified: z.boolean().default(false),
+  isIdVerified: z.boolean().default(false),
+  role: z.enum(['user', 'admin']).default('user'),
+  status: z.enum(['pending', 'active', 'suspended']).default('pending'),
+  idDocuments: z.object({
+    idFront: z.string().optional(),
+    idBack: z.string().optional(),
+    selfie: z.string().optional(),
+  }).optional(),
+  withdrawalWallet: walletInfoSchema.optional(),
+  createdAt: z.date().or(z.string()).optional(),
+  updatedAt: z.date().or(z.string()).optional(),
+});
+
+
 // ============= Types =============
 export type RegistrationFormData = z.infer<typeof registrationSchema>;
 export type LoginFormData = z.infer<typeof loginSchema>;
 export type EmailVerificationData = z.infer<typeof emailVerificationSchema>;
 export type OtpVerificationData = z.infer<typeof otpVerificationSchema>;
 export type FileUploadData = z.infer<typeof fileUploadSchema>; 
+export type User = z.infer<typeof userSchema>;
+
+// Define AuthContextType directly as an interface instead of using Zod inference
+export interface AuthContextType {
+  user: User | null;
+  token: string | null;
+  login: (token: string, user: User) => void;
+  logout: () => void;
+  isAuthenticated: boolean;
+}
