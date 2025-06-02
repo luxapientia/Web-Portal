@@ -85,7 +85,7 @@ export default function Header({ className }: HeaderProps) {
         ))}
         {!isAuthenticated ? (
           <>
-            <ListItem disablePadding onClick={() => handleNavigation("/login")}>
+            <ListItem disablePadding onClick={() => handleNavigation("/auth/login")}>
               <ListItemText primary="Login" sx={{ textAlign: "center" }} />
             </ListItem>
             <ListItem
