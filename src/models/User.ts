@@ -4,7 +4,8 @@ export const UserCollection = 'users'
 export interface User {
   _id?: ObjectId
   fullName: string
-  email: string
+  email: string,
+  avatar: string,
   phone: string
   password: string
   idPassport: string
