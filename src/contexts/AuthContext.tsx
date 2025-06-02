@@ -2,21 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-
-interface User {
-  id: string;
-  email: string;
-  fullName: string;
-  role: string;
-}
-
-interface AuthContextType {
-  user: User | null;
-  token: string | null;
-  login: (token: string, user: User) => void;
-  logout: () => void;
-  isAuthenticated: boolean;
-}
+import { User, AuthContextType } from '@/schemas/auth.schema';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
