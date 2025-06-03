@@ -5,7 +5,8 @@ import {
   MenuItem, 
   Typography, 
   Divider, 
-  Box
+  Box,
+  Avatar
 } from '@mui/material';
 import { 
   Person as PersonIcon,
@@ -75,7 +76,15 @@ export default function UserMenu({
         color="inherit"
         sx={{ mr: 1 }}
       >
-        <AccountCircle />
+        {user?.avatar ? (
+          <Avatar 
+            src={user.avatar} 
+            alt={user.fullName || 'User'} 
+            sx={{ width: 32, height: 32 }}
+          />
+        ) : (
+          <AccountCircle />
+        )}
       </IconButton>
       
       {showDashboardButton && (
