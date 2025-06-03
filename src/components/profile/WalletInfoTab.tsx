@@ -12,7 +12,7 @@ import {
   IconButton,
   Tooltip,
 } from "@mui/material";
-import { EditOutlined, SaveOutlined, CloseOutlined } from "@mui/icons-material";
+import { EditOutlined, SaveOutlined, CloseOutlined, ContentCopy } from "@mui/icons-material";
 import { useAuth } from "@/contexts/AuthContext";
 import { fetchWithAuth } from "@/lib/api";
 import toast from "react-hot-toast";
@@ -159,7 +159,23 @@ export default function WalletInfoTab() {
                   disabled={!editMode || loading}
                   helperText="Enter your wallet address, bank account, or mobile money number"
                   variant="outlined"
-                  InputProps={{ sx: { borderRadius: 1 } }}
+                  InputProps={{ 
+                    sx: { borderRadius: 1 },
+                    endAdornment: !editMode && walletInfo.id ? (
+                      <Tooltip title="Copy to clipboard">
+                        <IconButton
+                          edge="end"
+                          size="small"
+                          onClick={() => {
+                            navigator.clipboard.writeText(walletInfo.id);
+                            toast.success("Wallet address copied to clipboard!");
+                          }}
+                        >
+                          <ContentCopy fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    ) : null
+                  }}
                 />
               </Stack>
               <Box

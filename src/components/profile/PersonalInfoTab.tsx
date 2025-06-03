@@ -23,6 +23,7 @@ import {
 import {
   PhotoCamera,
   Close as CloseIcon,
+  ContentCopy,
 } from "@mui/icons-material";
 import { User } from "@/schemas/auth.schema";
 import { useAuth } from "@/contexts/AuthContext";
@@ -282,15 +283,51 @@ export default function PersonalInfoTab() {
                 gutterBottom
                 align="center"
               >
-                My Invitation Code:
+                Share this code with others to invite them to build your team
               </Typography>
               <Divider sx={{ mb: 2 }} />
-              <Typography
-                variant="body1"
-                align="center"
-                sx={{ fontWeight: "medium", fontSize: "1.1rem" }}
+              <Box 
+                sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  gap: 1
+                }}
               >
-                {formData.myInvitationCode || "N/A"}
+                <Typography
+                  variant="body1"
+                  align="center"
+                  sx={{ fontWeight: "medium", fontSize: "1.1rem" }}
+                >
+                  {formData.myInvitationCode || "N/A"}
+                </Typography>
+                {formData.myInvitationCode && (
+                  <Tooltip title="Copy to clipboard">
+                    <IconButton
+                      size="small"
+                      color="primary"
+                      onClick={() => {
+                        navigator.clipboard.writeText(formData.myInvitationCode || "");
+                        toast.success("Invitation code copied to clipboard!");
+                      }}
+                      sx={{ 
+                        padding: 0.5,
+                        '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.08)' }
+                      }}
+                    >
+                      <ContentCopy fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                )}
+              </Box>
+              <Divider sx={{ mt: 2, mb: 2 }} />
+              <Typography
+                variant="subtitle2"
+                color="text.secondary"
+                gutterBottom
+                align="center"
+              >
+                Invite friends and get rewards! You receive 2 USD (in your investment balance) for each invited user after their first deposit of 50 USD or More.
               </Typography>
             </CardContent>
           </Card>
