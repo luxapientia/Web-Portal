@@ -82,31 +82,34 @@ export default function PersonalInfoTab() {
 
   const handleAvatarUpload = async () => {
     if (!user || !avatarFile) return;
-  
+
     try {
       setAvatarLoading(true);
-  
+
       // Create a FormData object for the avatar
       const formDataWithFile = new FormData();
       formDataWithFile.append("avatar", avatarFile);
-  
+
       // Send the avatar upload request
       const response = await fetchWithAuth("/api/profile/avatar", {
         method: "POST",
         body: formDataWithFile,
-        requireAuth: true
+        requireAuth: true,
       });
-  
+
       if (response) {
         const data = await response.json();
         if (data.success) {
           toast.success("Avatar updated successfully!");
           setAvatarFile(null);
           setAvatarDialogOpen(false);
-  
+
           // Update auth context with new user data
           if (data.avatarUrl) {
-            login(localStorage.getItem("token") || "", { ...user, avatar: data.avatarUrl });
+            login(localStorage.getItem("token") || "", {
+              ...user,
+              avatar: data.avatarUrl,
+            });
           }
         } else {
           throw new Error(data.error || "Failed to update avatar");
@@ -286,12 +289,12 @@ export default function PersonalInfoTab() {
                 Share this code with others to invite them to build your team
               </Typography>
               <Divider sx={{ mb: 2 }} />
-              <Box 
-                sx={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center',
-                  gap: 1
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 1,
                 }}
               >
                 <Typography
@@ -307,12 +310,16 @@ export default function PersonalInfoTab() {
                       size="small"
                       color="primary"
                       onClick={() => {
-                        navigator.clipboard.writeText(formData.myInvitationCode || "");
+                        navigator.clipboard.writeText(
+                          formData.myInvitationCode || ""
+                        );
                         toast.success("Invitation code copied to clipboard!");
                       }}
-                      sx={{ 
+                      sx={{
                         padding: 0.5,
-                        '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.08)' }
+                        "&:hover": {
+                          backgroundColor: "rgba(25, 118, 210, 0.08)",
+                        },
                       }}
                     >
                       <ContentCopy fontSize="small" />
@@ -327,7 +334,9 @@ export default function PersonalInfoTab() {
                 gutterBottom
                 align="center"
               >
-                Invite friends and get rewards! You receive 2 USD (in your investment balance) for each invited user after their first deposit of 50 USD or More.
+                Invite friends and get rewards! You receive 2 USD (in your
+                investment balance) for each invited user after their first
+                deposit of 50 USD or More.
               </Typography>
             </CardContent>
           </Card>
@@ -352,6 +361,7 @@ export default function PersonalInfoTab() {
                   InputProps={{
                     sx: { borderRadius: 1 },
                   }}
+                  disabled={true}
                 />
 
                 <Box
@@ -380,8 +390,9 @@ export default function PersonalInfoTab() {
                     name="phone"
                     value={formData.phone || ""}
                     onChange={handleInputChange}
-                    disabled={formData.isPhoneVerified}
+                    // disabled={formData.isPhoneVerified}
                     variant="outlined"
+                    disabled={true}
                     InputProps={{
                       sx: { borderRadius: 1 },
                     }}
@@ -394,7 +405,8 @@ export default function PersonalInfoTab() {
                   name="idPassport"
                   value={formData.idPassport || ""}
                   onChange={handleInputChange}
-                  disabled={formData.isIdVerified}
+                  // disabled={formData.isIdVerified}
+                  disabled={true}
                   variant="outlined"
                   InputProps={{
                     sx: { borderRadius: 1 },
@@ -407,6 +419,7 @@ export default function PersonalInfoTab() {
                   name="invitationCode"
                   value={formData.invitationCode || ""}
                   onChange={handleInputChange}
+                  disabled={true}
                   variant="outlined"
                   InputProps={{
                     sx: { borderRadius: 1 },
