@@ -279,12 +279,15 @@ export default function PersonalInfoTab() {
           </Typography>
 
           <Card sx={{ width: "100%", mb: 2, boxShadow: 1 }}>
+            <CardHeader
+              title="Build your team"
+              titleTypographyProps={{ variant: "h6", fontWeight: 500, align: 'center' }}
+            />
             <CardContent>
               <Typography
                 variant="subtitle2"
                 color="text.secondary"
                 gutterBottom
-                align="center"
               >
                 Share this code with others to invite them to build your team
               </Typography>
@@ -332,7 +335,6 @@ export default function PersonalInfoTab() {
                 variant="subtitle2"
                 color="text.secondary"
                 gutterBottom
-                align="center"
               >
                 Invite friends and get rewards! You receive 2 USD (in your
                 investment balance) for each invited user after their first

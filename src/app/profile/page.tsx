@@ -16,13 +16,15 @@ import {
 import { 
   AccountCircle,
   Wallet,
+  Stars,
 } from '@mui/icons-material';
 import { useAuth } from '@/contexts/AuthContext';
 import Layout from '@/components/layout/Layout';
 import { User } from '@/schemas/auth.schema';
 import { 
   PersonalInfoTab, 
-  WalletInfoTab 
+  WalletInfoTab,
+  VIPPlanTab
 } from '@/components/profile';
 
 interface TabPanelProps {
@@ -127,6 +129,7 @@ export default function ProfilePage() {
             >
               <Tab icon={<AccountCircle />} label="Personal Info" />
               <Tab icon={<Wallet />} label="Withdrawal" />
+              <Tab icon={<Stars />} label="VIP Plan" />
             </Tabs>
           </Box>
 
@@ -138,6 +141,10 @@ export default function ProfilePage() {
 
           <TabPanel value={tabValue} index={1}>
             <WalletInfoTab />
+          </TabPanel>
+
+          <TabPanel value={tabValue} index={2}>
+            <VIPPlanTab />
           </TabPanel>
         </Paper>
       </Container>
