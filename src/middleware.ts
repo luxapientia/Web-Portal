@@ -59,7 +59,7 @@ export async function middleware(request: NextRequest) {
         role: payload.role || 'user',
         lastActive: new Date().toISOString(),
       };
-      requestHeaders.set('x-user-data', JSON.stringify(userData));
+      requestHeaders.set('user', JSON.stringify(userData));
 
       // Create response with modified headers
       const response = NextResponse.next({
