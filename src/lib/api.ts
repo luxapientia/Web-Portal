@@ -7,8 +7,6 @@ export async function fetchWithAuth(url: string, options: FetchOptions = {}) {
     // Get token from localStorage
     const token = localStorage.getItem('token');
 
-    console.log('Token:', token);
-
     // If token is required but not present, redirect to login
     if (options.requireAuth && !token) {
       localStorage.removeItem('token');
@@ -20,10 +18,9 @@ export async function fetchWithAuth(url: string, options: FetchOptions = {}) {
     const response = await fetch(url, {
       ...options,
       headers: {
-        ...options.headers,
-        'Content-Type': 'application/json',
-        // Add Authorization header if token exists
         ...(token && { 'Authorization': `Bearer ${token}` }),
+        ...options.headers,
+        // Add Authorization header if token exists
       },
     });
 
