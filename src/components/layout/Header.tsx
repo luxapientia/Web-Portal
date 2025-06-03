@@ -25,16 +25,11 @@ import UserMenu from "@/components/common/UserMenu";
 // Define navigation items
 const publicNavItems = [
   { label: "Home", path: "/" },
-  { label: "About", path: "/about" },
-  { label: "How It Works", path: "/how-it-works" },
-  { label: "FAQ", path: "/faq" },
 ];
 
 // Define authenticated user navigation items
 const privateNavItems = [
-  { label: "Dashboard", path: "/dashboard" },
-  { label: "Investments", path: "/investments" },
-  { label: "Referrals", path: "/referrals" },
+  { label: "Home", path: "/" },
 ];
 
 interface HeaderProps {
