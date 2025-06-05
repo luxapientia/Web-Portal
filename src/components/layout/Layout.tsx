@@ -27,7 +27,7 @@ export default function Layout({
         display: 'flex',
         flexDirection: 'column',
         minHeight: '100vh',
-        backgroundImage: 'url(/images/background.jpg)',
+        backgroundImage: 'url(/images/background.png)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundAttachment: 'fixed',
