@@ -17,7 +17,7 @@ export default function Layout({
   children, 
   fullWidth = false,
   hideHeader = false,
-  hideFooter = false,
+  hideFooter = true,
   maxWidth = 'xl'
 }: LayoutProps) {
   return (
@@ -27,6 +27,10 @@ export default function Layout({
         display: 'flex',
         flexDirection: 'column',
         minHeight: '100vh',
+        backgroundImage: 'url(/images/background.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
       }}
     >
       {!hideHeader && <Header />}

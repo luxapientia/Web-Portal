@@ -64,7 +64,7 @@ export default function Logo({
             width: currentSize.backCoin.width,
             height: currentSize.backCoin.height,
             left: "15%",
-            top: 0,
+            top: -10,
             zIndex: 1,
           }}
         >
@@ -83,7 +83,7 @@ export default function Logo({
             width: currentSize.frontCoin.width,
             height: currentSize.frontCoin.height,
             right: "15%",
-            top: 3,
+            top: -5,
             zIndex: 2,
             filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.2))",
           }}

@@ -59,11 +59,11 @@ export default function Header({ className }: HeaderProps) {
 
   // Drawer content for mobile view
   const drawer = (
-    <Box onClick={handleDrawerToggle} sx={{ textAlign: "center" }}>
+    <Box onClick={handleDrawerToggle} sx={{ textAlign: "center", bgcolor: 'rgb(30, 41, 59)' }}>
       <Box sx={{ p: 2, display: "flex", justifyContent: "center" }}>
         <Logo size="small" />
       </Box>
-      <Divider />
+      <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.1)' }} />
       <List>
         {navItems.map((item) => (
           <ListItem
@@ -71,7 +71,7 @@ export default function Header({ className }: HeaderProps) {
             disablePadding
             onClick={() => handleNavigation(item.path)}
             sx={{
-              color: pathname === item.path ? "primary.main" : "inherit",
+              color: pathname === item.path ? "primary.light" : "rgba(255, 255, 255, 0.9)",
               fontWeight: pathname === item.path ? "bold" : "normal",
             }}
           >
@@ -80,12 +80,20 @@ export default function Header({ className }: HeaderProps) {
         ))}
         {!isAuthenticated ? (
           <>
-            <ListItem disablePadding onClick={() => handleNavigation("/auth/login")}>
+            <ListItem 
+              disablePadding 
+              onClick={() => handleNavigation("/auth/login")}
+              sx={{ color: "rgba(255, 255, 255, 0.9)" }}
+            >
               <ListItemText primary="Login" sx={{ textAlign: "center" }} />
             </ListItem>
             <ListItem
               disablePadding
               onClick={() => handleNavigation("/auth/register")}
+              sx={{ 
+                color: "rgba(255, 255, 255, 0.9)",
+                fontWeight: "bold"
+              }}
             >
               <ListItemText primary="Join" sx={{ textAlign: "center" }} />
             </ListItem>
@@ -94,6 +102,7 @@ export default function Header({ className }: HeaderProps) {
           <ListItem
             disablePadding
             onClick={() => handleNavigation("/dashboard")}
+            sx={{ color: "rgba(255, 255, 255, 0.9)" }}
           >
             <ListItemText primary="Dashboard" sx={{ textAlign: "center" }} />
           </ListItem>
@@ -109,9 +118,11 @@ export default function Header({ className }: HeaderProps) {
       elevation={0}
       className={className}
       sx={{
-        backgroundColor: "background.paper",
-        borderBottom: "1px solid",
-        borderColor: "divider",
+        background: 'linear-gradient(135deg, rgba(247, 232, 31, 0.8) 0%, rgba(171, 241, 105, 0.8) 100%)',
+        backdropFilter: 'blur(10px)',
+        borderBottom: '1px solid',
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
       }}
     >
       <Container maxWidth="xl">
@@ -142,13 +153,18 @@ export default function Header({ className }: HeaderProps) {
                 onClick={() => handleNavigation(item.path)}
                 sx={{
                   my: 2,
-                  color: "text.primary",
+                  color: pathname === item.path ? "primary.light" : "rgba(255, 255, 255, 0.9)",
                   display: "block",
                   fontWeight: pathname === item.path ? "bold" : "normal",
                   borderBottom: pathname === item.path ? "2px solid" : "none",
-                  borderColor: "primary.main",
+                  borderColor: "primary.light",
                   borderRadius: 0,
                   mx: 1,
+                  transition: 'all 0.2s ease-in-out',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    transform: 'translateY(-2px)',
+                  }
                 }}
               >
                 {item.label}
@@ -164,18 +180,39 @@ export default function Header({ className }: HeaderProps) {
               !isMobile && (
                 <>
                   <Button
-                    color="inherit"
+                    variant="text"
                     onClick={() => router.push("/auth/login")}
-                    sx={{ mr: 1 }}
+                    sx={{ 
+                      mr: 1,
+                      px: 2,
+                      color: 'rgba(255, 255, 255, 0.9)',
+                      borderRadius: '8px',
+                      transition: 'all 0.2s ease-in-out',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        transform: 'translateY(-2px)',
+                      }
+                    }}
                   >
                     Login
                   </Button>
                   <Button
-                    variant="contained"
-                    color="secondary"
+                    variant="outlined"
                     onClick={() => router.push("/auth/register")}
                     sx={{
                       fontWeight: "bold",
+                      px: 2,
+                      color: 'rgba(255, 255, 255, 0.9)',
+                      borderColor: 'rgba(255, 255, 255, 0.5)',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 10px rgba(0, 0, 0, 0.15)',
+                      transition: 'all 0.2s ease-in-out',
+                      '&:hover': {
+                        borderColor: 'rgba(255, 255, 255, 0.9)',
+                        boxShadow: '0 6px 15px rgba(0, 0, 0, 0.2)',
+                        transform: 'translateY(-2px)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                      }
                     }}
                   >
                     Join
@@ -197,7 +234,13 @@ export default function Header({ className }: HeaderProps) {
         }}
         sx={{
           display: { xs: "block", md: "none" },
-          "& .MuiDrawer-paper": { boxSizing: "border-box", width: 240 },
+          "& .MuiDrawer-paper": { 
+            boxSizing: "border-box", 
+            width: 240,
+            background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(44, 55, 74, 0.95) 100%)',
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
+          },
         }}
       >
         {drawer}
