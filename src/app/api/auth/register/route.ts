@@ -51,16 +51,16 @@ export async function POST(request: Request) {
     }
 
     //Check if user with the invitation code is existed
-    // const invitingUser = await db.collection(UserCollection).findOne({
-    //   myInvitationCode: invitationCode
-    // })
+    const invitingUser = await db.collection(UserCollection).findOne({
+      myInvitationCode: invitationCode
+    })
 
-    // if(!invitingUser) {
-    //   return NextResponse.json(
-    //     { error: 'No user with the invitation code' },
-    //     { status: 400 }
-    //   );
-    // }
+    if(!invitingUser) {
+      return NextResponse.json(
+        { error: 'No user with the invitation code' },
+        { status: 400 }
+      );
+    }
 
     // Check if user already exists
     const existingUser = await db.collection(UserCollection).findOne({
