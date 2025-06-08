@@ -118,15 +118,17 @@ export default function Header({ className }: HeaderProps) {
       elevation={0}
       className={className}
       sx={{
-        background: 'linear-gradient(135deg, rgba(247, 232, 31, 0.8) 0%, rgba(171, 241, 105, 0.8) 100%)',
-        backdropFilter: 'blur(10px)',
-        borderBottom: '1px solid',
-        borderColor: 'rgba(255, 255, 255, 0.1)',
-        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+        background: 'linear-gradient(135deg, rgba(255,255,255,0.75) 0%, rgba(140,217,133,0.18) 100%)',
+        backdropFilter: 'blur(18px) saturate(1.2)',
+        WebkitBackdropFilter: 'blur(18px) saturate(1.2)',
+        borderBottom: '1.5px solid',
+        borderColor: 'rgba(140,217,133,0.18)',
+        boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.10)',
+        zIndex: 1201,
       }}
     >
       <Container maxWidth="xl">
-        <Toolbar disableGutters sx={{ py: 1 }}>
+        <Toolbar disableGutters sx={{ py: 2, px: 1, minHeight: 72 }}>
           {/* Mobile menu button */}
           {isMobile && (
             <IconButton
@@ -141,8 +143,8 @@ export default function Header({ className }: HeaderProps) {
           )}
 
           {/* Logo */}
-          <Box sx={{ flexGrow: 1, display: "flex" }}>
-            <Logo size="small" />
+          <Box sx={{ flexGrow: 1, display: "flex", alignItems: 'center' }}>
+            <Logo size="medium" />
           </Box>
 
           {/* Desktop navigation */}
@@ -153,17 +155,20 @@ export default function Header({ className }: HeaderProps) {
                 onClick={() => handleNavigation(item.path)}
                 sx={{
                   my: 2,
-                  color: pathname === item.path ? "primary.light" : "rgba(255, 255, 255, 0.9)",
+                  color: pathname === item.path ? "primary.main" : "rgba(30, 41, 59, 0.85)",
                   display: "block",
-                  fontWeight: pathname === item.path ? "bold" : "normal",
-                  borderBottom: pathname === item.path ? "2px solid" : "none",
-                  borderColor: "primary.light",
+                  fontWeight: pathname === item.path ? "bold" : 500,
+                  borderBottom: pathname === item.path ? "2.5px solid" : "none",
+                  borderColor: "primary.main",
                   borderRadius: 0,
-                  mx: 1,
-                  transition: 'all 0.2s ease-in-out',
+                  mx: 1.5,
+                  fontSize: '1.1rem',
+                  letterSpacing: 0.5,
+                  transition: 'all 0.2s cubic-bezier(.4,0,.2,1)',
                   '&:hover': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    transform: 'translateY(-2px)',
+                    backgroundColor: 'rgba(140,217,133,0.10)',
+                    color: 'primary.main',
+                    transform: 'translateY(-2px) scale(1.04)',
                   }
                 }}
               >
@@ -183,14 +188,17 @@ export default function Header({ className }: HeaderProps) {
                     variant="text"
                     onClick={() => router.push("/auth/login")}
                     sx={{ 
-                      mr: 1,
-                      px: 2,
-                      color: 'rgba(255, 255, 255, 0.9)',
-                      borderRadius: '8px',
-                      transition: 'all 0.2s ease-in-out',
+                      mr: 1.5,
+                      px: 2.5,
+                      color: 'rgba(30, 41, 59, 0.85)',
+                      borderRadius: '10px',
+                      fontWeight: 500,
+                      fontSize: '1.05rem',
+                      transition: 'all 0.2s cubic-bezier(.4,0,.2,1)',
                       '&:hover': {
-                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                        transform: 'translateY(-2px)',
+                        backgroundColor: 'rgba(140,217,133,0.10)',
+                        color: 'primary.main',
+                        transform: 'translateY(-2px) scale(1.04)',
                       }
                     }}
                   >
@@ -200,18 +208,20 @@ export default function Header({ className }: HeaderProps) {
                     variant="outlined"
                     onClick={() => router.push("/auth/register")}
                     sx={{
-                      fontWeight: "bold",
-                      px: 2,
-                      color: 'rgba(255, 255, 255, 0.9)',
-                      borderColor: 'rgba(255, 255, 255, 0.5)',
-                      borderRadius: '8px',
-                      boxShadow: '0 4px 10px rgba(0, 0, 0, 0.15)',
-                      transition: 'all 0.2s ease-in-out',
+                      fontWeight: 700,
+                      px: 2.5,
+                      color: 'primary.main',
+                      borderColor: 'primary.main',
+                      borderRadius: '10px',
+                      fontSize: '1.05rem',
+                      boxShadow: '0 4px 10px rgba(140,217,133,0.10)',
+                      transition: 'all 0.2s cubic-bezier(.4,0,.2,1)',
                       '&:hover': {
-                        borderColor: 'rgba(255, 255, 255, 0.9)',
-                        boxShadow: '0 6px 15px rgba(0, 0, 0, 0.2)',
-                        transform: 'translateY(-2px)',
-                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        borderColor: 'primary.dark',
+                        color: 'primary.dark',
+                        boxShadow: '0 6px 15px rgba(140,217,133,0.18)',
+                        backgroundColor: 'rgba(140,217,133,0.10)',
+                        transform: 'translateY(-2px) scale(1.04)',
                       }
                     }}
                   >
@@ -222,6 +232,7 @@ export default function Header({ className }: HeaderProps) {
             )}
           </Box>
         </Toolbar>
+        <Divider sx={{ opacity: 0.18, borderColor: 'primary.main', borderBottomWidth: 2 }} />
       </Container>
 
       {/* Mobile drawer */}
@@ -237,9 +248,10 @@ export default function Header({ className }: HeaderProps) {
           "& .MuiDrawer-paper": { 
             boxSizing: "border-box", 
             width: 240,
-            background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(44, 55, 74, 0.95) 100%)',
-            backdropFilter: 'blur(10px)',
-            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(140,217,133,0.18) 100%)',
+            backdropFilter: 'blur(18px) saturate(1.2)',
+            WebkitBackdropFilter: 'blur(18px) saturate(1.2)',
+            boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.10)',
           },
         }}
       >

@@ -45,7 +45,7 @@ export default function Layout({
       >
         {fullWidth ? (
           children
-        ) : (
+        ) : ( 
           <Container 
             maxWidth={maxWidth} 
             sx={{ 
@@ -54,7 +54,7 @@ export default function Layout({
               display: 'flex', 
               flexDirection: 'column' 
             }}
-          >
+          >                                         
             {children}
           </Container>
         )}
