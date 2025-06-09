@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
-import { UserCollection } from '@/models/User';
+import { UserModel } from '@/models/User';
 import { ObjectId } from 'mongodb';
 import { writeFile, unlink } from 'fs/promises';
 import { join } from 'path';
 import sharp from 'sharp';
-import { AppConfigCollection } from '@/models/AppConfig';
+import { AppConfigModel } from '@/models/AppConfig';
 import { mkdir } from 'fs/promises';
 
 // Configure upload directory
@@ -54,11 +53,9 @@ export async function POST(request: NextRequest) {
     }
     
     // Connect to database
-    const db = await getDb();
-    const usersCollection = db.collection(UserCollection);
     
     // Find the user
-    const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
+    const user = await UserModel.findOne({ _id: new ObjectId(userId) });
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
@@ -66,7 +63,7 @@ export async function POST(request: NextRequest) {
     // Handle avatar upload
     try {
       // Get allowed image types from app config
-      const appConfig = await db.collection(AppConfigCollection).findOne({});
+      const appConfig = await AppConfigModel.findOne({});
       const allowedImgUploadTypes = appConfig?.image_upload_types || [
         'image/jpeg', 'image/png', 'image/webp', 'image/jpg'
       ];
@@ -139,7 +136,7 @@ export async function POST(request: NextRequest) {
       const avatarUrl = `/uploads/avatars/${filename}`;
       
       // Update user in database
-      const result = await usersCollection.updateOne(
+      const result = await UserModel.updateOne(
         { _id: new ObjectId(userId) },
         { 
           $set: { 

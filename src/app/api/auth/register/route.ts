@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
 import { registrationSchema } from '@/schemas/auth.schema';
 import bcrypt from 'bcryptjs';
-import { UserCollection } from '@/models/User';
+import { UserModel } from '@/models/User';
 import redis from '@/lib/redis';
 import { writeFile } from 'fs/promises';
 import { join } from 'path';
 import sharp from 'sharp';
-import { AppConfigCollection } from '@/models/AppConfig';
+import { AppConfigCollection, AppConfigModel } from '@/models/AppConfig';
 import { generateRandomInvitationCode } from '@/utils/generate-code';
 
 // Configure upload directory
@@ -15,6 +14,7 @@ const uploadDir = join(process.cwd(), 'public');
 
 export async function POST(request: Request) {
   try {
+
     // Parse multipart form data
     const formData = await request.formData();
     
@@ -38,7 +38,6 @@ export async function POST(request: Request) {
       );
     }
 
-    const db = await getDb();
     const { email, password, fullName, phone, idPassport, invitationCode } = validationResult.data;
 
     // Check if email is verified
@@ -51,19 +50,19 @@ export async function POST(request: Request) {
     }
 
     //Check if user with the invitation code is existed
-    const invitingUser = await db.collection(UserCollection).findOne({
+    const invitingUser = await UserModel.findOne({
       myInvitationCode: invitationCode
     })
 
-    if(!invitingUser) {
-      return NextResponse.json(
-        { error: 'No user with the invitation code' },
-        { status: 400 }
-      );
-    }
+    // if(!invitingUser) {
+    //   return NextResponse.json(
+    //     { error: 'No user with the invitation code' },
+    //     { status: 400 }
+    //   );
+    // }
 
     // Check if user already exists
-    const existingUser = await db.collection(UserCollection).findOne({
+    const existingUser = await UserModel.findOne({
       $or: [
         { email },
         { phone },
@@ -98,13 +97,10 @@ export async function POST(request: Request) {
       );
     }
 
-
-    
-
     // Save files
     const savedFiles: Record<string, string> = {};
 
-    const appConfig = await db.collection(AppConfigCollection).findOne({});
+    const appConfig = await AppConfigModel.findOne({});
     const allowedImgUploadTypes = appConfig?.image_upload_types;
 
     for (const [key, file] of Object.entries(files)) {
@@ -155,19 +151,6 @@ export async function POST(request: Request) {
       await writeFile(filepath, compressedBuffer);
       savedFiles[key] = `/uploads/${filename}`;
     }
-    // for (const [key, file] of Object.entries(files)) {
-    //   const timestamp = Date.now();
-    //   const filename = `${key}_${timestamp}_${file.name}`;
-    //   const filepath = join(uploadDir, filename);
-
-    //   // Convert File to Buffer and save
-    //   const bytes = await file.arrayBuffer();
-    //   const buffer = Buffer.from(bytes);
-    //   await writeFile(filepath, buffer);
-
-    //   // Store relative path
-    //   savedFiles[key] = `/uploads/${filename}`;
-    // }
 
     // Hash password
     const salt = await bcrypt.genSalt(10);
@@ -177,7 +160,7 @@ export async function POST(request: Request) {
     let invitationCodeExists = true;
     while (invitationCodeExists) {
       myInvitationCode = generateRandomInvitationCode();
-        const existingInvitationCode = await db.collection(UserCollection).findOne({
+        const existingInvitationCode = await UserModel.findOne({
             myInvitationCode
         });
         if (!existingInvitationCode) {
@@ -205,11 +188,7 @@ export async function POST(request: Request) {
     };
 
     // Insert user into database
-    const result = await db.collection(UserCollection).insertOne(newUser);
-
-    if (!result.acknowledged) {
-      throw new Error('Failed to create user');
-    }
+    const result = await UserModel.create(newUser);
 
     // Clear email verification status
     await redis.del(`email_verified:${email}`);

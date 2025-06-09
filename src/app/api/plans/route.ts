@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
-import { PlanCollection } from '@/models/Plan';
+import { PlanModel } from '@/models/Plan';
 import { ObjectId } from 'mongodb';
 
 /**
@@ -12,11 +11,9 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     
-    const db = await getDb();
-    
     // Get plan by ID
     if (id) {
-      const plan = await db.collection(PlanCollection).findOne({ _id: new ObjectId(id) });
+      const plan = await PlanModel.findOne({ _id: new ObjectId(id) });
       if (!plan) {
         return NextResponse.json(
           { success: false, error: 'Plan not found' },
@@ -27,10 +24,8 @@ export async function GET(request: NextRequest) {
     }
     
     // Get all plans
-    const plans = await db.collection(PlanCollection)
-      .find({})
-      .sort({ account_value_start_usd: 1 })
-      .toArray();
+    const plans = await PlanModel.find({})
+      .sort({ account_value_start_usd: 1 });
       
     return NextResponse.json({ success: true, plans });
   } catch (error) {

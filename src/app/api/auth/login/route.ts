@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
 import bcrypt from 'bcryptjs';
-import { UserCollection } from '@/models/User';
+import { UserModel } from '@/models/User';
 import { signJWT } from '@/lib/auth';
 import { loginSchema, userSchema } from '@/schemas/auth.schema';
 
@@ -20,10 +19,9 @@ export async function POST(request: Request) {
     }
 
     const { email, password } = validationResult.data;
-    const db = await getDb();
 
     // Find user by email
-    const user = await db.collection(UserCollection).findOne({ email });
+    const user = await UserModel.findOne({ email });
     if (!user) {
       return NextResponse.json(
         { error: 'Invalid email or password' },

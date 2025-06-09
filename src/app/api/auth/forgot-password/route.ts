@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
-import { UserCollection } from '@/models/User';
+import { UserModel } from '@/models/User';
 import redis from '@/lib/redis';
 import { sendEmail } from '@/lib/mailgun';
 import { emailSchema } from '@/schemas/auth.schema';
@@ -21,10 +20,9 @@ export async function POST(req: Request) {
     }
 
     const email = validatedFields.data;
-    const db = await getDb();
 
     // Check if user exists
-    const user = await db.collection(UserCollection).findOne({ email });
+    const user = await UserModel.findOne({ email });
 
     if (!user) {
       return NextResponse.json(

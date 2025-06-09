@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ObjectId } from 'mongodb';
-import { getDb } from '@/lib/db';
-import { UserCollection } from '@/models/User';
+import { UserModel } from '@/models/User';
 import { walletInfoSchema } from '@/schemas/auth.schema';
 
 /**
@@ -43,11 +42,8 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // Connect to database
-    const db = await getDb();
-    
     // Update user's wallet info
-    const result = await db.collection(UserCollection).updateOne(
+    const result = await UserModel.updateOne(
       { _id: new ObjectId(userId) },
       { 
         $set: { 
@@ -65,7 +61,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // Get updated user data
-    const updatedUser = await db.collection(UserCollection).findOne(
+    const updatedUser = await UserModel.findOne(
       { _id: new ObjectId(userId) },
       { projection: { password: 0 } }
     );
@@ -95,11 +91,8 @@ export async function GET(request: NextRequest) {
     const userData = JSON.parse(userHeader);
     const userId = userData.id;
     
-    // Connect to database
-    const db = await getDb();
-    
     // Get user data
-    const user = await db.collection(UserCollection).findOne(
+    const user = await UserModel.findOne(
       { _id: new ObjectId(userId) },
       { projection: { withdrawalWallet: 1 } }
     );

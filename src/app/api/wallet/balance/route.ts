@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
 import { ObjectId } from 'mongodb';
-import { WalletTransactionCollection } from '@/models/Wallet';
+import { WalletTransactionModel } from '@/models/Wallet';
 
 /**
  * GET /api/wallet/balance
@@ -19,14 +18,12 @@ export async function GET(request: NextRequest) {
         const userData = JSON.parse(userHeader);
         const userId = userData.id;
 
-        const db = await getDb();
-
         // If no wallet balance record exists, get the last transaction to determine balance
-        const lastTransaction = await db.collection(WalletTransactionCollection)
+        const lastTransaction = await WalletTransactionModel
             .find({ userId: new ObjectId(userId) })
             .sort({ createdAt: -1 })
             .limit(1)
-            .toArray();
+            .lean();
 
         if (lastTransaction.length > 0 && lastTransaction[0].balance !== undefined) {
             return NextResponse.json({
