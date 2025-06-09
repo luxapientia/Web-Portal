@@ -24,12 +24,12 @@ import UserMenu from "@/components/common/UserMenu";
 
 // Define navigation items
 const publicNavItems = [
-  { label: "Home", path: "/" },
+  { label: "Home", path: "/home" },
 ];
 
 // Define authenticated user navigation items
 const privateNavItems = [
-  { label: "Home", path: "/" },
+  { label: "Home", path: "/home" },
 ];
 
 interface HeaderProps {
