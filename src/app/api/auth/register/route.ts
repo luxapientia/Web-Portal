@@ -6,7 +6,7 @@ import redis from '@/lib/redis';
 import { writeFile } from 'fs/promises';
 import { join } from 'path';
 import sharp from 'sharp';
-import { AppConfigCollection, AppConfigModel } from '@/models/AppConfig';
+import { AppConfigModel } from '@/models/AppConfig';
 import { generateRandomInvitationCode } from '@/utils/generate-code';
 
 // Configure upload directory
@@ -14,7 +14,6 @@ const uploadDir = join(process.cwd(), 'public');
 
 export async function POST(request: Request) {
   try {
-
     // Parse multipart form data
     const formData = await request.formData();
     
@@ -54,12 +53,12 @@ export async function POST(request: Request) {
       myInvitationCode: invitationCode
     })
 
-    // if(!invitingUser) {
-    //   return NextResponse.json(
-    //     { error: 'No user with the invitation code' },
-    //     { status: 400 }
-    //   );
-    // }
+    if(!invitingUser) {
+      return NextResponse.json(
+        { error: 'No user with the invitation code' },
+        { status: 400 }
+      );
+    }
 
     // Check if user already exists
     const existingUser = await UserModel.findOne({
@@ -96,7 +95,6 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-
     // Save files
     const savedFiles: Record<string, string> = {};
 
@@ -189,6 +187,10 @@ export async function POST(request: Request) {
 
     // Insert user into database
     const result = await UserModel.create(newUser);
+
+    if (!result.acknowledged) {
+      throw new Error('Failed to create user');
+    }
 
     // Clear email verification status
     await redis.del(`email_verified:${email}`);

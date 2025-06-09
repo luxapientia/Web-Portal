@@ -91,6 +91,8 @@ export async function GET(request: NextRequest) {
     const userData = JSON.parse(userHeader);
     const userId = userData.id;
     
+    // Connect to database
+    
     // Get user data
     const user = await UserModel.findOne(
       { _id: new ObjectId(userId) },
