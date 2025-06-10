@@ -3,6 +3,7 @@ import { RedisCacheService } from './RedisCache';
 import { CryptoPriceModel } from '../models/CryptoPrice';
 import { logger } from '../utils/logger';
 import { PriceUpdate } from '../schemas/price.schema';
+import { config } from '../config';
 
 export class PriceSyncService {
   private coinGecko: CoinGeckoService;
@@ -18,10 +19,10 @@ export class PriceSyncService {
    */
   async syncPrices(): Promise<void> {
     try {
-      const cryptoNames = process.env.CRYPTO_NAMES || 'bitcoin,ethereum,tether,usd-coin,binancecoin,tron,litecoin,solana'
+      const cryptoNames = config.cryptoMarket.symbols;
 
       // Fetch fresh prices from CoinGecko
-      const freshPrices = await this.coinGecko.getPrices(cryptoNames.split(',').map(symbol => symbol.trim()));
+      const freshPrices = await this.coinGecko.getPrices(cryptoNames);
 
       // Cache all prices in Redis first
       await this.redisCache.setCachedPrices(freshPrices);
