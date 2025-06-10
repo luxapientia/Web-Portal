@@ -141,7 +141,7 @@ export const config = {
 
   //Crypto Market
   cryptoMarket: {
-    priceSyncInterval: Number(process.env.PRICE_SYNC_INTERVAL) || 1,
+    priceSyncInterval: Number(process.env.PRICE_SYNC_INTERVAL) || 30,
     symbols: (process.env.SYMBOLS || 'bitcoin,ethereum,tether,usd-coin,binancecoin,tron,litecoin,solana')
       .split(',')
       .map(s => s.trim()),

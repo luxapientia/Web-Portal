@@ -1,4 +1,4 @@
-import { PriceUpdate } from '../schemas/price.schema';
+import { CryptoPrice } from '../schemas/price.schema';
 import redis from '../lib/redis';
 
 export class RedisCacheService {
@@ -8,7 +8,7 @@ export class RedisCacheService {
     return `prices:${symbol.toLowerCase()}`;
   }
 
-  async getCachedPrice(symbol: string): Promise<PriceUpdate | null> {
+  async getCachedPrice(symbol: string): Promise<CryptoPrice | null> {
     const data = await redis.get(this.getPriceKey(symbol));
     if (!data) return null;
     
@@ -19,22 +19,22 @@ export class RedisCacheService {
     }
   }
 
-  async setCachedPrice(symbol: string, priceUpdate: PriceUpdate): Promise<void> {
+  async setCachedPrice(symbol: string, cryptoPrice: CryptoPrice): Promise<void> {
     await redis.setex(
       this.getPriceKey(symbol),
       this.TTL,
-      JSON.stringify(priceUpdate)
+      JSON.stringify(cryptoPrice)
     );
   }
 
-  async getCachedPrices(symbols: string[]): Promise<Record<string, PriceUpdate | null>> {
+  async getCachedPrices(symbols: string[]): Promise<Record<string, CryptoPrice | null>> {
     const pipeline = redis.pipeline();
     symbols.forEach(symbol => {
       pipeline.get(this.getPriceKey(symbol));
     });
 
     const results = await pipeline.exec();
-    const prices: Record<string, PriceUpdate | null> = {};
+    const prices: Record<string, CryptoPrice | null> = {};
 
     if (!results) return prices;
 
@@ -55,7 +55,7 @@ export class RedisCacheService {
     return prices;
   }
 
-  async setCachedPrices(updates: Record<string, PriceUpdate>): Promise<void> {
+  async setCachedPrices(updates: Record<string, CryptoPrice>): Promise<void> {
     const pipeline = redis.pipeline();
     
     Object.entries(updates).forEach(([symbol, update]) => {

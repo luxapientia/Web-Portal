@@ -1,27 +1,12 @@
 'use client';
 
-import { Box, Typography, IconButton, Collapse } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
-import {
-    PriceUpdate,
-} from '@/schemas/price.schema';
-// import PriceChart from './PriceChart';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-
-// Helper function to generate trend line path
-const generateTrendPath = (trend: 'up' | 'down') => {
-    // Create a curved line that goes up or down
-    const height = 24;
-    const width = 60;
-    const startY = trend === 'up' ? height : 0;
-    const endY = trend === 'up' ? 0 : height;
-
-    return `M0,${startY} C20,${startY} 40,${endY} ${width},${endY}`;
-};
+import { CryptoPrice } from '@/schemas/price.schema';
+import PriceGraph from "./PriceGraph";
 
 export default function MarketSentiment() {
-    const [prices, setPrices] = useState<Record<string, PriceUpdate>>({});
+    const [prices, setPrices] = useState<Record<string, CryptoPrice>>({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [expandedCoin, setExpandedCoin] = useState<string | null>(null);
@@ -55,7 +40,7 @@ export default function MarketSentiment() {
         }
     };
 
-    const renderCryptoCard = (symbol: string, priceData: PriceUpdate) => {
+    const renderCryptoCard = (symbol: string, priceData: CryptoPrice) => {
         const priceChange24h = priceData?.priceChange?.['24h'] || 0;
         const trend: 'up' | 'down' = priceChange24h >= 0 ? 'up' : 'down';
         const trendColor = trend === 'up' ? '#4CAF50' : '#FF5252';
@@ -94,34 +79,15 @@ export default function MarketSentiment() {
                         />
                     )}
 
-                    <Box sx={{ flex: 1 }}>
+                    <Box sx={{ minWidth: '100px', flex: 1 }}>
                         <Typography variant="body2" color="text.secondary">
                             {`${priceData?.name} (${symbol})`}
                         </Typography>
                     </Box>
 
-                    <Box sx={{ position: 'relative', width: 60, height: 24 }}>
-                        {!loading && (
-                            <svg
-                                width="60"
-                                height="24"
-                                style={{
-                                    position: 'absolute',
-                                    top: 0,
-                                    left: 0,
-                                }}
-                            >
-                                <path
-                                    d={generateTrendPath(trend)}
-                                    stroke={trendColor}
-                                    strokeWidth="2"
-                                    fill="none"
-                                />
-                            </svg>
-                        )}
-                    </Box>
+                    <PriceGraph symbol={symbol} />
 
-                    <Box sx={{ textAlign: 'right', minWidth: 100 }}>
+                    <Box sx={{ textAlign: 'right', minWidth: '100px' }}>
                         {loading ? (
                             <Box sx={{ height: 24, width: 80, bgcolor: '#f5f5f5', borderRadius: 1 }} />
                         ) : (
@@ -139,6 +105,7 @@ export default function MarketSentiment() {
                         )}
                     </Box>
                 </Box>
+
             </Box>
         );
     };

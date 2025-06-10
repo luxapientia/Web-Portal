@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { PriceSyncService } from '@/services/PriceSync';
-import { PriceUpdate } from '@/schemas/price.schema';
+import { CryptoPrice } from '@/schemas/price.schema';
 import { config } from '@/config';
 
 const priceService = new PriceSyncService();
@@ -16,7 +16,7 @@ export async function GET() {
     const priceResults = await Promise.all(pricePromises);
 
     // Convert array of results to a record object
-    const prices = priceResults.reduce<Record<string, PriceUpdate>>((acc, price) => {
+    const prices = priceResults.reduce<Record<string, CryptoPrice>>((acc, price) => {
       if (price) {
         acc[price.symbol] = price;
       }

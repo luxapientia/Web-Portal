@@ -2,7 +2,7 @@ import { CoinGeckoService } from './CoinGecko';
 import { RedisCacheService } from './RedisCache';
 import { CryptoPriceModel } from '../models/CryptoPrice';
 import { logger } from '../utils/logger';
-import { PriceUpdate } from '../schemas/price.schema';
+import { CryptoPrice } from '../schemas/price.schema';
 import { config } from '../config';
 
 export class PriceSyncService {
@@ -29,7 +29,7 @@ export class PriceSyncService {
       logger.info('Prices cached in Redis successfully');
 
       // Store in MongoDB and prepare updates for broadcasting
-      const priceUpdates: PriceUpdate[] = [];
+      const cryptoPrices: CryptoPrice[] = [];
       
       await Promise.all(
         Object.values(freshPrices).map(async (update) => {
@@ -43,7 +43,7 @@ export class PriceSyncService {
             priceChange: update.priceChange
           });
 
-          priceUpdates.push(update);
+          cryptoPrices.push(update);
         })
       );
 
@@ -61,7 +61,7 @@ export class PriceSyncService {
    * Get current price for a symbol
    * First checks Redis cache, then falls back to CoinGecko if not found
    */
-  async getCurrentPrice(name: string): Promise<PriceUpdate | null> {
+  async getCurrentPrice(name: string): Promise<CryptoPrice | null> {
     try {
       // Check cache first
       const cachedPrice = await this.redisCache.getCachedPrice(name);

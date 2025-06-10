@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { PriceUpdate } from '../schemas/price.schema';
+import { CryptoPrice } from '../schemas/price.schema';
 
 interface CoinGeckoMarketResponse {
   id: string;
@@ -60,9 +60,9 @@ export class CoinGeckoService {
   /**
    * Fetch current prices and price changes for multiple names
    * @param names Array of cryptocurrency names
-   * @returns Promise<Record<string, PriceUpdate>> Prices and price changes in USD
+   * @returns Promise<Record<string, CryptoPrice>> Prices and price changes in USD
    */
-  async getPrices(names: string[]): Promise<Record<string, PriceUpdate>> {
+  async getPrices(names: string[]): Promise<Record<string, CryptoPrice>> {
     try {
       const response = await axios.get<CoinGeckoMarketResponse[]>(`${this.baseUrl}/coins/markets`, {
         params: {
@@ -74,7 +74,7 @@ export class CoinGeckoService {
         }
       });
 
-      const updates: Record<string, PriceUpdate> = {};
+      const updates: Record<string, CryptoPrice> = {};
 
       response.data.forEach((coin) => {
         updates[coin.id] = {

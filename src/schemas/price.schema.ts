@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 // Schema for a single price update
-export const PriceUpdateSchema = z.object({
+export const CryptoPriceSchema = z.object({
   name: z.string(),
   symbol: z.string(),
   image: z.string(),
@@ -15,15 +15,8 @@ export const PriceUpdateSchema = z.object({
 });
 
 // Schema for batch price updates
-export const PriceUpdatesSchema = z.array(PriceUpdateSchema);
+export const CryptoPricesSchema = z.array(CryptoPriceSchema);
 
 // Infer TypeScript types from the schemas
-export type PriceUpdate = z.infer<typeof PriceUpdateSchema>;
-export type PriceUpdates = z.infer<typeof PriceUpdatesSchema>;
-
-
-// Socket event names
-export const PRICE_EVENTS = {
-  SINGLE_UPDATE: 'priceUpdate',
-  BATCH_UPDATES: 'priceUpdates'
-} as const; 
+export type CryptoPrice = z.infer<typeof CryptoPriceSchema>;
+export type CryptoPrices = z.infer<typeof CryptoPricesSchema>;
