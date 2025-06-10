@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
+import { config as appConfig } from './config';
 
 // Define public routes that don't require authentication
 const publicRoutes = [
@@ -29,7 +30,7 @@ export async function middleware(req: NextRequest) {
     }
 
     // For all other routes, require authentication
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    const token = await getToken({ req, secret: appConfig.nextAuth.secret });
     if (!token) {
         return NextResponse.redirect(new URL('/auth/login', req.url));
     }

@@ -52,7 +52,7 @@ async function startServer() {
     await priceSyncService.syncPrices();
     setInterval(async () => {
       priceSyncService.syncPrices();
-    }, 1000 * 60 * 1);
+    }, 1000 * 60 * config.cryptoMarket.priceSyncInterval);
   } catch (err) {
     console.error(`Failed to start server: ${err instanceof Error ? err.message : 'Unknown error'}`);
     process.exit(1);

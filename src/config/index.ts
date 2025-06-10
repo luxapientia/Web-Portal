@@ -62,8 +62,9 @@ export const config = {
 
   // Redis Configuration
   redis: {
-    url: process.env.REDIS_URL || 'redis://localhost:6379',
-    ttl: 3600 // Cache TTL in seconds
+    host: process.env.REDIS_HOST || 'localhost',
+    port: process.env.REDIS_PORT || '6379',
+    password: process.env.REDIS_PASSWORD || '',
   },
 
   // API Rate Limiting
@@ -79,30 +80,12 @@ export const config = {
     rateLimit: 50 // requests per minute
   },
 
-  // Cryptocurrency Configuration
-  crypto: {
-    symbols: (process.env.SYMBOLS || 'bitcoin,ethereum,tether,usd-coin,binancecoin,tron,litecoin,solana')
-      .split(',')
-      .map(s => s.trim()),
-    priceSync: {
-      intervalMinutes: 1,
-      retryAttempts: 3,
-      retryDelay: 1000 // ms
-    }
-  },
-
-  // Email Configuration
-  email: {
-    from: process.env.EMAIL_FROM || 'noreply@webportal.com',
-    smtp: {
-      host: process.env.SMTP_HOST || 'smtp.gmail.com',
-      port: parseInt(process.env.SMTP_PORT || '587', 10),
-      secure: process.env.SMTP_SECURE === 'true',
-      auth: {
-        user: process.env.SMTP_USER || '',
-        pass: process.env.SMTP_PASS || ''
-      }
-    }
+  //Next Auth
+  nextAuth: {
+    secret: process.env.NEXTAUTH_SECRET || 'your-secret-key',
+    jwtSecret: process.env.JWT_SECRET || 'your-jwt-secret',
+    sessionSecret: process.env.SESSION_SECRET || 'your-session-secret',
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
 
   // Security Configuration
@@ -154,6 +137,14 @@ export const config = {
       secret: process.env.ENCRYPTION_SECRET || '123456789012345678901234567890ab',
       ivLength: 16
     }
+  },
+
+  //Crypto Market
+  cryptoMarket: {
+    priceSyncInterval: Number(process.env.PRICE_SYNC_INTERVAL) || 1,
+    symbols: (process.env.SYMBOLS || 'bitcoin,ethereum,tether,usd-coin,binancecoin,tron,litecoin,solana')
+      .split(',')
+      .map(s => s.trim()),
   }
 }; 
 
@@ -249,5 +240,5 @@ export const authOptions: NextAuthOptions = {
   pages: {
     signIn: '/auth/login',
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: config.nextAuth.secret,
 }

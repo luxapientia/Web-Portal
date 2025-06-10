@@ -1,14 +1,15 @@
 import { NextResponse } from 'next/server';
 import { PriceSyncService } from '@/services/PriceSync';
 import { PriceUpdate } from '@/schemas/price.schema';
+import { config } from '@/config';
 
 const priceService = new PriceSyncService();
 
 export async function GET() {
   try {
-    const cryptoNames = process.env.CRYPTO_NAMES || 'bitcoin,ethereum,tether,usd-coin,binancecoin,tron,litecoin,solana'
+    const cryptoNames = config.cryptoMarket.symbols;
     // Get prices for all available symbols
-    const pricePromises = cryptoNames.split(',').map(name => 
+    const pricePromises = cryptoNames.map(name => 
       priceService.getCurrentPrice(name)
     );
 
