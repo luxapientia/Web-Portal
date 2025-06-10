@@ -1,38 +1,32 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
-import { getTokenFromHeader, verifyJWT } from '@/lib/auth';
+import { NextResponse, NextRequest } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { UserModel } from '@/models/User';
+import { authOptions } from '../[...nextauth]/route';
 
-export async function GET(request: NextRequest) {
-  try {
-    const token = await getTokenFromHeader(request);
-    if (!token) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
+export async function GET(req: NextRequest) {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user?.email) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        // Get user details excluding sensitive information
+        const user = await UserModel.findById(session.user.id)
+            .select('-password -__v');
+
+        if (!user) {
+            return NextResponse.json(
+                { error: 'User not found' },
+                { status: 404 }
+            );
+        }
+
+        return NextResponse.json(user);
+    } catch (error) {
+        console.error('Error fetching user details:', error);
+        return NextResponse.json(
+            { error: 'Internal server error' },
+            { status: 500 }
+        );
     }
-
-    const payload = await verifyJWT(token);
-    if (!payload) {
-      return NextResponse.json(
-        { error: 'Invalid token' },
-        { status: 401 }
-      );
-    }
-
-    // Return user data
-    return NextResponse.json({
-      user: {
-        id: payload.userId,
-        email: payload.email,
-        role: payload.role || 'user',
-      }
-    });
-  } catch (error) {
-    console.error('Authentication error:', error);
-    return NextResponse.json(
-      { error: 'Authentication failed' },
-      { status: 401 }
-    );
-  }
 } 

@@ -1,34 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Box, Typography, Paper, CircularProgress } from '@mui/material';
-import { useAuth } from '@/contexts/AuthContext';
-import { fetchWithAuth } from '@/lib/api';
+import { useSession } from 'next-auth/react';
 import Layout from '@/components/layout/Layout';
 
-
 export default function DashboardPage() {
-  const { user } = useAuth();
-  const [loading, setLoading] = useState(true);
+  const { data: session } = useSession();
 
-  useEffect(() => {
-    const verifyAuth = async () => {
-      try {
-        const response = await fetchWithAuth('/api/auth/me', { requireAuth: true });
-        if (response) {
-          // const data = await response.json();
-        }
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    verifyAuth();
-  }, []);
-
-  if (loading) {
+  if (!session) {
     return (
       <Layout>
         <Box
@@ -44,6 +24,8 @@ export default function DashboardPage() {
       </Layout>
     );
   }
+
+  console.log(session);
 
   return (
     <Layout>
@@ -62,7 +44,7 @@ export default function DashboardPage() {
       >
         <Box>
           <Typography variant="h4" component="h1" gutterBottom>
-            Welcome back, {user?.fullName || user?.fullName || 'Investor'}!
+            Welcome back, {session?.user?.name || 'Investor'}!
           </Typography>
           <Typography variant="body1" color="text.secondary">
             Manage your investments and track your earnings

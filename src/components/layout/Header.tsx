@@ -18,9 +18,9 @@ import {
   useTheme,
 } from "@mui/material";
 import { Menu as MenuIcon } from "@mui/icons-material";
-import { useAuth } from "@/contexts/AuthContext";
 import Logo from "@/components/common/Logo";
 import UserMenu from "@/components/common/UserMenu";
+import { useSession } from "next-auth/react";
 
 // Define navigation items
 const publicNavItems = [
@@ -41,7 +41,7 @@ export default function Header({ className }: HeaderProps) {
   const pathname = usePathname();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const { isAuthenticated } = useAuth();
+  const { data: session, status } = useSession();
 
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -55,7 +55,7 @@ export default function Header({ className }: HeaderProps) {
   };
 
   // Get the appropriate navigation items based on authentication status
-  const navItems = isAuthenticated ? privateNavItems : publicNavItems;
+  const navItems = status === 'authenticated' ? privateNavItems : publicNavItems;
 
   // Drawer content for mobile view
   const drawer = (
@@ -78,7 +78,7 @@ export default function Header({ className }: HeaderProps) {
             <ListItemText primary={item.label} sx={{ textAlign: "center" }} />
           </ListItem>
         ))}
-        {!isAuthenticated ? (
+        {status !== 'authenticated' ? (
           <>
             <ListItem 
               disablePadding 
@@ -179,7 +179,7 @@ export default function Header({ className }: HeaderProps) {
 
           {/* Auth buttons or User Menu */}
           <Box sx={{ display: "flex", alignItems: "center" }}>
-            {isAuthenticated ? (
+            {status === 'authenticated' ? (
               <UserMenu showDashboardButton={!isMobile} />
             ) : (
               !isMobile && (

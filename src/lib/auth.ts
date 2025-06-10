@@ -1,8 +1,8 @@
 import { SignJWT, jwtVerify } from 'jose';
-import { AUTH_CONFIG } from './config';
+import { config } from '@/config';
 import { NextRequest } from 'next/server';
 
-const secretKey = new TextEncoder().encode(AUTH_CONFIG.jwtSecret);
+const secretKey = new TextEncoder().encode(config.auth.secret);
 
 interface JWTPayloadData {
   userId: string;
@@ -15,7 +15,7 @@ export async function signJWT(payload: JWTPayloadData) {
   try {
     const token = await new SignJWT(payload)
       .setProtectedHeader({ alg: 'HS256' })
-      .setExpirationTime(AUTH_CONFIG.tokenExpiration)
+      .setExpirationTime(config.auth.expiresIn)
       .sign(secretKey);
     return token;
   } catch (error) {

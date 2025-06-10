@@ -4,12 +4,28 @@ export const CryptoPriceCollection = 'crypto_prices';
 
 export interface CryptoPrice extends Document {
   symbol: string;
+  image: string;
   price: number;
+  name: string;
   timestamp: Date;
+  priceChange: {
+    '1h'?: number;
+    '24h'?: number;
+    '7d'?: number;
+  };
 }
 
 const CryptoPriceSchema = new Schema({
   symbol: {
+    type: String,
+    required: true,
+    index: true
+  },
+  image: {
+    type: String,
+    required: true
+  },
+  name: {
     type: String,
     required: true,
     index: true
@@ -22,6 +38,20 @@ const CryptoPriceSchema = new Schema({
     type: Date,
     required: true,
     index: true
+  },
+  priceChange: {
+    '1h': {
+      type: Number,
+      required: false
+    },
+    '24h': {
+      type: Number,
+      required: false
+    },
+    '7d': {
+      type: Number,
+      required: false
+    }
   }
 }, {
   timestamps: true,

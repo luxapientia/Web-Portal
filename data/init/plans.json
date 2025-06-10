@@ -1,0 +1,74 @@
+[
+  {
+    "plan_name": "Bronze",
+    "account_value_start_usd": 0,
+    "account_value_end_usd": 499,
+    "active_members_above": 0,
+    "level_change_bonus_reward_usd": 0,
+    "interest_daily_percent": 0.5,
+    "reward_per_user_deposit_usd": 5,
+    "interest_from_each_direct_active_user_usd": 0.1,
+    "daily_tasks_count_allowed": 3,
+    "daily_tasks_reward_usd": 0.5
+  },
+  {
+    "plan_name": "Silver",
+    "account_value_start_usd": 500,
+    "account_value_end_usd": 999,
+    "active_members_above": 2,
+    "level_change_bonus_reward_usd": 50,
+    "interest_daily_percent": 0.7,
+    "reward_per_user_deposit_usd": 10,
+    "interest_from_each_direct_active_user_usd": 0.2,
+    "daily_tasks_count_allowed": 5,
+    "daily_tasks_reward_usd": 0.7
+  },
+  {
+    "plan_name": "Gold",
+    "account_value_start_usd": 1000,
+    "account_value_end_usd": 4999,
+    "active_members_above": 5,
+    "level_change_bonus_reward_usd": 100,
+    "interest_daily_percent": 1.0,
+    "reward_per_user_deposit_usd": 20,
+    "interest_from_each_direct_active_user_usd": 0.3,
+    "daily_tasks_count_allowed": 7,
+    "daily_tasks_reward_usd": 1.0
+  },
+  {
+    "plan_name": "Platinum",
+    "account_value_start_usd": 5000,
+    "account_value_end_usd": 9999,
+    "active_members_above": 10,
+    "level_change_bonus_reward_usd": 250,
+    "interest_daily_percent": 1.2,
+    "reward_per_user_deposit_usd": 30,
+    "interest_from_each_direct_active_user_usd": 0.5,
+    "daily_tasks_count_allowed": 10,
+    "daily_tasks_reward_usd": 1.5
+  },
+  {
+    "plan_name": "Diamond",
+    "account_value_start_usd": 10000,
+    "account_value_end_usd": 49999,
+    "active_members_above": 20,
+    "level_change_bonus_reward_usd": 500,
+    "interest_daily_percent": 1.5,
+    "reward_per_user_deposit_usd": 50,
+    "interest_from_each_direct_active_user_usd": 0.8,
+    "daily_tasks_count_allowed": 15,
+    "daily_tasks_reward_usd": 2.0
+  },
+  {
+    "plan_name": "Black Diamond",
+    "account_value_start_usd": 50000,
+    "account_value_end_usd": 999999999,
+    "active_members_above": 50,
+    "level_change_bonus_reward_usd": 1000,
+    "interest_daily_percent": 2.0,
+    "reward_per_user_deposit_usd": 100,
+    "interest_from_each_direct_active_user_usd": 1.0,
+    "daily_tasks_count_allowed": 20,
+    "daily_tasks_reward_usd": 3.0
+  }
+]

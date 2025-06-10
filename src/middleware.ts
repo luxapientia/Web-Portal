@@ -1,96 +1,53 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
-import { getTokenFromHeader, verifyJWT, signJWT } from '@/lib/auth';
+import { NextRequest, NextResponse } from 'next/server';
+import { getToken } from 'next-auth/jwt';
 
-// List of public API routes that don't require authentication
-const publicApiRoutes = [
-  '/api/auth/verify-email',
-  '/api/auth/register',
-  '/api/auth/login',
-  '/api/auth/logout',
-  '/api/auth/refresh-token',
-  '/api/auth/me',
-  '/api/auth/forgot-password',
-  '/api/auth/verify-reset-code',
-  '/api/auth/reset-password',
-  '/api/auth/gen-invitation-code',
-  '/api/app-config',
+// Define public routes that don't require authentication
+const publicRoutes = [
+    '/auth/login',          // Login page
+    '/auth/register',       // Register page
+    '/api/auth',       // NextAuth API routes
+    '/api/auth/verify-email',
+    '/api/auth/register',
+    '/api/auth/refresh-token',
+    '/api/auth/me',
+    '/api/auth/forgot-password',
+    '/api/auth/verify-reset-code',
+    '/api/auth/reset-password',
+    '/api/auth/gen-invitation-code',
+    '/api/app-config',
 ];
 
-export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+export async function middleware(req: NextRequest) {
+    // Check if the current path is a public route
+    const isPublicRoute = publicRoutes.some(route =>
+        req.nextUrl.pathname.startsWith(route)
+    );
 
-  // Skip authentication for public paths
-  if (publicApiRoutes.some(route => pathname.startsWith(route))) {
-    return NextResponse.next();
-  }
-
-  // Only apply to /api routes
-  if (pathname.startsWith('/api')) {
-    try {
-      const token = await getTokenFromHeader(request);
-      if (!token) {
-        return NextResponse.json(
-          { error: 'Authentication required' },
-          { status: 401 }
-        );
-      }
-
-      const payload = await verifyJWT(token);
-      if (!payload) {
-        return NextResponse.json(
-          { error: 'Invalid token' },
-          { status: 401 }
-        );
-      }
-
-      // Generate new token with extended expiration
-      const newToken = await signJWT({
-        userId: payload.userId,
-        email: payload.email,
-        role: payload.role,
-      });
-
-      // Add user data as a single JSON object in headers
-      const requestHeaders = new Headers(request.headers);
-      const userData = {
-        id: payload.userId,
-        email: payload.email,
-        role: payload.role || 'user',
-        lastActive: new Date().toISOString(),
-      };
-      requestHeaders.set('user', JSON.stringify(userData));
-
-      // Create response with modified headers
-      const response = NextResponse.next({
-        request: {
-          headers: requestHeaders,
-        },
-      });
-
-      // Set the new token in cookie with security flags
-      response.headers.set(
-        'Set-Cookie',
-        `token=${newToken}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${60 * 60 * 24 * 7}`
-      );
-
-      return response;
-    } catch (error) {
-      console.error('Authentication error:', error);
-      return NextResponse.json(
-        { error: 'Authentication failed' },
-        { status: 401 }
-      );
+    // Allow access to public routes
+    if (isPublicRoute) {
+        return NextResponse.next();
     }
-  }
 
-  return NextResponse.next();
+    // For all other routes, require authentication
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    if (!token) {
+        return NextResponse.redirect(new URL('/auth/login', req.url));
+    }
+
+    return NextResponse.next();
 }
 
-// Configure the paths that middleware will run on
+// Match all routes except static files and API routes that don't need auth
 export const config = {
-  matcher: [
-    // Apply to all API routes
-    '/api/:path*',
-  ],
+    matcher: [
+        /*
+         * Match all request paths except:
+         * 1. /_next (Next.js internals)
+         * 2. /images (inside public directory)
+         * 3. /favicon.ico (inside public directory)
+         * 4. /api/auth/* (NextAuth.js API routes)
+         */
+        '/api/:path*',
+        '/dashboard',
+    ],
 }; 

@@ -11,14 +11,14 @@ import {
   Tabs,
   Container,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  CircularProgress
 } from '@mui/material';
 import { 
   AccountCircle,
   Wallet,
   Stars,
 } from '@mui/icons-material';
-import { useAuth } from '@/contexts/AuthContext';
 import Layout from '@/components/layout/Layout';
 import { User } from '@/schemas/auth.schema';
 import { 
@@ -26,6 +26,7 @@ import {
   WalletInfoTab,
   VIPPlanTab
 } from '@/components/profile';
+import toast from 'react-hot-toast';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -54,30 +55,67 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export default function ProfilePage() {
-  const { user } = useAuth();
   const [tabValue, setTabValue] = useState(0);
-  const [userData, setUserData] = useState<Partial<User> | null>(null);
+  const [userData, setUserData] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  // Initialize user data from auth context
   useEffect(() => {
-    if (user) {
-      setUserData(user);
-    }
-  }, [user]);
+    const fetchUserData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await fetch('/api/auth/me');
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to fetch user data');
+        }
+
+        const userData = await response.json();
+        setUserData(userData);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'An error occurred';
+        setError(message);
+        toast.error(message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 
-  if (!user) {
+  if (loading) {
     return (
       <Layout>
-        <Container maxWidth="lg" sx={{ py: 4 }}>
-          <Alert severity="warning" sx={{ mb: 2 }}>
-            Please log in to view your profile.
+        <Container 
+          sx={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center',
+            minHeight: '50vh'
+          }}
+        >
+          <CircularProgress />
+        </Container>
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout>
+        <Container sx={{ py: 4 }}>
+          <Alert severity="error">
+            {error}
           </Alert>
         </Container>
       </Layout>
@@ -111,6 +149,11 @@ export default function ProfilePage() {
             <Typography variant="h4" component="h1" fontWeight="500">
               My Profile
             </Typography>
+            {userData && (
+              <Typography variant="subtitle1">
+                Welcome back, {userData.name}
+              </Typography>
+            )}
           </Box>
 
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
@@ -135,12 +178,14 @@ export default function ProfilePage() {
 
           <TabPanel value={tabValue} index={0}>
             {userData && (
-              <PersonalInfoTab />
+              <PersonalInfoTab userData={userData} />
             )}
           </TabPanel>
 
           <TabPanel value={tabValue} index={1}>
-            <WalletInfoTab />
+            {userData && (
+              <WalletInfoTab userData={userData} />
+            )}
           </TabPanel>
 
           <TabPanel value={tabValue} index={2}>
