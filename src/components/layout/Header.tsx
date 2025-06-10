@@ -59,40 +59,88 @@ export default function Header({ className }: HeaderProps) {
 
   // Drawer content for mobile view
   const drawer = (
-    <Box onClick={handleDrawerToggle} sx={{ textAlign: "center", bgcolor: 'rgb(30, 41, 59)' }}>
-      <Box sx={{ p: 2, display: "flex", justifyContent: "center" }}>
+    <Box
+      onClick={handleDrawerToggle}
+      sx={{
+        textAlign: "center",
+        bgcolor: "rgba(15, 23, 42, 0.6)", // darker slate
+        height: "100%",
+        color: "white",
+        display: "flex",
+        flexDirection: "column",
+        px: 2,
+      }}
+    >
+      {/* Logo Section */}
+      <Box sx={{ py: 3, display: "flex", justifyContent: "center" }}>
         <Logo size="small" />
       </Box>
-      <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.1)' }} />
-      <List>
+  
+      <Divider sx={{ borderColor: "rgba(255, 255, 255, 0.08)", mb: 2 }} />
+  
+      {/* Navigation Items */}
+      <List sx={{ flexGrow: 1 }}>
         {navItems.map((item) => (
           <ListItem
             key={item.label}
-            disablePadding
             onClick={() => handleNavigation(item.path)}
             sx={{
+              justifyContent: "center",
+              py: 1.5,
+              borderRadius: 2,
+              mb: 1,
+              bgcolor: pathname === item.path ? "rgba(140,217,133,0.12)" : "transparent",
               color: pathname === item.path ? "primary.light" : "rgba(255, 255, 255, 0.9)",
-              fontWeight: pathname === item.path ? "bold" : "normal",
+              fontWeight: pathname === item.path ? "bold" : 500,
+              transition: "all 0.2s ease-in-out",
+              "&:hover": {
+                bgcolor: "rgba(140,217,133,0.08)",
+                transform: "scale(1.02)",
+                cursor: "pointer",
+              },
             }}
           >
             <ListItemText primary={item.label} sx={{ textAlign: "center" }} />
           </ListItem>
         ))}
-        {status !== 'authenticated' ? (
+  
+        {/* Auth Buttons */}
+        {status !== "authenticated" ? (
           <>
-            <ListItem 
-              disablePadding 
+            <ListItem
               onClick={() => handleNavigation("/auth/login")}
-              sx={{ color: "rgba(255, 255, 255, 0.9)" }}
+              sx={{
+                justifyContent: "center",
+                py: 1.5,
+                borderRadius: 2,
+                mb: 1,
+                color: "rgba(255, 255, 255, 0.9)",
+                fontWeight: 500,
+                transition: "all 0.2s ease-in-out",
+                "&:hover": {
+                  bgcolor: "rgba(140,217,133,0.08)",
+                  transform: "scale(1.02)",
+                  cursor: "pointer",
+                },
+              }}
             >
               <ListItemText primary="Login" sx={{ textAlign: "center" }} />
             </ListItem>
             <ListItem
-              disablePadding
               onClick={() => handleNavigation("/auth/register")}
-              sx={{ 
-                color: "rgba(255, 255, 255, 0.9)",
-                fontWeight: "bold"
+              sx={{
+                justifyContent: "center",
+                py: 1.5,
+                borderRadius: 2,
+                mb: 1,
+                color: "primary.light",
+                fontWeight: 700,
+                transition: "all 0.2s ease-in-out",
+                "&:hover": {
+                  bgcolor: "rgba(140,217,133,0.12)",
+                  transform: "scale(1.03)",
+                  cursor: "pointer",
+                },
               }}
             >
               <ListItemText primary="Join" sx={{ textAlign: "center" }} />
@@ -100,9 +148,21 @@ export default function Header({ className }: HeaderProps) {
           </>
         ) : (
           <ListItem
-            disablePadding
             onClick={() => handleNavigation("/dashboard")}
-            sx={{ color: "rgba(255, 255, 255, 0.9)" }}
+            sx={{
+              justifyContent: "center",
+              py: 1.5,
+              borderRadius: 2,
+              mb: 1,
+              color: "rgba(255, 255, 255, 0.9)",
+              fontWeight: 600,
+              transition: "all 0.2s ease-in-out",
+              "&:hover": {
+                bgcolor: "rgba(140,217,133,0.08)",
+                transform: "scale(1.02)",
+                cursor: "pointer",
+              },
+            }}
           >
             <ListItemText primary="Dashboard" sx={{ textAlign: "center" }} />
           </ListItem>
@@ -110,6 +170,7 @@ export default function Header({ className }: HeaderProps) {
       </List>
     </Box>
   );
+  
 
   return (
     <AppBar
@@ -187,7 +248,7 @@ export default function Header({ className }: HeaderProps) {
                   <Button
                     variant="text"
                     onClick={() => router.push("/auth/login")}
-                    sx={{ 
+                    sx={{
                       mr: 1.5,
                       px: 2.5,
                       color: 'rgba(30, 41, 59, 0.85)',
@@ -245,8 +306,9 @@ export default function Header({ className }: HeaderProps) {
         }}
         sx={{
           display: { xs: "block", md: "none" },
-          "& .MuiDrawer-paper": { 
-            boxSizing: "border-box", 
+          zIndex: 1202,
+          "& .MuiDrawer-paper": {
+            boxSizing: "border-box",
             width: 240,
             background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(140,217,133,0.18) 100%)',
             backdropFilter: 'blur(18px) saturate(1.2)',
