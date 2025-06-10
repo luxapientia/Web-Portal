@@ -1,8 +1,6 @@
 import crypto from 'crypto';
 import { config } from '../config';
 
-console.log(config);
-
 export function encryptPrivateKey(plainKey: string): string {
     const iv = crypto.randomBytes(config.wallet.encryption.ivLength);
     const cipher = crypto.createCipheriv(config.wallet.encryption.algorithm, Buffer.from(config.wallet.encryption.secret), iv);
