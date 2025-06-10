@@ -1,5 +1,6 @@
+// <reference types="@types/tronweb" />
 import { ethers } from 'ethers';
-import { TronWeb } from 'tronweb';
+const TronWeb = require('tronweb');
 import QRCode from 'qrcode';
 import { SystemTokenModel } from '../models/System_Token';
 import { WalletCredentials } from '../schemas/wallet.schema';
@@ -104,7 +105,7 @@ export class WalletService {
         try {
             switch (walletConfig.type) {
                 case 'EVM':
-                    return ethers.isAddress(address);
+                    return ethers.utils.isAddress(address);
                 case 'TRON':
                     return TronWeb.isAddress(address);
                 default:
