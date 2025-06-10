@@ -1,11 +1,9 @@
 import { NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
-import { AppConfigCollection } from '@/models/AppConfig';
+import { AppConfigModel } from '@/models/AppConfig';
 
 export async function GET() {
     try {
-        const db = await getDb();
-        const appConfig = await db.collection(AppConfigCollection).findOne({});
+        const appConfig = await AppConfigModel.findOne({});
         return NextResponse.json({
             registration_max_img_upload_size: appConfig?.registration_max_img_upload_size,
             image_upload_types: appConfig?.image_upload_types,

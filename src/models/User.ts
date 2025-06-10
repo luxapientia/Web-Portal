@@ -3,9 +3,9 @@ import mongoose, { Schema, Document } from 'mongoose';
 export const UserCollection = 'users';
 
 export interface User extends Document {
-  fullName: string;
+  name: string;
   email: string;
-  avatar?: string;
+  image?: string;
   phone: string;
   password: string;
   idPassport: string;
@@ -30,9 +30,9 @@ export interface User extends Document {
 }
 
 const UserSchema: Schema = new Schema({
-  fullName: { type: String, required: true },
+  name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  avatar: { type: String, required: false, default: null },
+  image: { type: String, required: false, default: null },
   phone: { type: String, required: true },
   password: { type: String, required: true },
   idPassport: { type: String, required: true },
@@ -63,5 +63,5 @@ const UserSchema: Schema = new Schema({
 
 export const UserModel = mongoose.models[UserCollection] || mongoose.model<User>(UserCollection, UserSchema);
 
-export type CreateUserInput = Pick<User, 'fullName' | 'email' | 'password'>;
+export type CreateUserInput = Pick<User, 'name' | 'email' | 'password'>;
 export type UserWithoutPassword = Omit<User, 'password'>;

@@ -1,18 +1,159 @@
-import { Card, CardContent, Typography, Divider, Stack, Box, Button, Tooltip } from '@mui/material';
+import { Card, CardContent, Typography, Divider, Stack, Box, Button, Tooltip, Modal, List, ListItem, ListItemIcon, Paper, Chip } from '@mui/material';
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import { motion } from 'framer-motion';
-import React from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
+import toast from 'react-hot-toast';
+import { DailyTask } from '@/models/DailyTask';
 
-interface TasksForTodayProps {
-  displayedPercent: number;
-  pulse: boolean;
-  progressTarget: number;
-}
+export default function TasksForToday() {
+  const [taskLimit, setTaskLimit] = useState<number>(0);
+  const [remainingTasks, setRemainingTasks] = useState<number>(0);
+  const [tasks, setTasks] = useState<DailyTask[]>([]);
+  const [curTask, setCurTask] = useState<DailyTask | null>(null);
+  const [isTaskRunning, setIsTaskRunning] = useState<boolean>(false);
+  const [displayedPercent, setDisplayedPercent] = useState<number>(0);
+  const [pulse, setPulse] = useState<boolean>(false);
+  const [progressTarget, setProgressTarget] = useState<number>(0);
+  const [reward, setReward] = useState<number>(0);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
-export default function TasksForToday({ displayedPercent, pulse, progressTarget }: TasksForTodayProps) {
   const circumference = 2 * Math.PI * 48;
   const dashOffset = circumference * (1 - displayedPercent / 100);
+
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
+  const fetchTasks = async () => {
+    try {
+      const response = await fetch('/api/daily-task/get-tasks');
+      const result = await response.json();
+
+      if (!response.ok) {
+        toast.error(result.error || 'Failed to get tasks');
+        return;
+      }
+
+      setTaskLimit(result.data.taskLimit);
+      setRemainingTasks(result.data.remainingTasks);
+      setTasks(result.data.tasks);
+    } catch {
+      toast.error('Failed to get tasks');
+    }
+  };
+
+  const startTask = useCallback(async () => {
+    if (isTaskRunning || remainingTasks === 0) return;
+
+    try {
+      const response = await fetch('/api/daily-task/start-task');
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to start task');
+      }
+
+      const task = result.data.task;
+      setCurTask(result.data.task);
+      setTaskLimit(result.data.taskLimit);
+      setRemainingTasks(result.data.remainingTasks);
+      setTasks(result.data.tasks);  
+      if (!task) {
+        toast.error('No available tasks for today');
+        return;
+      }
+
+      setIsTaskRunning(true);
+      setDisplayedPercent(0);
+      setProgressTarget(0);
+      setPulse(false);
+
+      // Start the 20-second animation
+      const startTime = Date.now();
+      const duration = 20000; // 20 seconds
+
+      const animateProgress = () => {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min((elapsed / duration) * 100, 100);
+
+        setDisplayedPercent(Math.round(progress));
+        setProgressTarget(progress);
+
+        if (progress < 100) {
+          requestAnimationFrame(animateProgress);
+        } else {
+          // Task completed
+          completeTask(task);
+        }
+      };
+
+      requestAnimationFrame(animateProgress);
+      
+    } catch {
+      toast.error('Failed to start task');
+      setIsTaskRunning(false);
+      setCurTask(null);
+    }
+  }, [isTaskRunning, remainingTasks]);
+  console.log(curTask);
+  
+  const completeTask = async (task: DailyTask) => {
+    try {
+
+      const response = await fetch('/api/daily-task/end-task', {
+        method: 'POST',
+        body: JSON.stringify({ taskId: task._id }),
+      });
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to complete task');
+      }
+
+      setPulse(true);
+      toast.success('Task completed successfully!');
+      setReward(result.data.reward);
+      setTasks(result.data.tasks);
+    } catch {
+      toast.error('Failed to complete task');
+    } finally {
+      setIsTaskRunning(false);
+      setDisplayedPercent(0);
+      setProgressTarget(0);
+      setPulse(false);
+      setCurTask(null);
+    }
+  };
+  console.log(reward)
+  
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  const formatTime = (date: string) => {
+    return new Date(date).toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
 
   return (
     <motion.div
@@ -34,14 +175,14 @@ export default function TasksForToday({ displayedPercent, pulse, progressTarget 
           <Stack direction="row" alignItems="center" spacing={1}>
             <RocketLaunchIcon color="primary" />
             <Typography variant="body2" fontWeight={700}>
-              5/5
+              {remainingTasks}/{taskLimit}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
               Tasks Remaining for the day
             </Typography>
           </Stack>
           <Typography variant="body1" fontWeight={700} mt={1}>
-            Activate Daily Booster AI trading Bot
+            {isTaskRunning ? 'Keep the progress bar running to complete the task' : 'Activate Daily Booster AI trading Bot'}
           </Typography>
           {/* Animated SVG Circular Progress with Framer Motion */}
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', my: 2 }}>
@@ -146,7 +287,9 @@ export default function TasksForToday({ displayedPercent, pulse, progressTarget 
             </Box>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1 }}>
-            <Box
+            <Button
+              onClick={startTask}
+              disabled={isTaskRunning || remainingTasks === 0}
               sx={{
                 bgcolor: 'success.main',
                 color: '#fff',
@@ -159,8 +302,8 @@ export default function TasksForToday({ displayedPercent, pulse, progressTarget 
                 letterSpacing: 0.5,
               }}
             >
-              Analyzing Trade &gt; activate trade Bot &gt; Finished
-            </Box>
+              {isTaskRunning ? 'Task in Progress...' : 'Start Task'}
+            </Button>
           </Box>
           {/* Animated horizontal progress bar */}
           <Box
@@ -191,6 +334,7 @@ export default function TasksForToday({ displayedPercent, pulse, progressTarget 
             fullWidth
             variant="contained"
             color="success"
+            onClick={handleOpenModal}
             sx={{
               borderRadius: 3,
               fontWeight: 700,
@@ -206,6 +350,193 @@ export default function TasksForToday({ displayedPercent, pulse, progressTarget 
           </Button>
         </CardContent>
       </Card>
+
+      {/* Tasks Modal */}
+      <Modal
+        open={isModalOpen}
+        onClose={handleCloseModal}
+        aria-labelledby="tasks-modal-title"
+        aria-describedby="tasks-modal-description"
+      >
+        <Box sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: { xs: '95%', sm: '600px' },
+          maxHeight: '90vh',
+          overflow: 'auto',
+          bgcolor: 'background.paper',
+          borderRadius: 3,
+          boxShadow: 24,
+          p: 4,
+        }}>
+          <Typography id="tasks-modal-title" variant="h5" component="h2" fontWeight={700} mb={1}>
+            Daily Tasks Overview
+          </Typography>
+          
+          {/* Date and Stats Section */}
+          <Box sx={{ mb: 3, mt: 2 }}>
+            {/* Date Header */}
+            <Paper sx={{ p: 2, mb: 2, bgcolor: 'primary.light', color: 'primary.contrastText' }}>
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <CalendarTodayIcon />
+                <Typography variant="subtitle1">
+                  {formatDate(new Date().toISOString())}
+                </Typography>
+              </Stack>
+            </Paper>
+            
+            {/* Stats Cards */}
+            <Stack 
+              direction={{ xs: 'column', sm: 'row' }} 
+              spacing={2} 
+              sx={{ width: '100%' }}
+            >
+              <Paper sx={{ p: 2, bgcolor: '#e8f5e9', flex: 1 }}>
+                <Typography variant="h6" color="success.main" fontWeight={700}>
+                  {tasks.filter(t => t.isCompleted).length}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Completed Tasks
+                </Typography>
+              </Paper>
+              <Paper sx={{ p: 2, bgcolor: '#fff3e0', flex: 1 }}>
+                <Typography variant="h6" color="warning.main" fontWeight={700}>
+                  {tasks.filter(t => !t.isCompleted).length}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Not Completed
+                </Typography>
+              </Paper>
+              <Paper sx={{ p: 2, bgcolor: '#e3f2fd', flex: 1 }}>
+                <Typography variant="h6" color="primary.main" fontWeight={700}>
+                  {remainingTasks}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Remaining Tasks
+                </Typography>
+              </Paper>
+            </Stack>
+          </Box>
+
+          <Divider sx={{ mb: 3 }} />
+
+          {/* Tasks List */}
+          <List sx={{ 
+            bgcolor: 'background.paper',
+            borderRadius: 2,
+            '& .MuiListItem-root': {
+              mb: 1,
+              bgcolor: '#f5f5f5',
+              borderRadius: 2,
+              transition: 'all 0.2s',
+              '&:hover': {
+                bgcolor: '#eeeeee',
+                transform: 'translateX(4px)'
+              }
+            }
+          }}>
+            {Array.from({ length: taskLimit }).map((_, index) => {
+              const task = tasks.find(t => t.taskIndex === index + 1);
+              return (
+                <ListItem 
+                  key={index} 
+                  sx={{ 
+                    py: 2,
+                    px: 3,
+                    border: 1,
+                    borderColor: 'divider',
+                  }}
+                >
+                  <Box sx={{ width: '100%' }}>
+                    <Stack direction="row" alignItems="center" spacing={2} mb={1}>
+                      <ListItemIcon sx={{ minWidth: 40 }}>
+                        {task?.isCompleted ? (
+                          <CheckCircleIcon color="success" />
+                        ) : (
+                          <RadioButtonUncheckedIcon color="disabled" />
+                        )}
+                      </ListItemIcon>
+                      <Typography variant="subtitle1" fontWeight={600}>
+                        Task {index + 1}
+                      </Typography>
+                      <Box flexGrow={1} />
+                      <Chip 
+                        label={task ? (task.isCompleted ? 'Completed' : 'Not Completed') : 'Not Started'}
+                        color={task ? (task.isCompleted ? 'success' : 'warning') : 'default'}
+                        size="small"
+                        sx={{ minWidth: 100 }}
+                      />
+                    </Stack>
+                    
+                    {task && (
+                      <Stack 
+                        direction={{ xs: 'column', sm: 'row' }} 
+                        spacing={2}
+                        ml={7}
+                        sx={{ 
+                          typography: 'body2',
+                          color: 'text.secondary'
+                        }}
+                      >
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <AccessTimeIcon fontSize="small" />
+                          <Typography variant="body2">
+                            Started: {formatTime(task.createdAt.toString())}
+                          </Typography>
+                        </Box>
+                        {task.isCompleted && (
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <CheckCircleIcon fontSize="small" color="success" />
+                            <Typography variant="body2">
+                              Completed: {formatTime(task.updatedAt.toString())}
+                            </Typography>
+                          </Box>
+                        )}
+                      </Stack>
+                    )}
+                  </Box>
+                </ListItem>
+              );
+            })}
+          </List>
+
+          {/* Footer Actions */}
+          <Box sx={{ 
+            mt: 3, 
+            pt: 2,
+            borderTop: 1,
+            borderColor: 'divider',
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center' 
+          }}>
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={handleCloseModal}
+              sx={{ borderRadius: 2 }}
+            >
+              Close
+            </Button>
+            {remainingTasks > 0 && (
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => {
+                  handleCloseModal();
+                  startTask();
+                }}
+                disabled={isTaskRunning}
+                sx={{ borderRadius: 2 }}
+              >
+                Start New Task
+              </Button>
+            )}
+          </Box>
+        </Box>
+      </Modal>
     </motion.div>
   );
 } 

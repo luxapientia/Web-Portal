@@ -9,11 +9,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
+import { signIn } from 'next-auth/react';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSendingCode, setIsSendingCode] = useState(false);
 
@@ -31,32 +30,28 @@ export default function LoginPage() {
   const email = watch('email');
 
   const onSubmit = async (data: LoginFormData) => {
+    const toastId = toast.loading('Logging in...');
     try {
       setIsSubmitting(true);
-      const toastId = toast.loading('Logging in...');
 
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
+      const result = await signIn('credentials', {
+        email: data.email,
+        password: data.password,
+        redirect: false,
       });
 
-      const result = await response.json();
+      console.log(result);
 
-      if (!response.ok) {
-        throw new Error(result.error || 'Login failed');
+      if (result?.error) {
+        throw new Error(result.error);
       }
 
-      // Store auth token and user data
-      login(result.token, result.user);
-      
       toast.success('Login successful!', { id: toastId });
       router.push('/dashboard');
+      router.refresh();
     } catch (error) {
       console.error('Login error:', error);
-      toast.error(error instanceof Error ? error.message : 'Login failed');
+      toast.error(error instanceof Error ? error.message : 'Login failed', { id: toastId });
     } finally {
       setIsSubmitting(false);
     }

@@ -7,7 +7,7 @@ const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/jpg', 'image/png'] as const;
 // ============= Error Messages =============
 export const authErrors = {
   required: 'This field is required',
-  fullName: {
+  name: {
     min: 'Full name must be at least 2 characters',
     max: 'Full name cannot exceed 50 characters',
     format: 'Only letters and spaces are allowed',
@@ -56,10 +56,10 @@ export const fileSchema = z.object({
 });
 
 // ============= Field Schemas =============
-export const fullNameSchema = z.string()
-  .min(2, authErrors.fullName.min)
-  .max(50, authErrors.fullName.max)
-  .regex(/^[a-zA-Z\s]*$/, authErrors.fullName.format)
+export const nameSchema = z.string()
+  .min(2, authErrors.name.min)
+  .max(50, authErrors.name.max)
+  .regex(/^[a-zA-Z\s]*$/, authErrors.name.format)
   .transform(val => val.trim());
 
 export const phoneSchema = z.string()
@@ -93,7 +93,7 @@ export const otpSchema = z.string()
 
 // ============= Main Schemas =============
 export const registrationSchema = z.object({
-  fullName: fullNameSchema,
+  name: nameSchema,
   phone: phoneSchema,
   email: emailSchema,
   password: passwordSchema,
@@ -139,9 +139,9 @@ export const walletInfoSchema = z.object({
 export const userSchema = z.object({
   id: z.string(),
   _id: z.string().optional(),
-  fullName: fullNameSchema,
+  name: nameSchema,
   email: emailSchema,
-  avatar: z.string().optional(),
+  image: z.string().optional(),
   phone: phoneSchema,
   idPassport: idPassportSchema,
   invitationCode: invitationCodeSchema.optional(),

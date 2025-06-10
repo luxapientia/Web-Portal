@@ -3,8 +3,6 @@
 import { Box, Typography, Card, CardContent, Stack, Container, Tabs, Tab, Skeleton } from "@mui/material";
 import { useState, useEffect } from "react";
 import { useTheme } from "@mui/material/styles";
-import { useMotionValue, useAnimationFrame, animate } from 'framer-motion';
-import TrustFundButton from '@/components/home/TrustFundButton';
 import TasksForToday from '@/components/home/TasksForToday';
 import VipPromotions from '@/components/home/VipPromotions';
 import AssetAccountValue from '@/components/home/AssetAccountValue';
@@ -15,34 +13,18 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import LiveTvIcon from '@mui/icons-material/LiveTv';
 import Layout from "@/components/layout/Layout";
 import RewardReceiveSection from '@/components/home/RewardReceiveSection';
+import TrustFundSection from '@/components/home/TrustFundSection';
 
 export default function HomePage() {
     const theme = useTheme();
     const [copied, setCopied] = useState(false);
     const [tab, setTab] = useState(0);
-    const invitationCode = "aeryyeu76";
     const invitationLink = "https://yourapp.com/invite/aeryyeu76";
-    const progressTarget = 71;
-    const percent = useMotionValue(0);
-    const [displayedPercent, setDisplayedPercent] = useState(0);
-    const [pulse, setPulse] = useState(false);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         setTimeout(() => setLoading(false), 800);
     }, []);
-
-    useEffect(() => {
-        percent.set(0);
-        animate(percent, progressTarget, { duration: 1.2, ease: 'easeOut' });
-        setPulse(true);
-        const pulseTimeout = setTimeout(() => setPulse(false), 1400);
-        return () => clearTimeout(pulseTimeout);
-    }, [progressTarget]);
-
-    useAnimationFrame(() => {
-        setDisplayedPercent(Math.round(percent.get()));
-    });
 
     const handleCopy = (text: string) => {
         navigator.clipboard.writeText(text);
@@ -50,7 +32,7 @@ export default function HomePage() {
         setTimeout(() => setCopied(false), 1500);
     };
 
-    const handleTabChange = (_: any, newValue: number) => setTab(newValue);
+    const handleTabChange = (_: unknown, newValue: number) => setTab(newValue);
 
     return (
         <Layout>
@@ -75,18 +57,17 @@ export default function HomePage() {
                         <AssetAccountValue />
                         <TeamContribution
                             invitationLink={invitationLink}
-                            invitationCode={invitationCode}
                             copied={copied}
                             handleCopy={handleCopy}
                         />
                     </Stack>
 
-                    {/* Invitation Section */}
-                    <TrustFundButton />
+                    {/* Trust Fund Section */}
+                    <TrustFundSection />
 
                     {/* Tasks and Reward Section */}
                     <Box flex={1} minWidth={0}>
-                        <Card sx={{ borderRadius: 4, boxShadow: 3, p: 0 }}>
+                        <Card sx={{ borderRadius: 4, boxShadow: 3, p: 0, backgroundColor: 'rgba(255, 255, 255, 0.42)' }}>
                             <CardContent>
                                 <Stack direction="row" alignItems="center" spacing={1} mb={2}>
                                     <RocketLaunchIcon color="primary" />
@@ -96,9 +77,6 @@ export default function HomePage() {
                                     <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 2 }} />
                                 ) : (
                                     <TasksForToday
-                                        displayedPercent={displayedPercent}
-                                        pulse={pulse}
-                                        progressTarget={progressTarget}
                                     />
                                 )}
                             </CardContent>

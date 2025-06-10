@@ -11,6 +11,13 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
+  {
+    // Add a rules object to override or disable specific rules
+    rules: {
+      "@next/next/no-img-element": "off",          // disables warning for <img>
+      "react/no-unescaped-entities": "off",        // disables warning for unescaped '
+    },
+  },
 ];
 
 export default eslintConfig;

@@ -2,29 +2,8 @@
 
 import Image from "next/image";
 import { Box, Container, Typography, Button, Stack } from '@mui/material';
-import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'next/navigation';
-import { fetchWithAuth } from '@/lib/api';
 
 export default function WelcomePage() {
-  const { isAuthenticated } = useAuth();
-  const router = useRouter();
-
-  const handleContinue = async () => {
-    if (isAuthenticated) {
-      // Verify authentication status with server
-      const response = await fetchWithAuth('/api/auth/me', { requireAuth: true });
-      if (response && response.ok) {
-        router.push('/dashboard');
-      } else {
-        router.push('/auth/login');
-      }
-      // If response is null, fetchWithAuth has already handled the redirect
-    } else {
-      router.push('/auth/login');
-    }
-  };
-
   return (
     <Box
       component="main"
@@ -173,7 +152,7 @@ export default function WelcomePage() {
                 variant="contained"
                 color="secondary"
                 size="large"
-                onClick={handleContinue}
+                href="/dashboard"
                 fullWidth
                 sx={{
                   py: { xs: 1.5, sm: 1.75 },

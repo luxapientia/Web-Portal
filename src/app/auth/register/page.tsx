@@ -61,23 +61,6 @@ export default function RegisterPage() {
   const email = watch('email');
   const otp = watch('otp');
 
-  // const getInvitationCode = async () => {
-  //   try {
-  //     const response = await fetch('/api/auth/gen-invitation-code', {
-  //       method: 'POST',
-  //     });
-  //     const data = await response.json();
-  //     if (!response.ok) {
-  //       toast.error(data.error || 'Failed to generate invitation code');
-  //       return;
-  //     }
-  //     setInvitationCode(data.invitationCode);
-  //   } catch (error) {
-  //     console.error('Error generating invitation code:', error);
-  //     toast.error('Error generating invitation code');
-  //   }
-  // };
-
   const getAppConfig = async () => {
     try {
       const response = await fetch('/api/app-config', {
@@ -190,7 +173,7 @@ export default function RegisterPage() {
       const formData = new FormData();
       
       // Append form fields
-      formData.append('fullName', data.fullName);
+      formData.append('name', data.name);
       formData.append('email', data.email);
       formData.append('phone', data.phone);
       formData.append('password', data.password);
@@ -290,10 +273,10 @@ export default function RegisterPage() {
             </Typography>
             <TextField
               fullWidth
-              {...register('fullName')}
+              {...register('name')}
               placeholder="John Doe"
-              error={!!errors.fullName}
-              helperText={errors.fullName?.message}
+              error={!!errors.name}
+              helperText={errors.name?.message}
               sx={inputStyle}
             />
           </Box>

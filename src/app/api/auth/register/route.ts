@@ -8,6 +8,10 @@ import { join } from 'path';
 import sharp from 'sharp';
 import { AppConfigModel } from '@/models/AppConfig';
 import { generateRandomInvitationCode } from '@/utils/generate-code';
+import { walletService } from '@/services/Wallet';
+import { WalletModel } from '@/models/Wallet';
+import { config } from '@/config';
+import { encryptPrivateKey } from '@/utils/encrypt';
 
 // Configure upload directory
 const uploadDir = join(process.cwd(), 'public');
@@ -16,10 +20,10 @@ export async function POST(request: Request) {
   try {
     // Parse multipart form data
     const formData = await request.formData();
-    
+
     // Extract form fields
     const data = {
-      fullName: formData.get('fullName'),
+      name: formData.get('name'),
       email: formData.get('email'),
       phone: formData.get('phone'),
       password: formData.get('password'),
@@ -37,7 +41,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { email, password, fullName, phone, idPassport, invitationCode } = validationResult.data;
+    const { email, password, name, phone, idPassport, invitationCode } = validationResult.data;
 
     // Check if email is verified
     const isEmailVerified = await redis.get(`email_verified:${email}`);
@@ -48,16 +52,21 @@ export async function POST(request: Request) {
       );
     }
 
-    //Check if user with the invitation code is existed
-    const invitingUser = await UserModel.findOne({
-      myInvitationCode: invitationCode
-    })
+    // Check if user already exists
+    const userCount = await UserModel.countDocuments();
 
-    if(!invitingUser) {
-      return NextResponse.json(
-        { error: 'No user with the invitation code' },
-        { status: 400 }
-      );
+    if (userCount > 0) {
+      //Check if user with the invitation code is existed
+      const invitingUser = await UserModel.findOne({
+        myInvitationCode: invitationCode
+      })
+
+      if (!invitingUser) {
+        return NextResponse.json(
+          { error: 'No user with the invitation code' },
+          { status: 400 }
+        );
+      }
     }
 
     // Check if user already exists
@@ -111,25 +120,25 @@ export async function POST(request: Request) {
       if (!allowedImgUploadTypes.includes(file.type)) {
         return NextResponse.json({ error: `Unsupported file type: ${file.type}` }, { status: 400 });
       }
-    
+
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
-    
+
       let compressedBuffer: Buffer;
-    
+
       switch (file.type) {
         case 'image/png':
           compressedBuffer = await sharp(buffer)
             .png({ compressionLevel: 9 }) // Lossless PNG
             .toBuffer();
           break;
-    
+
         case 'image/jpeg':
           compressedBuffer = await sharp(buffer)
             .jpeg({ quality: 90, mozjpeg: true }) // Near-lossless JPEG
             .toBuffer();
           break;
-    
+
         case 'image/webp':
           compressedBuffer = await sharp(buffer)
             .webp({ quality: 90, lossless: true }) // Lossless WebP
@@ -141,11 +150,11 @@ export async function POST(request: Request) {
             .jpeg({ quality: 90, mozjpeg: true }) // Near-lossless JPEG
             .toBuffer();
           break;
-    
+
         default:
           compressedBuffer = buffer; // Fallback (shouldn't happen due to MIME check)
       }
-    
+
       await writeFile(filepath, compressedBuffer);
       savedFiles[key] = `/uploads/${filename}`;
     }
@@ -158,17 +167,17 @@ export async function POST(request: Request) {
     let invitationCodeExists = true;
     while (invitationCodeExists) {
       myInvitationCode = generateRandomInvitationCode();
-        const existingInvitationCode = await UserModel.findOne({
-            myInvitationCode
-        });
-        if (!existingInvitationCode) {
-          invitationCodeExists = false;
-        }
+      const existingInvitationCode = await UserModel.findOne({
+        myInvitationCode
+      });
+      if (!existingInvitationCode) {
+        invitationCodeExists = false;
+      }
     }
 
     // Create user document
     const newUser = {
-      fullName,
+      name,
       email,
       phone,
       password: hashedPassword,
@@ -188,15 +197,33 @@ export async function POST(request: Request) {
     // Insert user into database
     const result = await UserModel.create(newUser);
 
-    if (!result.acknowledged) {
-      throw new Error('Failed to create user');
+    if (!result) {
+      return NextResponse.json(
+        { error: 'Failed to register user' },
+        { status: 500 }
+      );
     }
 
+    // Create wallet
+    const supportedChains = Object.keys(config.wallet.supportedChains);
+    for (const chain of supportedChains) {
+      const wallet = await walletService.generateWalletCredentials(chain);
+      const supportedTokens = config.wallet.supportedChains[chain as keyof typeof config.wallet.supportedChains].supportedTokens;
+      for (const token of supportedTokens) {
+        await WalletModel.create({
+          userId: result._id,
+          address: wallet.address,
+          privateKeyEncrypted: encryptPrivateKey(wallet.privateKey),
+          chain: chain,
+          token: token
+        });
+      }
+    }
     // Clear email verification status
     await redis.del(`email_verified:${email}`);
 
     // Return success response (excluding password)
-    const {...userWithoutPassword } = newUser;
+    const { ...userWithoutPassword } = newUser;
     return NextResponse.json(
       {
         message: 'Registration successful',

@@ -1,16 +1,23 @@
-import { Card, CardContent, Stack, Typography, Tooltip, Button, TextField, InputAdornment, IconButton, useTheme } from '@mui/material';
+import { Card, CardContent, Stack, Typography, Tooltip, Button, TextField, InputAdornment, IconButton, Box } from '@mui/material';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 interface TeamContributionProps {
   invitationLink: string;
-  invitationCode: string;
   copied: boolean;
   handleCopy: (text: string) => void;
 }
 
-export default function TeamContribution({ invitationLink, invitationCode, copied, handleCopy }: TeamContributionProps) {
-  const theme = useTheme();
+export default function TeamContribution({ invitationLink, copied, handleCopy }: TeamContributionProps) {
+  const user = useSession();
+  const router = useRouter();
+
+  const handleViewTeamStatus = () => {
+    router.push('/home/team-contribution');
+  };
+
   return (
     <Card
       sx={{
@@ -36,23 +43,7 @@ export default function TeamContribution({ invitationLink, invitationCode, copie
         <Typography variant="h6" color="primary" fontWeight={800} mt={1} sx={{ fontSize: { xs: '1.3rem', md: '1.7rem' } }}>
           $5,000
         </Typography>
-        <Button
-          fullWidth
-          variant="contained"
-          color="primary"
-          sx={{
-            mt: 2,
-            borderRadius: 3,
-            fontWeight: 700,
-            fontSize: { xs: '1rem', md: '1.1rem' },
-            boxShadow: 1,
-            transition: '0.2s',
-            ':hover': { boxShadow: 3, transform: 'translateY(-2px)' },
-            py: { xs: 1, md: 1.5 },
-          }}
-        >
-          View My Team Status
-        </Button>
+
         {/* Inline Invitation UI */}
         <Typography variant="h6" fontWeight={700} mb={2} mt={3}>
           Share Link and Invitation Code
@@ -82,16 +73,38 @@ export default function TeamContribution({ invitationLink, invitationCode, copie
             Invitation Code :
           </Typography>
           <Typography variant="body1" fontWeight={800} color="primary.main">
-            {invitationCode}
+            {user.data?.user.myInvitationCode}
           </Typography>
           <Tooltip title={copied ? 'Copied!' : 'Copy'}>
-            <IconButton onClick={() => handleCopy(invitationCode)}>
+            <IconButton onClick={() => handleCopy(user.data?.user.myInvitationCode || '')}>
               <ContentCopyIcon fontSize="small" />
             </IconButton>
           </Tooltip>
           {copied && <Typography variant="caption" color="success.main">Copied!</Typography>}
         </Stack>
       </CardContent>
+      <Box sx={{
+        p: 1
+      }}>
+        <Button
+          fullWidth
+          variant="contained"
+          color="primary"
+          onClick={handleViewTeamStatus}
+          sx={{
+            mt: 2,
+            borderRadius: 3,
+            fontWeight: 700,
+            fontSize: { xs: '1rem', md: '1.1rem' },
+            boxShadow: 1,
+            transition: '0.2s',
+            ':hover': { boxShadow: 3, transform: 'translateY(-2px)' },
+            py: { xs: 1, md: 1.5 },
+          }}
+        >
+          View My Team Status
+        </Button>
+      </Box>
     </Card>
   );
 } 
