@@ -24,8 +24,6 @@ export default function DashboardPage() {
     );
   }
 
-  console.log(session);
-
   return (
     <Layout>
       {/* Welcome Section */}

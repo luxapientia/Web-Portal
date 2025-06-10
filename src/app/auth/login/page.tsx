@@ -40,8 +40,6 @@ export default function LoginPage() {
         redirect: false,
       });
 
-      console.log(result);
-
       if (result?.error) {
         throw new Error(result.error);
       }

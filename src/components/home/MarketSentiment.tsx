@@ -138,28 +138,7 @@ export default function MarketSentiment() {
                             </>
                         )}
                     </Box>
-
-                    <IconButton
-                        size="small"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            setExpandedCoin(isExpanded ? null : symbol);
-                        }}
-                    >
-                        {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                    </IconButton>
                 </Box>
-
-                <Collapse in={isExpanded}>
-                    <Box sx={{ p: 2, bgcolor: 'rgba(0, 0, 0, 0.02)' }}>
-                        {/* <PriceChart
-                            coinId={symbol.toLowerCase()}
-                            coinName={priceData.name}
-                            days={30}
-                            interval="daily"
-                        /> */}
-                    </Box>
-                </Collapse>
             </Box>
         );
     };

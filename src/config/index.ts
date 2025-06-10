@@ -159,7 +159,6 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         try {
-          console.log(credentials, 'credentials');
           // If accessToken is provided, verify it and return user
           if (credentials?.accessToken && credentials.email) {
             const user = await UserModel.findOne({ email: credentials.email });
