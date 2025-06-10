@@ -13,25 +13,37 @@ import {
   Tooltip,
 } from "@mui/material";
 import { EditOutlined, SaveOutlined, CloseOutlined, ContentCopy } from "@mui/icons-material";
+import { useAuth } from "@/contexts/AuthContext";
+import { fetchWithAuth } from "@/lib/api";
 import toast from "react-hot-toast";
-import { User } from "@/schemas/auth.schema";
 
 type WalletInfo = {
   type: string;
   id: string;
 };
 
-interface WalletInfoTabProps {
-  userData: User;
-}
-
-export function WalletInfoTab({ userData }: WalletInfoTabProps) {
+export default function WalletInfoTab() {
+  const { user, login } = useAuth();
   const [loading, setLoading] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [walletInfo, setWalletInfo] = useState<WalletInfo>({
     type: "",
     id: "",
   });
+
+  // Update wallet info when user data changes
+  useEffect(() => {
+    if (user) {
+      const walletType = user.withdrawalWallet?.type || "";
+      const walletId = user.withdrawalWallet?.id || "";
+      
+      // Set wallet info from user data
+      setWalletInfo({
+        type: walletType,
+        id: walletId,
+      });
+    }
+  }, [user]);
 
   const handleWalletChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -42,6 +54,16 @@ export function WalletInfoTab({ userData }: WalletInfoTabProps) {
   };
 
   const handleEditToggle = () => {
+    if (editMode && user) {
+      // Reset wallet info to user data when canceling edit
+      const walletType = user.withdrawalWallet?.type || "";
+      const walletId = user.withdrawalWallet?.id || "";
+      
+      setWalletInfo({
+        type: walletType,
+        id: walletId,
+      });
+    }
     setEditMode(!editMode);
   };
 
@@ -55,12 +77,13 @@ export function WalletInfoTab({ userData }: WalletInfoTabProps) {
       };
       
       // Update user profile
-      const response = await fetch('/api/profile/wallet', {
+      const response = await fetchWithAuth('/api/profile/wallet', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(walletData),
+        requireAuth: true
       });
 
       if (response) {
@@ -70,7 +93,7 @@ export function WalletInfoTab({ userData }: WalletInfoTabProps) {
           
           // Update user data
           if (data.user) {
-            setWalletInfo(data.user);
+            login(localStorage.getItem('token') || '', data.user);
           }
           setEditMode(false);
         } else {
@@ -85,7 +108,7 @@ export function WalletInfoTab({ userData }: WalletInfoTabProps) {
     }
   };
 
-  if (!userData) {
+  if (!user) {
     return (
       <Box sx={{ p: 3, textAlign: "center" }}>
         <CircularProgress />

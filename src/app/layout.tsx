@@ -1,10 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import { Toaster } from "react-hot-toast";
 import { Geist, Geist_Mono } from "next/font/google";
+import ClientProviders from "@/components/providers/ClientProviders";
+import { AuthProvider } from '@/contexts/AuthContext';
 import "./globals.css";
-import { NextAuthProvider } from '@/components/providers/NextAuthProvider';
-import ClientProviders from '@/components/providers/ClientProviders';
-import ToastProvider from "@/components/providers/ToastProvider";
+import { SocketProvider } from "@/components/providers/SocketProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,21 +30,19 @@ export const viewport: Viewport = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <ClientProviders>
-          <NextAuthProvider>
-            {children}
-            <ToastProvider />
-            <Toaster position="top-right" />
-          </NextAuthProvider>
-        </ClientProviders>
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body>
+        <AuthProvider>
+          <ClientProviders>
+            <SocketProvider>
+              {children}
+            </SocketProvider>
+          </ClientProviders>
+        </AuthProvider>
       </body>
     </html>
   );

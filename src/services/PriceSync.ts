@@ -1,6 +1,7 @@
 import { CoinGeckoService } from './CoinGecko';
 import { RedisCacheService } from './RedisCache';
 import { CryptoPriceModel } from '../models/CryptoPrice';
+import { config } from '../config';
 import { logger } from '../utils/logger';
 import { PriceUpdate } from '../schemas/price.schema';
 
@@ -14,15 +15,16 @@ export class PriceSyncService {
   }
 
   /**
-   * Sync prices for all configured cryptoIds
+   * Sync prices for all configured symbols
    */
   async syncPrices(): Promise<void> {
     try {
-      const cryptoNames = process.env.CRYPTO_NAMES || 'bitcoin,ethereum,tether,usd-coin,binancecoin,tron,litecoin,solana'
+      const symbols = config.symbols;
+      logger.info(`Starting price sync for symbols: ${symbols.join(', ')}`);
 
       // Fetch fresh prices from CoinGecko
-      const freshPrices = await this.coinGecko.getPrices(cryptoNames.split(',').map(symbol => symbol.trim()));
-
+      const freshPrices = await this.coinGecko.getPrices(symbols);
+      
       // Cache all prices in Redis first
       await this.redisCache.setCachedPrices(freshPrices);
       logger.info('Prices cached in Redis successfully');
@@ -35,8 +37,6 @@ export class PriceSyncService {
           // Store in MongoDB
           await CryptoPriceModel.create({
             symbol: update.symbol,
-            image: update.image,
-            name: update.name,
             price: update.price,
             timestamp: update.timestamp,
             priceChange: update.priceChange
@@ -46,6 +46,7 @@ export class PriceSyncService {
         })
       );
 
+      logger.info(`Successfully completed price sync for ${symbols.length} symbols`);
     } catch (error) {
       if (error instanceof Error) {
         logger.error(`Price sync failed: ${error.message}`);
@@ -60,42 +61,37 @@ export class PriceSyncService {
    * Get current price for a symbol
    * First checks Redis cache, then falls back to CoinGecko if not found
    */
-  async getCurrentPrice(name: string): Promise<PriceUpdate | null> {
+  async getCurrentPrice(symbol: string): Promise<PriceUpdate> {
     try {
       // Check cache first
-      const cachedPrice = await this.redisCache.getCachedPrice(name);
-      return cachedPrice;
+      const cachedPrice = await this.redisCache.getCachedPrice(symbol);
+      if (cachedPrice !== null) {
+        logger.info(`Retrieved price for ${symbol} from cache`);
+        return cachedPrice;
+      }
 
-      // if (cachedPrice !== null) {
-      //   logger.info(`Retrieved price for ${name} from cache`);
-      //   return cachedPrice;
-      // }
+      // If not in cache, fetch from CoinGecko
+      logger.info(`Cache miss for ${symbol}, fetching from CoinGecko`);
+      const prices = await this.coinGecko.getPrices([symbol]);
+      const update = prices[symbol];
 
-      // // If not in cache, fetch from CoinGecko
-      // logger.info(`Cache miss for ${name}, fetching from CoinGecko`);
-      // const prices = await this.coinGecko.getPrices([name]);
+      // Always cache first
+      await this.redisCache.setCachedPrice(symbol, update);
+      logger.info(`Cached new price for ${symbol}`);
 
-      // const update = prices[name];
+      // Store in MongoDB
+      await CryptoPriceModel.create({
+        symbol: update.symbol,
+        price: update.price,
+        timestamp: update.timestamp,
+        priceChange: update.priceChange
+      });
+      logger.info(`Stored new price for ${symbol} in MongoDB`);
 
-      // // Always cache first
-      // await this.redisCache.setCachedPrice(name, update);
-      // logger.info(`Cached new price for ${name}`);
-
-      // // Store in MongoDB
-      // await CryptoPriceModel.create({
-      //   symbol: update.symbol,
-      //   name: name,
-      //   image: update.image,
-      //   price: update.price,
-      //   timestamp: update.timestamp,
-      //   priceChange: update.priceChange
-      // });
-      // logger.info(`Stored new price for ${name} in MongoDB`);
-
-      // return update;
+      return update;
     } catch (error) {
       if (error instanceof Error) {
-        logger.error(`Failed to get current price for ${name}: ${error.message}`);
+        logger.error(`Failed to get current price for ${symbol}: ${error.message}`);
         throw new Error(`Failed to get current price: ${error.message}`);
       }
       throw new Error('Failed to get current price');

@@ -6,9 +6,6 @@ import { join } from 'path';
 import sharp from 'sharp';
 import { AppConfigModel } from '@/models/AppConfig';
 import { mkdir } from 'fs/promises';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { getServerSession } from 'next-auth';
-
 
 // Configure upload directory
 const uploadDir = join(process.cwd(), 'public', 'uploads', 'avatars');
@@ -33,12 +30,14 @@ ensureUploadDirExists();
  */
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Get user data from request headers (set by middleware)
+    const userHeader = request.headers.get('user');
+    if (!userHeader) {
+      return NextResponse.json({ error: 'User data not found' }, { status: 401 });
     }
 
-    const userId = session.user.id;
+    const userData = JSON.parse(userHeader);
+    const userId = userData.id;
     
     // Parse multipart form data
     const formData = await request.formData();
@@ -141,7 +140,7 @@ export async function POST(request: NextRequest) {
         { _id: new ObjectId(userId) },
         { 
           $set: { 
-            image: avatarUrl,
+            avatar: avatarUrl,
             updatedAt: new Date()
           } 
         }

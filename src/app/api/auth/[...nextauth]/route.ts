@@ -1,140 +1,72 @@
-import NextAuth, { NextAuthOptions } from 'next-auth';
+import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import bcrypt from 'bcryptjs';
-import { UserModel } from '@/models/User';
-import jwt from 'jsonwebtoken';
+import { userSchema, type User } from '@/schemas/auth.schema';
 
-// Extend the built-in session types
-declare module 'next-auth' {
-  interface Session {
-    user: {
-      id: string;
-      email: string;
-      name: string;
-      image?: string;
-      role: string;
-      myInvitationCode: string;
-    }
-  }
-
-  interface User {
-    id: string;
-    email: string;
-    name: string;
-    image?: string;
-    role: string;
-    myInvitationCode: string;
-  }
-}
-
-// Extend JWT type
-declare module 'next-auth/jwt' {
-  interface JWT {
-    id: string;
-    email: string;
-    name: string;
-    image?: string;
-    role: string;
-    myInvitationCode: string;
-  }
-}
-
-export const authOptions: NextAuthOptions = {
+const handler = NextAuth({
   providers: [
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
         email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-        accessToken: { label: "Access Token", type: "text" }
+        password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) return null;
+        
         try {
-          console.log(credentials, 'credentials');
-          // If accessToken is provided, verify it and return user
-          if (credentials?.accessToken && credentials.email) {
-            const user = await UserModel.findOne({ email: credentials.email });
-            
-            if (!user) {
-              throw new Error('User not found');
-            }
+          // Make API call to your existing login endpoint
+          const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: credentials.email,
+              password: credentials.password,
+            }),
+          });
 
-            return {
-              id: user._id.toString(),
-              email: user.email,
-              name: user.name,
-              image: user.image,
-              role: user.role,
-              myInvitationCode: user.myInvitationCode,
-            };
+          if (!response.ok) {
+            throw new Error('Login failed');
           }
 
-          // Regular email/password authentication
-          if (!credentials?.email || !credentials?.password) {
-            throw new Error('Please enter an email and password');
-          }
-
-          const user = await UserModel.findOne({ email: credentials.email });
-
-          if (!user) {
-            throw new Error('No user found');
-          }
-
-          const isPasswordMatch = await bcrypt.compare(credentials.password, user.password);
-
-          if (!isPasswordMatch) {
-            throw new Error('Invalid password');
-          }
-
+          const data = await response.json();
+          const user = userSchema.parse(data.user);
+          
+          // Return both user data and token
           return {
-            id: user._id.toString(),
-            email: user.email,
-            name: user.name,
-            image: user.image,
-            role: user.role,
-            myInvitationCode: user.myInvitationCode,
+            ...user,
+            token: data.token // NextAuth will store this in the JWT
           };
         } catch (error) {
           console.error('Auth error:', error);
           return null;
         }
       }
-    })
+    }),
   ],
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-        token.email = user.email;
-        token.name = user.name;
-        token.image = user.image;
-        token.role = user.role;
-        token.myInvitationCode = user.myInvitationCode;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id;
-        session.user.email = token.email;
-        session.user.name = token.name;
-        session.user.image = token.image;
-        session.user.role = token.role;
-        session.user.myInvitationCode = token.myInvitationCode;
-      }
-      return session;
-    }
+  pages: {
+    signIn: '/auth/login',
+    error: '/auth/error',
   },
   session: {
     strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
-  pages: {
-    signIn: '/auth/login',
-  },
-  secret: process.env.NEXTAUTH_SECRET,
-}
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        // Store all user data and token in the JWT
+        token.user = user as User;
+        token.accessToken = (user as any).token;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      // Add user data and token to the session
+      session.user = token.user as User;
+      session.token = token.accessToken as string;
+      return session;
+    }
+  }
+});
 
-const handler = NextAuth(authOptions);
-
-export { handler as GET, handler as POST }; 
+export { handler as GET, handler as POST };

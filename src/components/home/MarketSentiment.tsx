@@ -1,36 +1,23 @@
 'use client';
 
-import { Box, Typography, IconButton, Collapse } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import {
     PriceUpdate,
+    type Symbol,
+    AVAILABLE_SYMBOLS
 } from '@/schemas/price.schema';
-// import PriceChart from './PriceChart';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import { fetchWithAuth } from '@/lib/api';
 
-// Helper function to generate trend line path
-const generateTrendPath = (trend: 'up' | 'down') => {
-    // Create a curved line that goes up or down
-    const height = 24;
-    const width = 60;
-    const startY = trend === 'up' ? height : 0;
-    const endY = trend === 'up' ? 0 : height;
-    
-    return `M0,${startY} C20,${startY} 40,${endY} ${width},${endY}`;
-};
+type PriceRecord = Record<Symbol, Omit<PriceUpdate, 'symbol'>>;
 
 export default function MarketSentiment() {
-    const [prices, setPrices] = useState<Record<string, PriceUpdate>>({});
+    const [prices, setPrices] = useState<PriceRecord>({} as PriceRecord);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [expandedCoin, setExpandedCoin] = useState<string | null>(null);
 
     useEffect(() => {
         fetchPrices();
-        // Set up auto-refresh every 30 seconds
-        const interval = setInterval(fetchPrices, 60 * 5 * 1000);
-        return () => clearInterval(interval);
     }, []);
 
     const fetchPrices = async () => {
@@ -38,15 +25,22 @@ export default function MarketSentiment() {
             setLoading(true);
             setError(null);
 
-            const response = await fetch('/api/market-sentiment/current', {
+            const response = await fetchWithAuth('/api/prices', {
                 method: 'GET',
+                requireAuth: true
             });
 
-            const result = await response.json();
-            if (!response.ok) {
-                throw new Error(result.error || 'Failed to fetch prices');
+            if (!response) {
+                throw new Error('Authentication required');
             }
-            setPrices(result.data);
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to fetch prices');
+            }
+
+            const data = await response.json();
+            setPrices(data);
         } catch (err) {
             console.error('Failed to fetch prices:', err);
             setError('Failed to fetch price data');
@@ -55,171 +49,77 @@ export default function MarketSentiment() {
         }
     };
 
-    const renderCryptoCard = (symbol: string, priceData: PriceUpdate) => {
-        const priceChange24h = priceData?.priceChange?.['24h'] || 0;
-        const trend: 'up' | 'down' = priceChange24h >= 0 ? 'up' : 'down';
-        const trendColor = trend === 'up' ? '#4CAF50' : '#FF5252';
-        const isExpanded = expandedCoin === symbol;
+    // Function to format price with color based on price change
+    const renderPrice = (symbol: Symbol) => {
+        const priceData = prices[symbol];
 
-        return (
-            <Box key={symbol}>
-                <Box
-                    sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 2,
-                        p: 2,
-                        borderBottom: '1px solid #e0e0e0',
-                        '&:last-child': {
-                            borderBottom: 'none',
-                        },
-                        cursor: 'pointer',
-                        '&:hover': {
-                            bgcolor: 'rgba(0, 0, 0, 0.02)',
-                        },
-                    }}
-                    onClick={() => setExpandedCoin(isExpanded ? null : symbol)}
-                >
-                    {loading ? (
-                        <Box sx={{ width: 32, height: 32, bgcolor: '#f5f5f5', borderRadius: '50%' }} />
-                    ) : (
-                        <img
-                            src={priceData?.image}
-                            alt={`${symbol} icon`}
-                            style={{
-                                width: 32,
-                                height: 32,
-                                borderRadius: '50%',
-                            }}
-                        />
-                    )}
-                    
-                    <Box sx={{ flex: 1 }}>
-                        <Typography variant="body2" color="text.secondary">
-                            {`${priceData?.name} (${symbol})`}
-                        </Typography>
-                    </Box>
+        if (loading) {
+            return (
+                <Typography variant="h5" color="text.secondary" fontWeight={900}>
+                    Loading...
+                </Typography>
+            );
+        }
 
-                    <Box sx={{ position: 'relative', width: 60, height: 24 }}>
-                        {!loading && (
-                            <svg
-                                width="60"
-                                height="24"
-                                style={{
-                                    position: 'absolute',
-                                    top: 0,
-                                    left: 0,
-                                }}
-                            >
-                                <path
-                                    d={generateTrendPath(trend)}
-                                    stroke={trendColor}
-                                    strokeWidth="2"
-                                    fill="none"
-                                />
-                            </svg>
-                        )}
-                    </Box>
-
-                    <Box sx={{ textAlign: 'right', minWidth: 100 }}>
-                        {loading ? (
-                            <Box sx={{ height: 24, width: 80, bgcolor: '#f5f5f5', borderRadius: 1 }} />
-                        ) : (
-                            <>
-                                <Typography variant="body1" fontWeight="bold">
-                                    ${priceData?.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                </Typography>
-                                <Typography
-                                    variant="body2"
-                                    sx={{ color: trendColor }}
-                                >
-                                    {priceChange24h > 0 ? '+' : ''}{priceChange24h.toFixed(2)}%
-                                </Typography>
-                            </>
-                        )}
-                    </Box>
-
-                    <IconButton
-                        size="small"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            setExpandedCoin(isExpanded ? null : symbol);
-                        }}
-                    >
-                        {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                    </IconButton>
-                </Box>
-
-                <Collapse in={isExpanded}>
-                    <Box sx={{ p: 2, bgcolor: 'rgba(0, 0, 0, 0.02)' }}>
-                        {/* <PriceChart
-                            coinId={symbol.toLowerCase()}
-                            coinName={priceData.name}
-                            days={30}
-                            interval="daily"
-                        /> */}
-                    </Box>
-                </Collapse>
-            </Box>
-        );
-    };
-
-    const renderContent = () => {
         if (error) {
             return (
-                <Typography color="error" sx={{ p: 2 }}>
+                <Typography variant="h5" color="error" fontWeight={900}>
                     {error}
                 </Typography>
             );
         }
 
-        if (loading) {
-            // Show loading placeholders for 4 items
-            return Array(4).fill(null).map((_, index) => (
-                <Box
-                    key={`loading-${index}`}
-                    sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 2,
-                        p: 2,
-                        borderBottom: '1px solid #e0e0e0',
-                        '&:last-child': {
-                            borderBottom: 'none',
-                        }
-                    }}
-                >
-                    <Box sx={{ width: 32, height: 32, bgcolor: '#f5f5f5', borderRadius: '50%' }} />
-                    <Box sx={{ flex: 1 }}>
-                        <Box sx={{ width: 40, height: 20, bgcolor: '#f5f5f5', borderRadius: 1 }} />
-                    </Box>
-                    <Box sx={{ width: 60, height: 24 }} />
-                    <Box sx={{ textAlign: 'right', minWidth: 100 }}>
-                        <Box sx={{ height: 24, width: 80, bgcolor: '#f5f5f5', borderRadius: 1, mb: 1 }} />
-                        <Box sx={{ height: 20, width: 60, bgcolor: '#f5f5f5', borderRadius: 1 }} />
-                    </Box>
-                </Box>
-            ));
+        if (!priceData) {
+            return (
+                <Typography variant="h5" color="text.secondary" fontWeight={900}>
+                    No data available
+                </Typography>
+            );
         }
 
-        return Object.entries(prices)
-            .sort(([, a], [, b]) => (b.price || 0) - (a.price || 0)) // Sort by price, highest first
-            .map(([symbol, priceData]) => renderCryptoCard(symbol, priceData));
+        const priceChange24h = priceData.priceChange?.['24h'] || 0;
+        const priceChangeColor = priceChange24h > 0 ? 'success.main' :
+            priceChange24h < 0 ? 'error.main' :
+                'text.primary';
+
+        return (
+            <>
+                <Typography variant="h5" color={priceChangeColor} fontWeight={900}>
+                    ${priceData.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </Typography>
+                <Typography variant="body2" color={priceChangeColor}>
+                    {priceChange24h.toFixed(2)}% (24h)
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                    Last updated: {priceData.timestamp.toLocaleTimeString()}
+                </Typography>
+            </>
+        );
     };
 
     return (
-        <Box sx={{ bgcolor: '#ffffff', borderRadius: 2, border: '1px solid #e0e0e0' }}>
-            <Typography variant="h6" sx={{ p: 2, borderBottom: '1px solid #e0e0e0' }}>
-                Crypto Market Sentiment
-            </Typography>
-            
-            {renderContent()}
-
-            <Box sx={{ p: 2, borderTop: '1px solid #e0e0e0' }}>
-                <Typography variant="body2" color="text.secondary">
-                    Investor sentiment is cautiously optimistic, with altcoins and institutional deals boosting confidence despite Bitcoin's slowdown. Traders remain alert to inflation and interest rate signals that may affect the market.
-                </Typography>
+        <>
+            <Typography variant="h6" fontWeight={700} mb={2}>Crypto Market Sentiment</Typography>
+            <Box sx={{ mt: 2 }}>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+                    <Box sx={{ flex: '1 1 45%', minWidth: '45%', bgcolor: '#fff', borderRadius: 3, p: { xs: 2, md: 3 }, mb: 1, boxShadow: 2 }}>
+                        <Typography variant="body1" fontWeight={800}>Binance BNB</Typography>
+                        {renderPrice('BNB')}
+                    </Box>
+                    <Box sx={{ flex: '1 1 45%', minWidth: '45%', bgcolor: '#fff', borderRadius: 3, p: { xs: 2, md: 3 }, mb: 1, boxShadow: 2 }}>
+                        <Typography variant="body1" fontWeight={800}>Ethereum ETH</Typography>
+                        {renderPrice('ETH')}
+                    </Box>
+                    <Box sx={{ flex: '1 1 45%', minWidth: '45%', bgcolor: '#fff', borderRadius: 3, p: { xs: 2, md: 3 }, mb: 1, boxShadow: 2 }}>
+                        <Typography variant="body1" fontWeight={800}>Litecoin LTC</Typography>
+                        {renderPrice('LTC')}
+                    </Box>
+                    <Box sx={{ flex: '1 1 45%', minWidth: '45%', bgcolor: '#fff', borderRadius: 3, p: { xs: 2, md: 3 }, mb: 1, boxShadow: 2 }}>
+                        <Typography variant="body1" fontWeight={800}>Bitcoin BTC</Typography>
+                        {renderPrice('BTC')}
+                    </Box>
+                </Box>
             </Box>
-        </Box>
+        </>
     );
 } 

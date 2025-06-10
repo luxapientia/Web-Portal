@@ -16,8 +16,7 @@ import {
   AccountCircle
 } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
-import { signOut } from 'next-auth/react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface UserMenuProps {
   showDashboardButton?: boolean;
@@ -28,7 +27,7 @@ export default function UserMenu({
   showDashboardButton = false,
   onDashboardClick
 }: UserMenuProps) {
-  const { data: session, status } = useSession();
+  const { user, logout } = useAuth();
   const router = useRouter();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const isMenuOpen = Boolean(anchorEl);
@@ -43,7 +42,7 @@ export default function UserMenu({
   
   const handleLogout = async () => {
     handleMenuClose();
-    await signOut();
+    await logout();
     router.push('/auth/login');
   };
 
@@ -77,10 +76,10 @@ export default function UserMenu({
         color="inherit"
         sx={{ mr: 1 }}
       >
-        {session?.user?.image ? (
+        {user?.avatar ? (
           <Avatar 
-            src={session.user.image} 
-            alt={session.user.name || 'User'} 
+            src={user.avatar} 
+            alt={user.fullName || 'User'} 
             sx={{ width: 32, height: 32 }}
           />
         ) : (
@@ -114,7 +113,7 @@ export default function UserMenu({
         <MenuItem onClick={handleProfile}>
           <PersonIcon fontSize="small" sx={{ mr: 1 }} />
           <Typography variant="body1">
-            {session?.user?.name || 'My Profile'}
+            {user?.fullName || 'My Profile'}
           </Typography>
         </MenuItem>
         <MenuItem onClick={handleSettings}>

@@ -24,12 +24,13 @@ import {
   MonetizationOn,
   Assignment,
 } from "@mui/icons-material";
+import { useAuth } from "@/contexts/AuthContext";
+import { fetchWithAuth } from "@/lib/api";
 import toast from "react-hot-toast";
-import { useSession } from "next-auth/react";
 import { PlanWithoutId as Plan } from "@/models/Plan";
 
 export default function VIPPlanTab() {
-  const { data: session } = useSession();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [balance, setBalance] = useState(0);
   const [plans, setPlans] = useState<Plan[]>([]);
@@ -39,10 +40,10 @@ export default function VIPPlanTab() {
   const theme = useTheme();
 
   useEffect(() => {
-    if (session) {
+    if (user) {
       fetchBalance();
     }
-  }, [session]);
+  }, [user]);
 
   useEffect(() => {
     fetchVIPPlans();
@@ -50,18 +51,18 @@ export default function VIPPlanTab() {
 
   const fetchBalance = async () => {
     try {
-      // setLoading(true);
-      // const balanceResponse = await fetch("/api/wallet/balance", {
-      //   method: "GET",
-      // });
+      setLoading(true);
+      const balanceResponse = await fetchWithAuth("/api/wallet/balance", {
+        method: "GET",
+        requireAuth: true,
+      });
 
-      // if (balanceResponse) {
-      //   const balanceData = await balanceResponse.json();
-      //   if (balanceData.success) {
-      //     setBalance(balanceData.balance || 0);
-      //   }
-      // }
-      setBalance(0);
+      if (balanceResponse) {
+        const balanceData = await balanceResponse.json();
+        if (balanceData.success) {
+          setBalance(balanceData.balance || 0);
+        }
+      }
     } catch (error) {
       console.error("Error fetching VIP plan data:", error);
       toast.error("Failed to load VIP plan information");
@@ -72,8 +73,9 @@ export default function VIPPlanTab() {
 
   const fetchVIPPlans = async () => {
     setLoading(true);
-    const plansResponse = await fetch("/api/plans", {
+    const plansResponse = await fetchWithAuth("/api/plans", {
       method: "GET",
+      requireAuth: true,
     });
     if (plansResponse) {
       const plansData = await plansResponse.json();

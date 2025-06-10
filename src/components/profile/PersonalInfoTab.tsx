@@ -26,31 +26,24 @@ import {
   ContentCopy,
 } from "@mui/icons-material";
 import { User } from "@/schemas/auth.schema";
+import { useAuth } from "@/contexts/AuthContext";
 import toast from "react-hot-toast";
-import { signIn, useSession } from "next-auth/react";
+import { fetchWithAuth } from "@/lib/api";
 
-interface PersonalInfoTabProps {
-  userData: User;
-}
-
-export function PersonalInfoTab({ userData }: PersonalInfoTabProps) {
-  const { data: session, update: updateSession } = useSession();
+export default function PersonalInfoTab() {
+  const { user, login } = useAuth();
   const [avatarLoading, setAvatarLoading] = useState(false);
-  const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
+  const [formData, setFormData] = useState<Partial<User>>({});
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
-    name: userData?.name || '',
-    email: userData?.email || '',
-    phone: userData?.phone || '',
-    idPassport: userData?.idPassport || '',
-    image: userData?.image || '',
-    invitationCode: userData?.invitationCode || '',
-    myInvitationCode: userData?.myInvitationCode || '',
-    isEmailVerified: userData?.isEmailVerified || false,
-    isPhoneVerified: userData?.isPhoneVerified || false,
-    isIdVerified: userData?.isIdVerified || false,
-  });
+  const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
+
+  // Initialize form data from auth context
+  useEffect(() => {
+    if (user) {
+      setFormData(user);
+    }
+  }, [user]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -88,44 +81,36 @@ export function PersonalInfoTab({ userData }: PersonalInfoTabProps) {
   };
 
   const handleAvatarUpload = async () => {
+    if (!user || !avatarFile) return;
+
     try {
       setAvatarLoading(true);
 
       // Create a FormData object for the avatar
       const formDataWithFile = new FormData();
-      formDataWithFile.append("avatar", avatarFile as File);
+      formDataWithFile.append("avatar", avatarFile);
 
       // Send the avatar upload request
-      const response = await fetch("/api/profile/avatar", {
+      const response = await fetchWithAuth("/api/profile/avatar", {
         method: "POST",
         body: formDataWithFile,
+        requireAuth: true,
       });
 
       if (response) {
         const data = await response.json();
         if (data.success) {
-          // Update local state
-          setFormData((prev) => ({
-            ...prev,
-            image: data.avatarUrl,
-          }));
-
-          // Get the token from localStorage
-          const token = localStorage.getItem('token');
-          if (token) {
-            // Sign in again with the token to refresh the session
-            const result = await signIn('credentials', {
-              accessToken: token,
-              email: session?.user?.email,
-              callbackUrl: '/dashboard',
-              redirect: false
-            });
-            console.log(result);
-          }
-
           toast.success("Avatar updated successfully!");
           setAvatarFile(null);
           setAvatarDialogOpen(false);
+
+          // Update auth context with new user data
+          if (data.avatarUrl) {
+            login(localStorage.getItem("token") || "", {
+              ...user,
+              avatar: data.avatarUrl,
+            });
+          }
         } else {
           throw new Error(data.error || "Failed to update avatar");
         }
@@ -140,7 +125,7 @@ export function PersonalInfoTab({ userData }: PersonalInfoTabProps) {
     }
   };
 
-  if (!userData) {
+  if (!user) {
     return (
       <Box sx={{ p: 3, textAlign: "center" }}>
         <CircularProgress />
@@ -195,9 +180,9 @@ export function PersonalInfoTab({ userData }: PersonalInfoTabProps) {
                 mb: 3,
                 boxShadow: 2,
               }}
-              alt={formData.name}
+              alt={formData.fullName}
               src={
-                avatarPreview || formData.image || "/placeholder-avatar.jpg"
+                avatarPreview || formData.avatar || "/placeholder-avatar.jpg"
               }
             />
             <Button
@@ -284,13 +269,13 @@ export function PersonalInfoTab({ userData }: PersonalInfoTabProps) {
                   mb: 1,
                   boxShadow: 2,
                 }}
-                alt={formData.name}
-                src={formData.image || "/placeholder-avatar.jpg"}
+                alt={formData.fullName}
+                src={formData.avatar || "/placeholder-avatar.jpg"}
               />
             </Badge>
           </Box>
           <Typography variant="h6" gutterBottom fontWeight="500">
-            {formData.name}
+            {formData.fullName}
           </Typography>
 
           <Card sx={{ width: "100%", mb: 2, boxShadow: 1 }}>
@@ -371,8 +356,8 @@ export function PersonalInfoTab({ userData }: PersonalInfoTabProps) {
                 <TextField
                   fullWidth
                   label="Full Name"
-                  name="name"
-                  value={formData.name || ""}
+                  name="fullName"
+                  value={formData.fullName || ""}
                   onChange={handleInputChange}
                   variant="outlined"
                   InputProps={{

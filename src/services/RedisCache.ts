@@ -1,15 +1,21 @@
+import Redis from 'ioredis';
+import { config } from '../config';
 import { PriceUpdate } from '../schemas/price.schema';
-import redis from '../lib/redis';
 
 export class RedisCacheService {
+  private redis: Redis;
   private readonly TTL = 120; // 2 minutes cache TTL
+
+  constructor() {
+    this.redis = new Redis(config.redis.url);
+  }
 
   private getPriceKey(symbol: string): string {
     return `prices:${symbol.toLowerCase()}`;
   }
 
   async getCachedPrice(symbol: string): Promise<PriceUpdate | null> {
-    const data = await redis.get(this.getPriceKey(symbol));
+    const data = await this.redis.get(this.getPriceKey(symbol));
     if (!data) return null;
     
     try {
@@ -20,7 +26,7 @@ export class RedisCacheService {
   }
 
   async setCachedPrice(symbol: string, priceUpdate: PriceUpdate): Promise<void> {
-    await redis.setex(
+    await this.redis.setex(
       this.getPriceKey(symbol),
       this.TTL,
       JSON.stringify(priceUpdate)
@@ -28,7 +34,7 @@ export class RedisCacheService {
   }
 
   async getCachedPrices(symbols: string[]): Promise<Record<string, PriceUpdate | null>> {
-    const pipeline = redis.pipeline();
+    const pipeline = this.redis.pipeline();
     symbols.forEach(symbol => {
       pipeline.get(this.getPriceKey(symbol));
     });
@@ -55,7 +61,7 @@ export class RedisCacheService {
   }
 
   async setCachedPrices(updates: Record<string, PriceUpdate>): Promise<void> {
-    const pipeline = redis.pipeline();
+    const pipeline = this.redis.pipeline();
     
     Object.entries(updates).forEach(([symbol, update]) => {
       pipeline.setex(

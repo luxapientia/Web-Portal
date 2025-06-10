@@ -2,28 +2,23 @@ import { createServer } from 'http';
 import { parse } from 'url';
 import next from 'next';
 import mongoose from 'mongoose';
-import * as dotenv from 'dotenv';
-import { PriceSyncService } from './src/services/PriceSync';
+import { startPriceSyncJob } from './src/jobs/priceSync';
 import { config } from './src/config';
-import init_db from './src/init/init_db';
+import { logger } from './src/utils/logger';
+import { SocketService } from './src/services/SocketService';
 
-// Load environment variables from .env.local
-dotenv.config({ path: '.env.local' });
+const dev = process.env.NODE_ENV !== 'production';
+const hostname = process.env.HOSTNAME || '0.0.0.0';
+const port = parseInt(process.env.PORT || '3000', 10);
 
-const dev = config.server.nodeEnv !== 'production';    
-
-const app = next({ dev, hostname: config.server.hostname, port: parseInt(config.server.port as string) });
+const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
-
-const priceSyncService = new PriceSyncService();
 
 async function startServer() {
   try {
     // Connect to MongoDB
     await mongoose.connect(config.mongodb.url);
-    console.log('Connected to MongoDB');
-
-    await init_db();
+    logger.info('Connected to MongoDB');
 
     // Initialize Next.js
     await app.prepare();
@@ -40,21 +35,24 @@ async function startServer() {
       }
     });
 
+    // Initialize Socket.IO service
+    const socketService = SocketService.getInstance(server);
+    logger.info('Socket.IO service initialized');
+
+    // Start price sync job with socket service
+    startPriceSyncJob();
+    logger.info('Price sync service started');
+
     server.once('error', (err) => {
       console.error(err);
       process.exit(1);
     });
 
-    server.listen(config.server.port, () => {
-      console.log(`> Ready on http://${config.server.hostname}:${config.server.port}`);
+    server.listen(port, hostname, () => {
+      logger.info(`> Ready on http://${hostname}:${port}`);
     });
-
-    await priceSyncService.syncPrices();
-    setInterval(async () => {
-      priceSyncService.syncPrices();
-    }, 1000 * 60 * 1);
   } catch (err) {
-    console.error(`Failed to start server: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    logger.error(`Failed to start server: ${err instanceof Error ? err.message : 'Unknown error'}`);
     process.exit(1);
   }
 }

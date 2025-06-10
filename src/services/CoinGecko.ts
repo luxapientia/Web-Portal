@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { config } from '../config';
 import { PriceUpdate } from '../schemas/price.schema';
 
 interface CoinGeckoMarketResponse {
@@ -37,37 +38,24 @@ interface CoinGeckoMarketResponse {
   price_change_percentage_7d_in_currency: number;
 }
 
-interface CoinGeckoMarketChartResponse {
-  prices: [number, number][]; // [timestamp, price]
-  market_caps: [number, number][]; // [timestamp, market_cap]
-  total_volumes: [number, number][]; // [timestamp, volume]
-}
-
-export interface MarketChartData {
-  timestamps: Date[];
-  prices: number[];
-  marketCaps: number[];
-  volumes: number[];
-}
-
 export class CoinGeckoService {
   private readonly baseUrl: string;
 
   constructor() {
-    this.baseUrl = 'https://api.coingecko.com/api/v3'
+    this.baseUrl = config.coingecko.baseUrl;
   }
 
   /**
-   * Fetch current prices and price changes for multiple names
-   * @param names Array of cryptocurrency names
+   * Fetch current prices and price changes for multiple symbols
+   * @param symbols Array of cryptocurrency symbols
    * @returns Promise<Record<string, PriceUpdate>> Prices and price changes in USD
    */
-  async getPrices(names: string[]): Promise<Record<string, PriceUpdate>> {
+  async getPrices(symbols: string[]): Promise<Record<string, PriceUpdate>> {
     try {
       const response = await axios.get<CoinGeckoMarketResponse[]>(`${this.baseUrl}/coins/markets`, {
         params: {
           vs_currency: 'usd',
-          ids: names.join(','),
+          ids: symbols.join(','),
           price_change_percentage: '1h,24h,7d',
           sparkline: false,
           locale: 'en'
@@ -79,8 +67,6 @@ export class CoinGeckoService {
       response.data.forEach((coin) => {
         updates[coin.id] = {
           symbol: coin.symbol.toUpperCase(),
-          name: coin.name,
-          image: coin.image,
           price: coin.current_price,
           timestamp: new Date(coin.last_updated),
           priceChange: {
@@ -97,47 +83,6 @@ export class CoinGeckoService {
         throw new Error(`Failed to fetch prices from CoinGecko: ${error.message}`);
       }
       throw new Error('Failed to fetch prices from CoinGecko');
-    }
-  }
-
-  /**
-   * Fetch historical market chart data for a cryptocurrency
-   * @param coinId The coin identifier (e.g., 'bitcoin', 'ethereum')
-   * @param days Number of days of data to fetch (1, 7, 14, 30, 90, 180, 365, max)
-   * @param interval Data interval ('daily' for days > 30, 'hourly' for days <= 30)
-   * @returns Promise<MarketChartData> Historical price, market cap, and volume data
-   */
-  async getMarketChart(
-    coinId: string,
-    days: number | 'max' = 30,
-    interval: 'daily' | 'hourly' = 'daily'
-  ): Promise<MarketChartData> {
-    try {
-      const response = await axios.get<CoinGeckoMarketChartResponse>(
-        `${this.baseUrl}/coins/${coinId}/market_chart`,
-        {
-          params: {
-            vs_currency: 'usd',
-            days,
-            interval: typeof days === 'number' && days <= 30 ? interval : 'daily', // Force daily for longer periods
-          }
-        }
-      );
-
-      // Transform the data into a more usable format
-      const { prices, market_caps, total_volumes } = response.data;
-      
-      return {
-        timestamps: prices.map(([timestamp]) => new Date(timestamp)),
-        prices: prices.map(([, price]) => price),
-        marketCaps: market_caps.map(([, cap]) => cap),
-        volumes: total_volumes.map(([, volume]) => volume)
-      };
-    } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(`Failed to fetch market chart from CoinGecko: ${error.message}`);
-      }
-      throw new Error('Failed to fetch market chart from CoinGecko');
     }
   }
 } 

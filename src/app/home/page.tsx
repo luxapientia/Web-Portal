@@ -1,9 +1,10 @@
 "use client";
 
-import { Box, Typography, Card, CardContent, Stack, Container, Tabs, Tab, Skeleton, Button } from "@mui/material";
+import { Box, Typography, Card, CardContent, Stack, Container, Tabs, Tab, Skeleton } from "@mui/material";
 import { useState, useEffect } from "react";
 import { useTheme } from "@mui/material/styles";
 import { useMotionValue, useAnimationFrame, animate } from 'framer-motion';
+import TrustFundButton from '@/components/home/TrustFundButton';
 import TasksForToday from '@/components/home/TasksForToday';
 import VipPromotions from '@/components/home/VipPromotions';
 import AssetAccountValue from '@/components/home/AssetAccountValue';
@@ -14,7 +15,6 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import LiveTvIcon from '@mui/icons-material/LiveTv';
 import Layout from "@/components/layout/Layout";
 import RewardReceiveSection from '@/components/home/RewardReceiveSection';
-import TrustFundSection from '@/components/home/TrustFundSection';
 
 export default function HomePage() {
     const theme = useTheme();
@@ -81,12 +81,12 @@ export default function HomePage() {
                         />
                     </Stack>
 
-                    {/* Trust Fund Section */}
-                    <TrustFundSection />
+                    {/* Invitation Section */}
+                    <TrustFundButton />
 
                     {/* Tasks and Reward Section */}
                     <Box flex={1} minWidth={0}>
-                        <Card sx={{ borderRadius: 4, boxShadow: 3, p: 0, backgroundColor: 'rgba(255, 255, 255, 0.42)' }}>
+                        <Card sx={{ borderRadius: 4, boxShadow: 3, p: 0 }}>
                             <CardContent>
                                 <Stack direction="row" alignItems="center" spacing={1} mb={2}>
                                     <RocketLaunchIcon color="primary" />

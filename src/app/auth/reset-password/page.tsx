@@ -327,7 +327,7 @@ function ResetPasswordContent() {
           )}
 
           <Button
-            onClick={() => router.push('/auth/login')}
+            onClick={() => router.push('/login')}
             sx={{
               color: '#333',
               textTransform: 'none',

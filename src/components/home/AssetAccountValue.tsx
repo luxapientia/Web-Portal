@@ -1,31 +1,7 @@
-import { Card, CardContent, Stack, Typography, Tooltip, Button, Box } from '@mui/material';
+import { Card, CardContent, Stack, Typography, Tooltip, Button } from '@mui/material';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import { useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
 
 export default function AssetAccountValue() {
-  const [accountValue, setAccountValue] = useState<number>(0);
-  const [profit, setProfit] = useState<number>(0);
-  const [earningToday, setEarningToday] = useState<number>(0);
-
-  useEffect(() => {
-    const fetchAccountValue = async () => {
-      try {
-        const response = await fetch('/api/account-asset');
-        const data = await response.json();
-        if (!response.ok) {
-          throw new Error(data.error || 'Failed to fetch account value');
-        } 
-
-        setAccountValue(data.accountValue);
-      } catch (error) {
-        console.error('Error fetching account value:', error);
-        toast.error('Failed to fetch account value');
-      }
-    };
-    fetchAccountValue();
-  }, []);
-
   return (
     <Card
       sx={{
@@ -37,8 +13,6 @@ export default function AssetAccountValue() {
         minWidth: 0,
         maxWidth: { xs: '100%', md: 420 },
         mx: { xs: 0, md: 'auto' },
-        position: 'relative',
-        pb: 7 // Add padding at bottom for the button
       }}
     >
       <CardContent>
@@ -51,31 +25,23 @@ export default function AssetAccountValue() {
           </Tooltip>
         </Stack>
         <Typography variant="h3" color="success.main" fontWeight={900} mt={1} sx={{ fontSize: { xs: '2rem', md: '2.5rem' } }}>
-          ${accountValue}
+          $6,205
         </Typography>
         <Typography variant="body2" color="text.secondary" mt={1}>
           Total Profit as of now
         </Typography>
         <Typography variant="h6" color="#ff9800" fontWeight={700}>
-          ${profit}
+          $1,200
         </Typography>
         <Typography variant="caption" color="text.secondary">
-          Earning Today <span style={{ color: '#388e3c', fontWeight: 700 }}>${earningToday}</span>
+          Earning Today <span style={{ color: '#388e3c', fontWeight: 700 }}>$7.000121</span>
         </Typography>
-      </CardContent>
-
-      <Box sx={{ 
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        p: 2
-      }}>
         <Button
           fullWidth
           variant="contained"
           color="success"
           sx={{
+            mt: 2,
             borderRadius: 3,
             fontWeight: 700,
             fontSize: { xs: '1rem', md: '1.1rem' },
@@ -87,7 +53,7 @@ export default function AssetAccountValue() {
         >
           Invest More...
         </Button>
-      </Box>
+      </CardContent>
     </Card>
   );
 } 
