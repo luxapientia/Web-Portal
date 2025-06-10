@@ -16,7 +16,8 @@ const eslintConfig = [
     rules: {
       "@next/next/no-img-element": "off",          // disables warning for <img>
       "react/no-unescaped-entities": "off",        // disables warning for unescaped '
-    },
+      '@typescript-eslint/no-require-imports': 0,
+    }
   },
 ];
 
