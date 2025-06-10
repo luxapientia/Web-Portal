@@ -46,7 +46,7 @@ export default function VIPPlanTab() {
 
   useEffect(() => {
     fetchVIPPlans();
-  });
+  }, []);
 
   const fetchBalance = async () => {
     try {
