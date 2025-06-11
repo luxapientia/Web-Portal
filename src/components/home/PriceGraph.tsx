@@ -63,7 +63,7 @@ export default function PriceGraph({ symbol }: { symbol: string }) {
     const options: ChartOptions<'line'> = {
         responsive: true,
         maintainAspectRatio: true,
-        aspectRatio: 3,
+        aspectRatio: 6,
         scales: {
             x: { display: false, type: 'linear' },
             y: { display: false },
@@ -78,11 +78,13 @@ export default function PriceGraph({ symbol }: { symbol: string }) {
 
     return (
         <Box sx={{ 
-            flex: 1,
-            minWidth: '120px',
-            maxWidth: '200px',
-            height: '40px',
-            mx: 2
+            width: '100%',
+            height: '100%',
+            minHeight: '50px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column'
         }}>
             <Chart
                 ref={chartRef}

@@ -1,9 +1,11 @@
 'use client';
 
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, Collapse } from "@mui/material";
 import { useEffect, useState } from "react";
 import { CryptoPrice } from '@/schemas/price.schema';
 import PriceGraph from "./PriceGraph";
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
 export default function MarketSentiment() {
     const [prices, setPrices] = useState<Record<string, CryptoPrice>>({});
@@ -52,7 +54,6 @@ export default function MarketSentiment() {
                     sx={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: 2,
                         p: 2,
                         borderBottom: '1px solid #e0e0e0',
                         '&:last-child': {
@@ -79,13 +80,15 @@ export default function MarketSentiment() {
                         />
                     )}
 
-                    <Box sx={{ minWidth: '100px', flex: 1 }}>
+                    <Box sx={{ minWidth: '100px', flex: 1, ml: 2 }}>
                         <Typography variant="body2" color="text.secondary">
                             {`${priceData?.name} (${symbol})`}
                         </Typography>
                     </Box>
 
-                    <PriceGraph symbol={symbol} />
+                    <Box sx={{ display: { xs: 'none', md: 'block' }, flex: 1 }}>
+                        <PriceGraph symbol={symbol} />
+                    </Box>
 
                     <Box sx={{ textAlign: 'right', minWidth: '100px' }}>
                         {loading ? (
@@ -104,8 +107,30 @@ export default function MarketSentiment() {
                             </>
                         )}
                     </Box>
+
+                    <Box sx={{ 
+                        display: { xs: 'flex', md: 'none' },
+                        alignItems: 'center',
+                        ml: 1
+                    }}>
+                        {isExpanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                    </Box>
                 </Box>
 
+                <Collapse in={isExpanded}>
+                    <Box sx={{ 
+                        display: { xs: 'flex', md: 'none' },
+                        p: 2,
+                        bgcolor: 'rgba(0, 0, 0, 0.02)',
+                        height: '100px',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}>
+                        <Box sx={{ width: '80%', height: '100%' }}>
+                            <PriceGraph symbol={symbol} />
+                        </Box>
+                    </Box>
+                </Collapse>
             </Box>
         );
     };
