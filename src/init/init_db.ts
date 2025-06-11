@@ -1,10 +1,12 @@
 import { AppConfigModel } from '../models/AppConfig';
 import { PlanModel } from '../models/Plan';
 import { TeamCommisionLevelModel } from '../models/TeamCommisionLevel';
+import { TrustPlanModel } from '../models/TrustPlan';
 
 import app_config from '../../data/init/appConfig.json';
 import vip_plan from '../../data/init/plans.json';
 import team_commision_levels from '../../data/init/teamCommisionLevels.json';
+import trust_plan from '../../data/init/trustPlan.json';
 
 const init_db = async () => {
     const appConfig = await AppConfigModel.findOne({});
@@ -18,6 +20,10 @@ const init_db = async () => {
     const teamCommisionLevels = await TeamCommisionLevelModel.findOne({});
     if (!teamCommisionLevels) {
         await TeamCommisionLevelModel.create(team_commision_levels);
+    }
+    const trustPlan = await TrustPlanModel.findOne({});
+    if (!trustPlan) {
+        await TrustPlanModel.create(trust_plan);
     }
 }
 

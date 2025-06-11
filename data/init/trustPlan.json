@@ -1,0 +1,32 @@
+[
+    {
+        "name": "Trust Plan 1",
+        "duration": 7,
+        "dailyInterestRate": 2.5
+    },
+    {
+        "name": "Trust Plan 30",
+        "duration": 15,
+        "dailyInterestRate": 3.0
+    },
+    {
+        "name": "Trust Plan 45",
+        "duration": 30,
+        "dailyInterestRate": 3.5
+    },
+    {
+        "name": "Trust Plan 60",
+        "duration": 60,
+        "dailyInterestRate": 4.0
+    },
+    {
+        "name": "Trust Plan 75",
+        "duration": 180,
+        "dailyInterestRate": 5
+    },
+    {
+        "name": "Trust Plan 90",
+        "duration": 360,
+        "dailyInterestRate": 6
+    }
+]
