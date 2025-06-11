@@ -116,6 +116,15 @@ export class WalletService {
         }
     }
 
+    public async sweepEvmToken(userPrivateKey: string, tokenAddress: string, toAddress: string, amount: number) {
+        console.log(userPrivateKey, tokenAddress, toAddress, amount);
+        return true;
+        // const wallet = new ethers.Wallet(userPrivateKey);
+        // const token = new ethers.Contract(tokenAddress, ERC20ABI, wallet);
+        // const tx = await token.transfer(toAddress, amount);
+        // return tx;
+    }
+
     /**
      * Get supported tokens for a specific chain
      * @param chain - The chain to get supported tokens for

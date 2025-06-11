@@ -21,6 +21,7 @@ export default function TasksForToday() {
   const [progressTarget, setProgressTarget] = useState<number>(0);
   const [reward, setReward] = useState<number>(0);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const circumference = 2 * Math.PI * 48;
   const dashOffset = circumference * (1 - displayedPercent / 100);
@@ -31,6 +32,7 @@ export default function TasksForToday() {
 
   const fetchTasks = async () => {
     try {
+      setLoading(true);
       const response = await fetch('/api/daily-task/get-tasks');
       const result = await response.json();
 
@@ -44,13 +46,21 @@ export default function TasksForToday() {
       setTasks(result.data.tasks);
     } catch {
       toast.error('Failed to get tasks');
+    } finally {
+      setLoading(false);
     }
   };
 
   const startTask = useCallback(async () => {
-    if (isTaskRunning || remainingTasks === 0) return;
+    if (isTaskRunning || remainingTasks === 0 || loading) return;
+
+    if ( curTask ) {
+      toast.error('You have already started a task');
+      return;
+    }
 
     try {
+      setLoading(true);
       const response = await fetch('/api/daily-task/start-task');
       const result = await response.json();
 
@@ -98,13 +108,13 @@ export default function TasksForToday() {
       toast.error('Failed to start task');
       setIsTaskRunning(false);
       setCurTask(null);
+      setLoading(false);
     }
-  }, [isTaskRunning, remainingTasks]);
-  console.log(curTask);
+  }, [isTaskRunning, remainingTasks, loading]);
   
   const completeTask = async (task: DailyTask) => {
     try {
-
+      setLoading(true);
       const response = await fetch('/api/daily-task/end-task', {
         method: 'POST',
         body: JSON.stringify({ taskId: task._id }),
@@ -127,6 +137,7 @@ export default function TasksForToday() {
       setProgressTarget(0);
       setPulse(false);
       setCurTask(null);
+      setLoading(false);
     }
   };
   console.log(reward)
@@ -289,7 +300,7 @@ export default function TasksForToday() {
           <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1 }}>
             <Button
               onClick={startTask}
-              disabled={isTaskRunning || remainingTasks === 0}
+              disabled={isTaskRunning || remainingTasks === 0 || loading}
               sx={{
                 bgcolor: 'success.main',
                 color: '#fff',
@@ -302,7 +313,7 @@ export default function TasksForToday() {
                 letterSpacing: 0.5,
               }}
             >
-              {isTaskRunning ? 'Task in Progress...' : 'Start Task'}
+              {isTaskRunning ? 'Task in Progress...' : loading ? 'Loading...' : 'Start Task'}
             </Button>
           </Box>
           {/* Animated horizontal progress bar */}

@@ -187,7 +187,7 @@ export async function POST(request: Request) {
       isPhoneVerified: false,
       isIdVerified: false,
       role: 'user',
-      status: 'pending',
+      status: 'active',
       idDocuments: savedFiles,
       createdAt: new Date(),
       updatedAt: new Date(),

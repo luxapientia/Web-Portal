@@ -136,6 +136,20 @@ export const config = {
       algorithm: 'aes-256-cbc',
       secret: process.env.ENCRYPTION_SECRET || '123456789012345678901234567890ab',
       ivLength: 16
+    },
+    centralWallet: {
+      EVM: {
+        address: process.env.CENTRAL_WALLET_ADDRESS_EVM || '',
+        privateKey: process.env.CENTRAL_WALLET_PRIVATE_KEY_EVM || '',
+        chainId: 1,
+        rpcUrl: 'https://mainnet.infura.io/v3/572fc7760a434384b1f5b69a84081198'
+      },
+      TRON: {
+        address: process.env.CENTRAL_WALLET_ADDRESS_TRON || '',
+        privateKey: process.env.CENTRAL_WALLET_PRIVATE_KEY_TRON || '',
+        chainId: 1,
+        rpcUrl: 'https://api.trongrid.io'
+      }
     }
   },
 

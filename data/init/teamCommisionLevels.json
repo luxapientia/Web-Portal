@@ -1,0 +1,17 @@
+[
+    {
+        "level": 1,
+        "percentage": 18,
+        "description": "For example Level 1 team members wit ha deposit of $500 who complete 4 grid trading tasks daily can earn up to $10 per day and you can earn a team commission of $1.8 per day"
+    },
+    {
+        "level": 2,
+        "percentage": 7,
+        "description": "For example Level 2 team members with a deposit of $500 who complete 4 grid trading tasks daily can earn up to $10 per day and you can earn a team commission of $1.8 per day"
+    },
+    {
+        "level": 3,
+        "percentage": 3,
+        "description": "For example Level 3 team members with a deposit of $500 who complete 4 grid trading tasks daily can earn up to $10 per day and you can earn a team commission of $1.8 per day"
+    }
+]

@@ -150,7 +150,7 @@ export const userSchema = z.object({
   isPhoneVerified: z.boolean().default(false),
   isIdVerified: z.boolean().default(false),
   role: z.enum(['user', 'admin']).default('user'),
-  status: z.enum(['pending', 'active', 'suspended']).default('pending'),
+  status: z.enum(['pending', 'active', 'suspended']).default('active'),
   idDocuments: z.object({
     idFront: z.string().optional(),
     idBack: z.string().optional(),

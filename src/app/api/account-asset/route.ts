@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { UserModel } from '@/models/User';
+import { ActivityLog, ActivityLogModel } from '@/models/ActivityLog';
 import { authOptions } from '@/config';
 import { getServerSession } from 'next-auth';
 import { getAccountValue, getVipLevel } from '@/controllers';
@@ -19,9 +20,32 @@ export async function GET() {
 
         const accountValue = await getAccountValue(user?.id);
         const vipLevel = await getVipLevel(user?.id);
+        const earningTodayLogs = await ActivityLogModel.find({
+            userId: user?.id,
+            createdAt: {
+                $gte: new Date(new Date().setHours(0, 0, 0, 0)),
+                $lt: new Date(new Date().setHours(23, 59, 59, 999))
+            },
+            type: { $in: ['earn', 'team_earn'] }
+        }) as ActivityLog[];
+
+        const totalDepositLogs = await ActivityLogModel.find({
+            userId: user?.id,
+            type: 'deposit'
+        }) as ActivityLog[];
+
+        const totalWithdrawLogs = await ActivityLogModel.find({
+            userId: user?.id,
+            type: 'withdraw'
+        }) as ActivityLog[];
+
+        const profit = accountValue - totalDepositLogs.reduce((acc, log) => acc + log.amount, 0) + totalWithdrawLogs.reduce((acc, log) => acc + log.amount, 0);
 
         return NextResponse.json({
             accountValue: accountValue,
+            profit: profit,
+            earningToday: earningTodayLogs.reduce((acc, log) => acc + log.amount, 0),
+            totalDeposit: totalDepositLogs.reduce((acc, log) => acc + log.amount, 0),
             vipLevel: vipLevel,
         });
     } catch {

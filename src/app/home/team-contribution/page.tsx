@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -25,38 +25,21 @@ import CloseIcon from '@mui/icons-material/Close';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import GroupIcon from '@mui/icons-material/Group';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { useRouter } from 'next/navigation';
 import Layout from '@/components/layout/Layout';
 import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
 import VipPromotions from '@/components/home/VipPromotions';
+import { User } from '@/models/User';
+import { TeamCommisionLevel } from '@/models/TeamCommisionLevel';
+import { getFormattedDateTime } from '@/utils/date-format';
+import { ActivityLog } from '@/models/ActivityLog';
 
 const MotionContainer = motion(Container);
 const MotionPaper = motion(Paper);
 const MotionCard = motion(Card);
-
-interface TeamMember {
-  registrationDate: string;
-  username: string;
-  state: 'Active' | 'Not Active';
-}
-
-interface LiveActivity {
-  username: string;
-  action: string;
-  amount: number;
-  timeAgo: string;
-}
-
-interface CommissionLevel {
-  level: number;
-  percentage: number;
-  description: string;
-  memberCount: number;
-  totalEarnings: number;
-}
 
 interface ChipData {
   icon: React.ReactNode;
@@ -85,57 +68,124 @@ const CARD_HEIGHT = 140;
 
 export default function TeamContributionPage() {
   const theme = useTheme();
+  const [teamMembers, setTeamMembers] = useState<{
+    level: number;
+    members: User[];
+  }[]>([]);
+  const [teamCommisionLevels, setTeamCommisionLevels] = useState<TeamCommisionLevel[]>([]);
+  const [totalEarning, setTotalEarning] = useState<number>(0);
+  const [todayEarning, setTodayEarning] = useState<number>(0);
+  const [levelEarnings, setLevelEarnings] = useState<{
+    level: number;
+    earnings: number;
+  }[]>([]);
+  const [teamActivities, setTeamActivities] = useState<{
+    member: User;
+    log: ActivityLog;
+  }[]>([]);
+
+  useEffect(() => {
+    fetchTeamMembers();
+    fetchTeamCommisionLevels();
+    fetchTeamEarnings();
+    fetchTeamActivities();
+  }, []);
+
+  const fetchTeamMembers = async () => {
+    try {
+      const response = await fetch('/api/team/members');
+      if (!response.ok) {
+        toast.error('Failed to fetch team members');
+        return;
+      }
+      const result = await response.json();
+      if (result.success) {
+        setTeamMembers(result.data);
+      } else {
+        toast.error(result.error);
+      }
+    } catch (error) {
+      console.error('Error fetching team members:', error);
+      toast.error('Error fetching team members');
+    }
+  };
+
+  const fetchTeamCommisionLevels = async () => {
+    try {
+      console.log('fetching team commision levels');
+      const response = await fetch('/api/team/commision-levels');
+      if (!response.ok) {
+        toast.error('Failed to fetch team commision levels');
+        return;
+      }
+      const result = await response.json();
+      if (result.success) {
+        setTeamCommisionLevels(result.data);
+      } else {
+        toast.error(result.error);
+      }
+    } catch (error) {
+      console.error('Error fetching team commision levels:', error);
+      toast.error('Error fetching team commision levels');
+    }
+  };
+
+  const fetchTeamEarnings = async () => {
+    try {
+      const response = await fetch('/api/team/earnings');
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch team earnings');
+      }
+      if (data.success) {
+        setTotalEarning(data.data.teamEarnings);
+        setTodayEarning(data.data.todayTeamEarnings);
+        setLevelEarnings(data.data.levelTeamEarnings);
+      }
+    } catch (error) {
+      console.error('Error fetching team earnings:', error);
+      toast.error('Error fetching team earnings');
+    }
+  };
+
+  const fetchTeamActivities = async () => {
+
+    try {
+      const response = await fetch('/api/team/activity');
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch team activities');
+      }
+      if (data.success) {
+        setTeamActivities(data.data.teamActivities);
+      }
+    } catch (error) {
+      console.error('Error fetching team activities:', error);
+      toast.error('Error fetching team activities');
+    }
+  };
+
   const router = useRouter();
   const [selectedLevel, setSelectedLevel] = useState<number>(1);
 
   // Sample data - replace with actual data from your API
-  const teamStats = {
-    vipLevel: 1,
-    totalEarning: 5000,
-    todayEarning: 1200,
-    totalMembers: 10,
-    depositToday: 1500,
-    withdrawToday: 5500,
-    activeMembers: 7,
-    inactiveMembers: 3,
-    monthlyGrowth: 25, // percentage
-  };
+  // const teamStats = {
+  //   vipLevel: 1,
+  //   totalEarning: 5000,
+  //   todayEarning: 1200,
+  //   totalMembers: 10,
+  //   depositToday: 1500,
+  //   withdrawToday: 5500,
+  //   activeMembers: 7,
+  //   inactiveMembers: 3,
+  //   monthlyGrowth: 25, // percentage
+  // };
 
-  const teamMembers: TeamMember[] = [
-    { registrationDate: '10-May-2025 11:44:33', username: 'dv1241', state: 'Active' },
-    { registrationDate: '10-May-2025 11:44:33', username: 'ladmode', state: 'Not Active' },
-    { registrationDate: '10-May-2025 11:44:33', username: 'sameer991', state: 'Not Active' },
-  ];
-
-  const liveActivities: LiveActivity[] = [
-    { username: 'hs***.com', action: 'Deposited', amount: 200.00, timeAgo: '3 minutes ago' },
-    { username: 'ali****.online', action: 'earned', amount: 150.00, timeAgo: '10 minutes ago' },
-    { username: 'justi****.sg', action: 'Deposited', amount: 400.00, timeAgo: '15 minutes ago' },
-  ];
-
-  const commissionLevels: CommissionLevel[] = [
-    {
-      level: 1,
-      percentage: 18,
-      description: "Direct referrals with highest commission rate",
-      memberCount: 5,
-      totalEarnings: 2500
-    },
-    {
-      level: 2,
-      percentage: 7,
-      description: "Second-tier referrals with medium commission",
-      memberCount: 3,
-      totalEarnings: 1500
-    },
-    {
-      level: 3,
-      percentage: 3,
-      description: "Third-tier referrals with base commission",
-      memberCount: 2,
-      totalEarnings: 1000
-    }
-  ];
+  // const liveActivities: LiveActivity[] = [
+  //   { username: 'hs***.com', action: 'Deposited', amount: 200.00, timeAgo: '3 minutes ago' },
+  //   { username: 'ali****.online', action: 'earned', amount: 150.00, timeAgo: '10 minutes ago' },
+  //   { username: 'justi****.sg', action: 'Deposited', amount: 400.00, timeAgo: '15 minutes ago' },
+  // ];
 
   const handleBack = () => {
     router.back();
@@ -159,49 +209,49 @@ export default function TeamContributionPage() {
     {
       icon: <TrendingUpIcon sx={{ fontSize: 28 }} />,
       title: "Total Earnings",
-      value: `$${teamStats.totalEarning}`,
-      subtitle: `+${teamStats.monthlyGrowth}% this month`,
+      value: `$${totalEarning}`,
+      subtitle: ``,
       gradient: 'linear-gradient(135deg, #28a745 0%, #20c997 100%)'
     },
     {
       icon: <AccountBalanceWalletIcon sx={{ fontSize: 28 }} />,
       title: "Today's Earnings",
-      value: `$${teamStats.todayEarning}`,
-      subtitle: `From ${teamStats.activeMembers} active members`,
+      value: `$${todayEarning}`,
+      subtitle: `From ${teamMembers.reduce((acc, team) => acc + team.members.filter(member => member.status === 'active').length, 0)} active members`,
       gradient: 'linear-gradient(135deg, #007bff 0%, #17a2b8 100%)'
     },
     {
       icon: <GroupIcon sx={{ fontSize: 28 }} />,
       title: "Team Members",
-      value: teamStats.totalMembers.toString(),
+      value: teamMembers.reduce((acc, team) => acc + team.members.length, 0).toString(),
       chips: [
         {
           icon: <CheckCircleIcon sx={{ fontSize: '14px !important' }} />,
-          label: `${teamStats.activeMembers} Active`,
+          label: `${teamMembers.reduce((acc, team) => acc + team.members.filter(member => member.status === 'active').length, 0)} Active`,
           color: 'rgba(255,255,255,0.2)'
         },
         {
           icon: <CancelIcon sx={{ fontSize: '14px !important' }} />,
-          label: `${teamStats.inactiveMembers} Inactive`,
+          label: `${teamMembers.reduce((acc, team) => acc + team.members.filter(member => member.status === 'suspended').length, 0)} Inactive`,
           color: 'rgba(255,255,255,0.1)'
         }
       ],
       gradient: 'linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%)'
     },
-    {
-      icon: <PeopleOutlineIcon sx={{ fontSize: 28 }} />,
-      title: "Daily Activity",
-      splitView: true,
-      leftValue: {
-        label: "Deposits",
-        value: `$${teamStats.depositToday}`
-      },
-      rightValue: {
-        label: "Withdraws",
-        value: `$${teamStats.withdrawToday}`
-      },
-      gradient: 'linear-gradient(135deg, #fd7e14 0%, #dc3545 100%)'
-    }
+    // {
+    //   icon: <PeopleOutlineIcon sx={{ fontSize: 28 }} />,
+    //   title: "Daily Activity",
+    //   splitView: true,
+    //   leftValue: {
+    //     label: "Deposits",
+    //     value: `$${todayEarning}`
+    //   },
+    //   rightValue: {
+    //     label: "Withdraws",
+    //     value: `$${todayEarning}`
+    //   },
+    //   gradient: 'linear-gradient(135deg, #fd7e14 0%, #dc3545 100%)'
+    // }
   ];
 
   return (
@@ -366,14 +416,14 @@ export default function TeamContributionPage() {
               }
             }}
           >
-            {commissionLevels.map((level) => (
+            {teamCommisionLevels.map((TeamCommisionLevel: TeamCommisionLevel, index: number) => (
               <MotionCard
-                key={level.level}
+                key={index}
                 variants={cardVariants}
                 sx={{
                   borderRadius: 2,
                   cursor: 'pointer',
-                  border: selectedLevel === level.level ? `2px solid ${theme.palette.primary.main}` : 'none',
+                  border: selectedLevel === TeamCommisionLevel.level ? `2px solid ${theme.palette.primary.main}` : 'none',
                   transition: 'all 0.3s',
                   '&:hover': {
                     transform: 'translateY(-4px)',
@@ -382,14 +432,13 @@ export default function TeamContributionPage() {
                   minHeight: CARD_HEIGHT,
                   display: 'flex',
                   flexDirection: 'column',
-                  bgcolor: selectedLevel === level.level ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.9)'
+                  bgcolor: selectedLevel === TeamCommisionLevel.level ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.9)'
                 }}
-                onClick={() => setSelectedLevel(level.level)}
+                onClick={() => setSelectedLevel(TeamCommisionLevel.level)}
               >
                 <CardContent
                   sx={{
                     p: 2,
-                    height: '100%',
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'space-between'
@@ -398,10 +447,10 @@ export default function TeamContributionPage() {
                   <Box>
                     <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
                       <Typography variant="subtitle1" color="primary" fontWeight={700}>
-                        Level {level.level}
+                        Level {TeamCommisionLevel.level}
                       </Typography>
                       <Chip
-                        label={`${level.percentage}%`}
+                        label={`${TeamCommisionLevel.percentage}%`}
                         color="primary"
                         size="small"
                         sx={{
@@ -421,20 +470,21 @@ export default function TeamContributionPage() {
                         WebkitBoxOrient: 'vertical',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
-                        lineHeight: 1.2
+                        lineHeight: 1.2,
+                        height: '100px'
                       }}
                     >
-                      {level.description}
+                      {TeamCommisionLevel.description}
                     </Typography>
                   </Box>
                   <Box>
                     <Divider sx={{ mb: 1 }} />
                     <Stack direction="row" justifyContent="space-between">
                       <Typography variant="body2">
-                        Members: {level.memberCount}
+                        Members: {teamMembers.find(member => member.level === TeamCommisionLevel.level)?.members.length}
                       </Typography>
                       <Typography variant="body2" color="primary" fontWeight={600}>
-                        ${level.totalEarnings}
+                        ${levelEarnings.find(earning => earning.level === TeamCommisionLevel.level)?.earnings}
                       </Typography>
                     </Stack>
                   </Box>
@@ -449,7 +499,7 @@ export default function TeamContributionPage() {
           <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
             <Typography variant="h6" fontWeight={700}>Team Members</Typography>
             <Chip
-              label={`Total: ${teamStats.totalMembers}`}
+              label={`Total: ${teamMembers.reduce((acc, team) => acc + team.members.length, 0)}`}
               color="primary"
               size="small"
               sx={{ fontWeight: 600 }}
@@ -469,39 +519,50 @@ export default function TeamContributionPage() {
             <Table size="small">
               <TableHead>
                 <TableRow sx={{ bgcolor: theme.palette.primary.main }}>
-                  <TableCell sx={{ color: 'white', fontWeight: 600, py: 1.5 }}>Registration Date</TableCell>
-                  <TableCell sx={{ color: 'white', fontWeight: 600, py: 1.5 }}>Username</TableCell>
-                  <TableCell sx={{ color: 'white', fontWeight: 600, py: 1.5 }}>State</TableCell>
+                  <TableCell sx={{ color: 'white', fontWeight: 600, py: 1.5 }} align="center">Registration Date</TableCell>
+                  <TableCell sx={{ color: 'white', fontWeight: 600, py: 1.5 }} align="center">Username</TableCell>
+                  <TableCell sx={{ color: 'white', fontWeight: 600, py: 1.5 }} align="center">Level</TableCell>
+                  <TableCell sx={{ color: 'white', fontWeight: 600, py: 1.5 }} align="center">State</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {teamMembers.map((member, index) => (
-                  <TableRow
-                    key={index}
-                    sx={{
-                      '&:hover': { bgcolor: 'rgba(0,0,0,0.02)' },
-                      transition: '0.2s'
-                    }}
-                  >
-                    <TableCell sx={{ py: 1.5 }}>{member.registrationDate}</TableCell>
-                    <TableCell sx={{ py: 1.5 }}>
-                      <Typography variant="body2" fontWeight={500}>
-                        {member.username}
-                      </Typography>
-                    </TableCell>
-                    <TableCell sx={{ py: 1.5 }}>
-                      <Chip
-                        size="small"
-                        label={member.state}
-                        color={member.state === 'Active' ? 'success' : 'default'}
-                        sx={{
-                          fontWeight: 500,
-                          height: 24,
-                          '& .MuiChip-label': { px: 1 }
-                        }}
-                      />
+                {teamMembers.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={4} align="center">
+                      <Typography variant="body2" color="text.secondary">No members found</Typography>
                     </TableCell>
                   </TableRow>
+                )}
+                {teamMembers.map((team: { level: number, members: User[] }) => (
+                  team.members.map((member: User, index: number) => (
+                    <TableRow
+                      key={index}
+                      sx={{
+                        '&:hover': { bgcolor: 'rgba(0,0,0,0.02)' },
+                        transition: '0.2s'
+                      }}
+                    >
+                      <TableCell sx={{ py: 1.5 }} align="center">{getFormattedDateTime(new Date(member.createdAt.toLocaleString()))}</TableCell>
+                      <TableCell sx={{ py: 1.5 }} align="center">
+                        <Typography variant="body2" fontWeight={500}>
+                          {member.name}
+                        </Typography>
+                      </TableCell>
+                      <TableCell sx={{ py: 1.5 }} align="center">{team.level}</TableCell>
+                      <TableCell sx={{ py: 1.5 }} align="center">
+                        <Chip
+                          size="small"
+                          label={member.status === 'active' ? 'Active' : 'Inactive'}
+                          color={member.status === 'active' ? 'success' : 'default'}
+                          sx={{
+                            fontWeight: 500,
+                            height: 24,
+                            '& .MuiChip-label': { px: 1 }
+                          }}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))
                 ))}
               </TableBody>
             </Table>
@@ -510,59 +571,83 @@ export default function TeamContributionPage() {
 
         {/* Live Activity */}
         <Box>
-          <Typography variant="h6" fontWeight={700} mb={2}>Live Activity</Typography>
-          <MotionPaper
-            elevation={2}
+          <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
+            <Typography variant="h6" fontWeight={700}>Live Activity</Typography>
+          </Stack>
+          <TableContainer
+            component={MotionPaper}
             sx={{
               borderRadius: 2,
               overflow: 'hidden',
-              bgcolor: 'rgba(255,255,255,0.9)',
-              '& > div:last-child': {
+              boxShadow: theme.shadows[2],
+              '& .MuiTableRow-root:last-child .MuiTableCell-body': {
                 borderBottom: 'none'
               }
             }}
           >
-            <Stack divider={<Divider />}>
-              {liveActivities.map((activity, index) => (
-                <Box
-                  key={index}
-                  sx={{
-                    p: 1.5,
-                    transition: '0.2s',
-                    '&:hover': {
-                      bgcolor: 'rgba(0,0,0,0.02)',
-                      transform: 'translateX(4px)'
-                    }
-                  }}
-                >
-                  <Stack direction="row" justifyContent="space-between" alignItems="center">
-                    <Stack spacing={0.5}>
-                      <Typography variant="body2" fontWeight={500}>
-                        <span style={{ textDecoration: 'underline' }}>{activity.username}</span>
-                        {' '}{activity.action}
-                        <Typography component="span" color="primary" fontWeight={600}>
-                          USD {activity.amount.toFixed(2)}
-                        </Typography>
+            <Table size="small">
+              <TableHead>
+                <TableRow sx={{ bgcolor: theme.palette.primary.main }}>
+                  <TableCell sx={{ color: 'white', fontWeight: 600, py: 1.5 }}>Member</TableCell>
+                  <TableCell sx={{ color: 'white', fontWeight: 600, py: 1.5 }}>Type</TableCell>
+                  <TableCell sx={{ color: 'white', fontWeight: 600, py: 1.5 }} align="right">Amount (USD)</TableCell>
+                  <TableCell sx={{ color: 'white', fontWeight: 600, py: 1.5 }}>Time</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {teamActivities.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={4} align="center">
+                      <Typography variant="body2" color="text.secondary">No activities found</Typography>
+                    </TableCell>
+                  </TableRow>
+                )}
+                {teamActivities.map((activity, index) => (
+                  <TableRow
+                    key={index}
+                    sx={{
+                      '&:hover': {
+                        backgroundColor: 'rgba(0,0,0,0.02)',
+                        transform: 'translateX(2px)',
+                        transition: '0.2s',
+                      }
+                    }}
+                  >
+                    <TableCell>
+                      <Typography fontWeight={600} sx={{ textDecoration: 'underline' }}>
+                        {activity.member.name}
                       </Typography>
+                    </TableCell>
+
+                    <TableCell>
+                      <Chip
+                        label={activity.log.type}
+                        size="small"
+                        color={activity.log.type === 'deposit' ? 'success' : 'primary'}
+                        sx={{
+                          fontWeight: 500,
+                          height: 22,
+                          '& .MuiChip-label': { px: 1 },
+                        }}
+                      />
+                    </TableCell>
+
+                    <TableCell align="right">
+                      <Typography fontWeight={600} color="primary">
+                        USD {activity.log.amount.toFixed(2)}
+                      </Typography>
+                    </TableCell>
+
+                    <TableCell>
                       <Typography variant="caption" color="text.secondary">
-                        {activity.timeAgo}
+                        {getFormattedDateTime(new Date(activity.log.timestamp))}
                       </Typography>
-                    </Stack>
-                    <Chip
-                      size="small"
-                      label={activity.action}
-                      color={activity.action === 'Deposited' ? 'success' : 'primary'}
-                      sx={{
-                        fontWeight: 500,
-                        height: 24,
-                        '& .MuiChip-label': { px: 1 }
-                      }}
-                    />
-                  </Stack>
-                </Box>
-              ))}
-            </Stack>
-          </MotionPaper>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
         </Box>
       </MotionContainer>
     </Layout>

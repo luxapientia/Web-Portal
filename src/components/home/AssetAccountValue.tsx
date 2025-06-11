@@ -18,8 +18,8 @@ export default function AssetAccountValue() {
         } 
 
         setAccountValue(data.accountValue);
-        setProfit(0);
-        setEarningToday(0);
+        setProfit(data.profit);
+        setEarningToday(data.earningToday);
       } catch {
         toast.error('Failed to fetch account value');
       }

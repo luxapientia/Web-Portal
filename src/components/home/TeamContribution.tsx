@@ -3,6 +3,8 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
 interface TeamContributionProps {
   invitationLink: string;
@@ -13,10 +15,33 @@ interface TeamContributionProps {
 export default function TeamContribution({ invitationLink, copied, handleCopy }: TeamContributionProps) {
   const user = useSession();
   const router = useRouter();
+  const [teamEarnings, setTeamEarnings] = useState<number>(0);
 
   const handleViewTeamStatus = () => {
     router.push('/home/team-contribution');
   };
+
+  useEffect(() => {
+
+    const fetchTeamEarnings = async () => {
+      try {
+
+        const response = await fetch('/api/team/earnings');
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to fetch team earnings');
+        }
+        if (data.success) {
+          setTeamEarnings(data.data.teamEarnings);
+        }
+      } catch {
+        toast.error('Failed to fetch team earnings');
+      }
+    };
+    fetchTeamEarnings();
+
+  }, []);
+
 
   return (
     <Card
@@ -41,7 +66,7 @@ export default function TeamContribution({ invitationLink, copied, handleCopy }:
           </Tooltip>
         </Stack>
         <Typography variant="h6" color="primary" fontWeight={800} mt={1} sx={{ fontSize: { xs: '1.3rem', md: '1.7rem' } }}>
-          $5,000
+          ${teamEarnings}
         </Typography>
 
         {/* Inline Invitation UI */}
