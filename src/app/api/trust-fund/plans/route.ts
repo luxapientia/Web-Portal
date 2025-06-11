@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { TrustPlanModel, TrustPlan } from '@/models/TrustPlan';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const trustPlans = await TrustPlanModel.find({})
       .sort({ duration: 1 }) as TrustPlan[];

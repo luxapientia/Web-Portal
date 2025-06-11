@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { User, UserModel } from '@/models/User';
-import { ActivityLog, ActivityLogModel } from '@/models/ActivityLog';
 import { ObjectId } from 'mongodb';
 import { authOptions } from '@/config';
 import { getServerSession } from 'next-auth';

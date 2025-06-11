@@ -14,7 +14,7 @@ import {
     Chip,
     Tooltip,
     useMediaQuery,
-    Button,
+    Button
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CloseIcon from '@mui/icons-material/Close';
@@ -22,15 +22,13 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import PercentIcon from '@mui/icons-material/Percent';
 import StarIcon from '@mui/icons-material/Star';
-import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
-import CalculateIcon from '@mui/icons-material/Calculate';
+import CalculateIcon from '@mui/icons-material/Calculate';  
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import Layout from '@/components/layout/Layout';
 import { motion, AnimatePresence } from 'framer-motion';
 import VipPromotions from '@/components/home/VipPromotions';
 import { TrustPlan } from '@/models/TrustPlan';
-import { TrustFund } from '@/models/TrustFund';
 
 const MotionPaper = motion(Paper);
 const MotionContainer = motion(Container);
@@ -44,7 +42,6 @@ export default function TrustPackPage() {
     const [error, setError] = useState<string>('');
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const [availableFunds, setAvailableFunds] = useState<number>(0);
-    const [lockedFunds, setLockedFunds] = useState<TrustFund[]>([]);
 
     useEffect(() => {
         fetchTrustPlans();
@@ -75,19 +72,16 @@ export default function TrustPackPage() {
             const response = await fetch('/api/trust-fund');
             if (!response.ok) {
                 toast.error('Failed to fetch trust funds');
-                setLockedFunds([]);
                 setAvailableFunds(0);
                 return;
             }
             const data = await response.json();
             if (data.success) {
-                setLockedFunds(data.data.lockedFunds);
                 setAvailableFunds(100);
             }
         } catch (error) {
             console.error('Error fetching trust funds:', error);
             toast.error('Error fetching trust funds');
-            setLockedFunds([]);
             setAvailableFunds(0);
         }
     };
