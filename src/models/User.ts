@@ -3,6 +3,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 export const UserCollection = 'users';
 
 export interface User extends Document {
+  _id: string;
   name: string;
   email: string;
   image?: string;
