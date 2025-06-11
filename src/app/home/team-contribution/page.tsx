@@ -526,7 +526,7 @@ export default function TeamContributionPage() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {teamMembers.length === 0 && (
+                {teamMembers.reduce((acc, team) => acc + team.members.length, 0) === 0 && (
                   <TableRow>
                     <TableCell colSpan={4} align="center">
                       <Typography variant="body2" color="text.secondary">No members found</Typography>
