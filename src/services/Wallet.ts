@@ -6,6 +6,21 @@ import { SystemTokenModel } from '../models/System_Token';
 import { WalletCredentials } from '../schemas/wallet.schema';
 import { config } from '../config';
 
+export interface TransactionDetails {
+    status: 'notStarted' | 'pending' | 'complete' | 'failed';
+    chain: 'BSC' | 'Ethereum' | 'TRON';
+    fromAddress?: string;         // sender address
+    toAddress?: string;           // recipient address
+    token?: string;               // e.g., 'USDT', 'USDC', 'ETH', etc.
+    tokenContract?: string;       // ERC20/TRC20 contract address (optional)
+    amount?: number;              // decimal format (e.g., 100.00)
+    decimals?: number;            // token decimals (optional)
+    fee?: string;                 // stringified fee (e.g., '0.00042')
+    rawTxHash: string;            // original transaction hash
+    blockNumber?: number;         // mined block number if available
+    confirmedAt?: Date;           // block timestamp (if retrievable)
+}
+
 export class WalletService {
     /**
      * Generate wallet credentials for a specific chain
@@ -139,6 +154,139 @@ export class WalletService {
                 throw new Error(`Failed to get supported tokens: ${error.message}`);
             }
             throw new Error('Failed to get supported tokens: Unknown error');
+        }
+    }
+
+    public async getEvmTxDetails(txHash: string, chain: 'BSC' | 'Ethereum'): Promise<TransactionDetails> {
+        const ERC20_ABI = [
+            'function symbol() view returns (string)',
+            'function decimals() view returns (uint8)',
+            'event Transfer(address indexed from, address indexed to, uint256 value)'
+        ];
+
+        const walletConfig = config.wallet.supportedChains[chain as keyof typeof config.wallet.supportedChains];
+        if (!walletConfig) {
+            throw new Error(`Unsupported chain: ${chain}`);
+        }
+
+        const provider = new ethers.providers.JsonRpcProvider(config.wallet.supportedChains[chain as keyof typeof config.wallet.supportedChains].rpcUrl);
+        const tx = await provider.getTransaction(txHash);
+        if (!tx) {
+            return { status: 'notStarted', chain: chain, rawTxHash: txHash };
+        }
+
+        const receipt = await provider.getTransactionReceipt(txHash);
+        if (!receipt) return { status: 'pending', chain: chain, rawTxHash: txHash };
+
+        if (receipt.status === 0) {
+            return { status: 'failed', chain: chain, rawTxHash: txHash };
+        }
+
+        const iface = new ethers.utils.Interface(ERC20_ABI);
+        const log = receipt.logs.find((log) => {
+            try {
+                iface.parseLog(log);
+                return true;
+            } catch {
+                return false;
+            }
+        });
+
+        if (!log) {
+            return {
+                status: 'complete',
+                chain: chain,
+                rawTxHash: txHash,
+                fromAddress: tx.from,
+                toAddress: tx.to!,
+                token: 'Native',
+                amount: Number(ethers.utils.formatEther(tx.value)),
+                fee: ethers.utils.formatEther(receipt.gasUsed.mul(tx.gasPrice!)),
+                blockNumber: receipt.blockNumber
+            };
+        }
+
+        const parsedLog = iface.parseLog(log);
+        const tokenAddress = log.address;
+        const tokenContract = new ethers.Contract(tokenAddress, ERC20_ABI, provider);
+
+        const [symbol, decimals] = await Promise.all([
+            tokenContract.symbol(),
+            tokenContract.decimals()
+        ]);
+
+        return {
+            status: 'complete',
+            chain: chain,
+            rawTxHash: txHash,
+            fromAddress: parsedLog.args.from,
+            toAddress: parsedLog.args.to,
+            token: symbol,
+            tokenContract: tokenAddress,
+            amount: Number(ethers.utils.formatUnits(parsedLog.args.value, decimals)),
+            decimals,
+            fee: ethers.utils.formatEther(receipt.gasUsed.mul(tx.gasPrice!)),
+            blockNumber: receipt.blockNumber
+        };
+
+    }
+
+    public async getTronTxDetails(txHash: string): Promise<TransactionDetails> {
+        const tronWeb = new TronWeb({
+            fullHost: 'https://api.trongrid.io',
+            eventServer: 'https://api.someotherevent.io',
+            privateKey: 'AD71C52E0FC0AB0DFB13B3B911624D4C1AB7BDEFAD93F36B6EF97DC955577509'
+        });
+        const tx = await tronWeb.trx.getTransaction(txHash).catch(() => null);
+        if (!tx) return { status: 'notStarted', chain: 'TRON', rawTxHash: txHash };
+
+        const info = await tronWeb.trx.getTransactionInfo(txHash).catch(() => null);
+        const status = tx.ret?.[0]?.contractRet;
+
+        if (!info) return { status: 'pending', chain: 'TRON', rawTxHash: txHash };
+        if (status !== 'SUCCESS') return { status: 'failed', chain: 'TRON', rawTxHash: txHash };
+
+        const contractValue = tx.raw_data.contract[0].parameter.value;
+        const from = tronWeb.address.fromHex(contractValue.owner_address);
+        const to = tronWeb.address.fromHex(contractValue.to_address);
+        const tokenContract = tronWeb.address.fromHex(contractValue.contract_address);
+        const amountRaw = contractValue.amount;
+
+        const contract = await tronWeb.contract().at(tokenContract);
+        const [symbol, decimals] = await Promise.all([
+            contract.symbol().call(),
+            contract.decimals().call()
+        ]);
+
+        return {
+            status: 'complete',
+            chain: 'TRON',
+            rawTxHash: txHash,
+            fromAddress: from,
+            toAddress: to,
+            token: symbol,
+            tokenContract,
+            amount: amountRaw / 10 ** decimals,
+            decimals,
+            fee: (info.fee / 1e6).toString(),
+            blockNumber: info.blockNumber,
+            confirmedAt: new Date(info.blockTimeStamp)
+        };
+    }
+
+    public async getTxDetails(txHash: string, chain: 'BSC' | 'Ethereum' | 'TRON'): Promise<TransactionDetails> {
+        const walletConfig = config.wallet.supportedChains[chain as keyof typeof config.wallet.supportedChains];
+        if (!walletConfig) {
+            throw new Error(`Unsupported chain: ${chain}`);
+        }
+
+        switch (walletConfig.type) {
+            case 'EVM':
+                return this.getEvmTxDetails(txHash, chain as 'BSC' | 'Ethereum');
+            case 'TRON':
+                return this.getTronTxDetails(txHash);
+            default:
+                throw new Error(`Unsupported chain type: ${walletConfig.type}`);
         }
     }
 }
