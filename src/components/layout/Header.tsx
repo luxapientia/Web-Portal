@@ -23,13 +23,14 @@ import UserMenu from "@/components/common/UserMenu";
 import { useSession } from "next-auth/react";
 
 // Define navigation items
-const publicNavItems = [
-  { label: "Home", path: "/home" },
+const publicNavItems: { label: string, path: string }[] = [
+  // { label: "Home", path: "/home" },
 ];
 
 // Define authenticated user navigation items
 const privateNavItems = [
   { label: "Home", path: "/home" },
+  { label: "Wallet", path: "/wallet" },
 ];
 
 interface HeaderProps {
@@ -89,9 +90,9 @@ export default function Header({ className }: HeaderProps) {
               py: 1.5,
               borderRadius: 2,
               mb: 1,
-              bgcolor: pathname === item.path ? "rgba(140,217,133,0.12)" : "transparent",
-              color: pathname === item.path ? "primary.light" : "rgba(255, 255, 255, 0.9)",
-              fontWeight: pathname === item.path ? "bold" : 500,
+              bgcolor: pathname.includes(item.path) ? "rgba(140,217,133,0.12)" : "transparent",
+              color: pathname.includes(item.path) ? "primary.light" : "rgba(255, 255, 255, 0.9)",
+              fontWeight: pathname.includes(item.path) ? "bold" : 500,
               transition: "all 0.2s ease-in-out",
               "&:hover": {
                 bgcolor: "rgba(140,217,133,0.08)",
@@ -216,10 +217,10 @@ export default function Header({ className }: HeaderProps) {
                 onClick={() => handleNavigation(item.path)}
                 sx={{
                   my: 2,
-                  color: pathname === item.path ? "primary.main" : "rgba(30, 41, 59, 0.85)",
+                  color: pathname.includes(item.path) ? "primary.main" : "rgba(30, 41, 59, 0.85)",
                   display: "block",
-                  fontWeight: pathname === item.path ? "bold" : 500,
-                  borderBottom: pathname === item.path ? "2.5px solid" : "none",
+                  fontWeight: pathname.includes(item.path) ? "bold" : 500,
+                  borderBottom: pathname.includes(item.path) ? "2.5px solid" : "none",
                   borderColor: "primary.main",
                   borderRadius: 0,
                   mx: 1.5,
