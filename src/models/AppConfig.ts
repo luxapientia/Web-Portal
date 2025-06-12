@@ -5,16 +5,18 @@ export const AppConfigCollection = 'app_config';
 export interface AppConfig extends Document {
   registration_max_img_upload_size: number;
   image_upload_types: string[];
+  transfer_fee: number;
 }
 
 const AppConfigSchema: Schema = new Schema({
   registration_max_img_upload_size: { type: Number, required: true },
-  image_upload_types: { type: [String], required: true }
+  image_upload_types: { type: [String], required: true },
+  transfer_fee: { type: Number, required: true }
 }, {
   collection: AppConfigCollection
 });
 
 export const AppConfigModel = mongoose.models[AppConfigCollection] || mongoose.model<AppConfig>(AppConfigCollection, AppConfigSchema);
 
-export type CreateAppConfigInput = Pick<AppConfig, 'registration_max_img_upload_size' | 'image_upload_types'>;
+export type CreateAppConfigInput = Pick<AppConfig, 'registration_max_img_upload_size' | 'image_upload_types' | 'transfer_fee'>;
 export type AppConfigWithoutId = Omit<AppConfig, '_id'>;

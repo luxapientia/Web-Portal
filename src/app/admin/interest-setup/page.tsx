@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Box, Container, Tab, Tabs, Typography } from '@mui/material';
 import InterestMatrixTable from '@/components/admin/interest-setup/InterestMatrixTable';
 import TrustPlanTable from '@/components/admin/interest-setup/TrustPlanTable';
+import FeeSetting from '@/components/admin/interest-setup/FeeSetting';
 import AdminLayout from '@/components/admin/AdminLayout';
 
 interface TabPanelProps {
@@ -60,6 +61,11 @@ export default function InterestSetupPage() {
                                 id="interest-tab-1"
                                 aria-controls="interest-tabpanel-1"
                             />
+                            <Tab 
+                                label="Platform Fees" 
+                                id="interest-tab-2"
+                                aria-controls="interest-tabpanel-2"
+                            />
                         </Tabs>
                     </Box>
 
@@ -68,6 +74,9 @@ export default function InterestSetupPage() {
                     </TabPanel>
                     <TabPanel value={tabValue} index={1}>
                         <TrustPlanTable />
+                    </TabPanel>
+                    <TabPanel value={tabValue} index={2}>
+                        <FeeSetting />
                     </TabPanel>
                 </Box>
             </Container>

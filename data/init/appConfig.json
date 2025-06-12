@@ -1,4 +1,9 @@
 {
   "registration_max_img_upload_size": 5242880,
-  "image_upload_types": ["image/jpeg", "image/jpg", "image/png"]
+  "image_upload_types": [
+    "image/jpeg",
+    "image/jpg",
+    "image/png"
+  ],
+  "transfer_fee": 2
 }
