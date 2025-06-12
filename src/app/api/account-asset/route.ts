@@ -3,7 +3,7 @@ import { UserModel } from '@/models/User';
 import { ActivityLog, ActivityLogModel } from '@/models/ActivityLog';
 import { authOptions } from '@/config';
 import { getServerSession } from 'next-auth';
-import { getAccountValue, getVipLevel } from '@/controllers';
+import { getVipLevel } from '@/controllers';
 
 
 export async function GET() {
@@ -18,7 +18,7 @@ export async function GET() {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
-        const accountValue = await getAccountValue(user?.id);
+        const accountValue = user.accountValue.totalAssetValue;
         const vipLevel = await getVipLevel(user?.id);
         const earningTodayLogs = await ActivityLogModel.find({
             userId: user?.id,

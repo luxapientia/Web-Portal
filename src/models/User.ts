@@ -26,6 +26,14 @@ export interface User extends Document {
     type: string;
     id: string;
   };
+  accountValue: {
+    totalAssetValue: number,
+    totalWithdrawable: number,
+    totalDeposited: number,
+    totalInterest: number,
+    totalTrustReleased: number,
+    totalInTrustFund: number
+  }
   createdAt: Date;
   updatedAt: Date;
 }
@@ -57,6 +65,14 @@ const UserSchema: Schema = new Schema({
       type: String
     }
   },
+  accountValue: {
+    totalAssetValue: { type: Number, required: true, default: 0 },
+    totalWithdrawable: { type: Number, required: true, default: 0 },
+    totalDeposited: { type: Number, required: true, default: 0 },
+    totalInterest: { type: Number, required: true, default: 0 },
+    totalTrustReleased: { type: Number, required: true, default: 0 },
+    totalInTrustFund: { type: Number, required: true, default: 0 }
+  }
 }, {
   timestamps: true,
   collection: UserCollection

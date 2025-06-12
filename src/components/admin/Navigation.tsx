@@ -9,37 +9,43 @@ import {
     MonetizationOn as MonetizationOnIcon,
     KeyboardArrowRight as ArrowIcon,
 } from '@mui/icons-material';
+import { useRouter, usePathname } from 'next/navigation';
 
 export const menuItems = [
     { 
         title: 'Dashboard', 
         icon: <DashboardIcon />, 
         color: '#4CAF50',
-        description: 'Overview of system statistics and activities'
+        description: 'Overview of system statistics and activities',
+        path: '/admin/dashboard'
     },
     { 
         title: 'User Admin', 
         icon: <PeopleIcon />, 
         color: '#2196F3',
-        description: 'Manage user accounts and permissions'
+        description: 'Manage user accounts and permissions',
+        path: '/admin/users'
     },
     { 
         title: 'Interest Setup', 
         icon: <PaidIcon />, 
         color: '#FF9800',
-        description: 'Configure interest rates and terms'
+        description: 'Configure interest rates and terms',
+        path: '/admin/interest-setup'
     },
     { 
         title: 'Deposit Approvals', 
         icon: <AccountBalanceIcon />, 
         color: '#9C27B0',
-        description: 'Review and approve deposit requests'
+        description: 'Review and approve deposit requests',
+        path: '/admin/deposits'
     },
     { 
         title: 'Withdraw Approvals', 
         icon: <MonetizationOnIcon />, 
         color: '#F44336',
-        description: 'Process withdrawal requests'
+        description: 'Process withdrawal requests',
+        path: '/admin/withdrawals'
     },
 ];
 
@@ -49,6 +55,19 @@ interface NavigationProps {
 }
 
 export default function Navigation({ activeMenu, onMenuSelect }: NavigationProps) {
+    const router = useRouter();
+    const pathname = usePathname();
+
+    const handleMenuClick = (menu: string, path: string) => {
+        onMenuSelect(menu);
+        router.push(path);
+    };
+
+    // Function to check if a path is active (including nested routes)
+    const isActivePath = (path: string) => {
+        return pathname.startsWith(path);
+    };
+
     return (
         <Stack 
             spacing={1} 
@@ -65,7 +84,9 @@ export default function Navigation({ activeMenu, onMenuSelect }: NavigationProps
                     mb: 2,
                     borderBottom: '1px solid',
                     borderColor: 'divider',
+                    cursor: 'pointer'
                 }}
+                onClick={() => router.push('/admin/dashboard')}
             >
                 <Typography 
                     variant="h6" 
@@ -90,13 +111,13 @@ export default function Navigation({ activeMenu, onMenuSelect }: NavigationProps
                     enterDelay={700}
                 >
                     <Button
-                        onClick={() => onMenuSelect(item.title)}
+                        onClick={() => handleMenuClick(item.title, item.path)}
                         aria-label={`Navigate to ${item.title}`}
                         sx={{
                             justifyContent: 'flex-start',
                             minHeight: 48,
-                            color: activeMenu === item.title ? 'white' : 'text.primary',
-                            bgcolor: activeMenu === item.title 
+                            color: isActivePath(item.path) ? 'white' : 'text.primary',
+                            bgcolor: isActivePath(item.path)
                                 ? alpha(item.color, 0.9)
                                 : 'transparent',
                             p: 1.5,
@@ -105,7 +126,7 @@ export default function Navigation({ activeMenu, onMenuSelect }: NavigationProps
                             position: 'relative',
                             transition: 'all 0.2s ease-in-out',
                             '&:hover': {
-                                bgcolor: activeMenu === item.title 
+                                bgcolor: isActivePath(item.path)
                                     ? alpha(item.color, 0.8)
                                     : alpha(item.color, 0.08),
                                 transform: 'translateX(4px)',
@@ -126,10 +147,10 @@ export default function Navigation({ activeMenu, onMenuSelect }: NavigationProps
                         >
                             <Avatar 
                                 sx={{ 
-                                    bgcolor: activeMenu === item.title 
+                                    bgcolor: isActivePath(item.path)
                                         ? 'rgba(255,255,255,0.2)' 
                                         : alpha(item.color, 0.12),
-                                    color: activeMenu === item.title 
+                                    color: isActivePath(item.path)
                                         ? 'white' 
                                         : item.color,
                                     width: 32,
@@ -146,7 +167,7 @@ export default function Navigation({ activeMenu, onMenuSelect }: NavigationProps
                             <Typography 
                                 sx={{ 
                                     flex: 1,
-                                    fontWeight: activeMenu === item.title ? 600 : 500,
+                                    fontWeight: isActivePath(item.path) ? 600 : 500,
                                     fontSize: '0.95rem',
                                     letterSpacing: 0.2,
                                     transition: 'all 0.2s ease-in-out',
@@ -156,8 +177,8 @@ export default function Navigation({ activeMenu, onMenuSelect }: NavigationProps
                             </Typography>
                             <ArrowIcon 
                                 sx={{ 
-                                    opacity: activeMenu === item.title ? 1 : 0,
-                                    transform: activeMenu === item.title 
+                                    opacity: isActivePath(item.path) ? 1 : 0,
+                                    transform: isActivePath(item.path)
                                         ? 'translateX(0) rotate(0deg)' 
                                         : 'translateX(-8px) rotate(-90deg)',
                                     transition: 'all 0.3s ease-in-out',
@@ -179,6 +200,7 @@ export default function Navigation({ activeMenu, onMenuSelect }: NavigationProps
                 }}
             >
                 <Button
+                    onClick={() => router.push('/admin/profile')}
                     sx={{
                         width: '100%',
                         justifyContent: 'flex-start',

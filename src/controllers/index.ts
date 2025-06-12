@@ -6,11 +6,7 @@ export const getVipLevel = async (userId: string): Promise<InterestMatrix> => {
     if (!user) {
         throw new Error('User not found');
     }
-    let accountValue: number = await getAccountValue(userId);
-
-    if (!accountValue) {
-        accountValue = 0;
-    }
+    const accountValue: number = user.accountValue.totalAssetValue;
 
     const interestMatrix = await InterestMatrixModel.find({}) as InterestMatrix[];
 
@@ -38,15 +34,4 @@ export const getVipLevel = async (userId: string): Promise<InterestMatrix> => {
     }
 
     return vipLevel;
-}
-
-export const getAccountValue = async (userId: string): Promise<number> => {
-    console.log(userId);
-    // const user = await UserModel.findById(userId);
-    // if (!user) {
-    //     throw new Error('User not found');
-    // }
-
-    // return user.accountValue;
-    return 0;
 }

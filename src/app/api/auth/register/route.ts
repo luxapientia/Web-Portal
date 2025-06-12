@@ -55,20 +55,7 @@ export async function POST(request: Request) {
     // Check if user already exists
     const userCount = await UserModel.countDocuments();
 
-    if (userCount > 0) {
-      //Check if user with the invitation code is existed
-      const invitingUser = await UserModel.findOne({
-        myInvitationCode: invitationCode
-      })
-
-      if (!invitingUser) {
-        return NextResponse.json(
-          { error: 'No user with the invitation code' },
-          { status: 400 }
-        );
-      }
-    }
-
+    
     // Check if user already exists
     const existingUser = await UserModel.findOne({
       $or: [
@@ -89,6 +76,25 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+
+    let isFirstUser: boolean = false;
+
+    if (userCount > 0) {
+      //Check if user with the invitation code is existed
+      const invitingUser = await UserModel.findOne({
+        myInvitationCode: invitationCode
+      })
+
+      if (!invitingUser) {
+        return NextResponse.json(
+          { error: 'No user with the invitation code' },
+          { status: 400 }
+        );
+      }
+    } else {
+      isFirstUser = true;
+    }
+
 
     // Handle file uploads
     const files = {
@@ -186,7 +192,7 @@ export async function POST(request: Request) {
       isEmailVerified: true,
       isPhoneVerified: false,
       isIdVerified: false,
-      role: 'user',
+      role: isFirstUser ? 'admin' : 'user',
       status: 'active',
       idDocuments: savedFiles,
       createdAt: new Date(),

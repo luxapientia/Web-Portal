@@ -4,7 +4,6 @@ import { ObjectId } from 'mongodb';
 import { authOptions } from '@/config';
 import { getServerSession } from 'next-auth';
 import { TrustFund, TrustFundModel } from '@/models/TrustFund';
-import { getAccountValue } from '@/controllers';
 
 export async function GET() {
     try {
@@ -19,7 +18,7 @@ export async function GET() {
         }
 
         const lockedFunds = await TrustFundModel.find({ userId: user.id, endDate: { $gt: new Date() } }) as TrustFund[];
-        const accountValue = await getAccountValue(user.id);
+        const accountValue = user.accountValue.totalAssetValue;
         const totalLockedFunds = lockedFunds.reduce((acc, fund) => acc + fund.amount, 0);
         const totalAvailableFunds = accountValue - totalLockedFunds;
 

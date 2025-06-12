@@ -383,14 +383,14 @@ export default function TrustPackPage() {
                     {/* Package Options */}
                     <Stack spacing={2}>
                         <AnimatePresence>
-                            {trustPlans.map((plan: TrustPlan, index: number) => {
+                        {trustPlans.map((plan: TrustPlan, index: number) => {
                                 const dailyReward = calculateDailyReward(plan.dailyInterestRate);
                                 const totalReward = dailyReward * plan.duration;
                                 
-                                return (
+                            return (
                                     <MotionPaper
-                                        key={index}
-                                        elevation={0}
+                                    key={index}
+                                    elevation={0}
                                         initial="hidden"
                                         animate="visible"
                                         whileHover="hover"
@@ -467,8 +467,8 @@ export default function TrustPackPage() {
                                                     textShadow: '0 2px 4px rgba(0,0,0,0.1)',
                                                 }}
                                             >
-                                                {plan.name}
-                                            </Typography>
+                                        {plan.name}
+                                    </Typography>
                                             <Stack 
                                                 direction={{ xs: 'row', md: 'column' }} 
                                                 spacing={1}
@@ -543,7 +543,7 @@ export default function TrustPackPage() {
                                                 <Box sx={{ flex: 1, textAlign: 'center' }}>
                                                     <Typography variant="overline" color="rgba(255, 255, 255, 0.7)">
                                                         Daily Reward
-                                                    </Typography>
+                                    </Typography>
                                                     <Typography 
                                                         variant="h5" 
                                                         color="rgba(50, 176, 207, 0.9)"
@@ -553,7 +553,7 @@ export default function TrustPackPage() {
                                                         }}
                                                     >
                                                         ${dailyReward.toFixed(2)}
-                                                    </Typography>
+                                    </Typography>
                                                 </Box>
                                             )}
 
@@ -590,8 +590,8 @@ export default function TrustPackPage() {
                                             </Button>
                                         </Box>
                                     </MotionPaper>
-                                );
-                            })}
+                            );
+                        })}
                         </AnimatePresence>
                     </Stack>
                 </Box>
