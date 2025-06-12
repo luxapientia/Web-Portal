@@ -3,6 +3,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 export const TrustPlanCollection = 'trust_plan';
 
 export interface TrustPlan extends Document {
+  _id: string;
   name: string;
   duration: number;
   dailyInterestRate: number;

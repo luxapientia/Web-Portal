@@ -26,15 +26,15 @@ import {
 } from "@mui/icons-material";
 import toast from "react-hot-toast";
 import { useSession } from "next-auth/react";
-import { PlanWithoutId as Plan } from "@/models/Plan";
+import { InterestMatrix } from "@/models/InterestMatrix";
 
 export default function VIPPlanTab() {
   const { data: session } = useSession();
   const [loading, setLoading] = useState(true);
   const [balance, setBalance] = useState(0);
-  const [plans, setPlans] = useState<Plan[]>([]);
-  const [currentPlan, setCurrentPlan] = useState<Plan | null>(null);
-  const [nextPlan, setNextPlan] = useState<Plan | null>(null);
+  const [plans, setPlans] = useState<InterestMatrix[]>([]);
+  const [currentPlan, setCurrentPlan] = useState<InterestMatrix | null>(null);
+  const [nextPlan, setNextPlan] = useState<InterestMatrix | null>(null);
   const [activeMembers, setActiveMembers] = useState(0);
   const theme = useTheme();
 
@@ -72,32 +72,32 @@ export default function VIPPlanTab() {
 
   const fetchVIPPlans = async () => {
     setLoading(true);
-    const plansResponse = await fetch("/api/plans", {
+    const response = await fetch("/api/interest-matrix", {
       method: "GET",
     });
-    if (plansResponse) {
-      const plansData = await plansResponse.json();
-      if (plansData.success && plansData.plans) {
-        setPlans(plansData.plans);
+    if (response) {
+      const interestMatrix = await response.json();
+      if (interestMatrix.success && interestMatrix.data) {
+        setPlans(interestMatrix.data);
         const userBalance = balance || 0;
-        const sortedPlans = [...plansData.plans].sort(
-          (a, b) => a.account_value_start_usd - b.account_value_start_usd
+        const sortedInterestMatrix = [...interestMatrix.data].sort(
+          (a, b) => a.startAccountValue - b.startAccountValue
         );
         let current = null;
         let next = null;
-        for (let i = 0; i < sortedPlans.length; i++) {
-          const plan = sortedPlans[i];
+        for (let i = 0; i < sortedInterestMatrix.length; i++) {
+          const plan = sortedInterestMatrix[i];
           if (
-            userBalance >= plan.account_value_start_usd &&
-            userBalance <= plan.account_value_end_usd
+            userBalance >= plan.startAccountValue &&
+            userBalance <= plan.endAccountValue
           ) {
             current = plan;
-            next = sortedPlans[i + 1] || null;
+            next = sortedInterestMatrix[i + 1] || null;
             break;
           }
         }
-        if (!current && sortedPlans.length > 0) {
-          next = sortedPlans[0];
+        if (!current && sortedInterestMatrix.length > 0) {
+          next = sortedInterestMatrix[0];
         }
         setCurrentPlan(current);
         setNextPlan(next);
@@ -110,8 +110,8 @@ export default function VIPPlanTab() {
   const calculateProgress = () => {
     if (!currentPlan || !nextPlan) return 0;
 
-    const currentMin = currentPlan.account_value_start_usd;
-    const nextMin = nextPlan.account_value_start_usd;
+    const currentMin = currentPlan.startAccountValue;
+    const nextMin = nextPlan.startAccountValue;
     const range = nextMin - currentMin;
 
     if (range <= 0) return 100;
@@ -141,7 +141,7 @@ export default function VIPPlanTab() {
           <Box sx={{ textAlign: "center", mb: 3 }}>
             <Chip
               icon={<StarRate />}
-              label={currentPlan ? currentPlan.plan_name : "No VIP Level Yet"}
+              label={currentPlan ? currentPlan.name : "No VIP Level Yet"}
               color="primary"
               sx={{
                 fontSize: "1.2rem",
@@ -212,9 +212,9 @@ export default function VIPPlanTab() {
                 sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}
               >
                 <Typography variant="body2">
-                  {currentPlan ? currentPlan.plan_name : "No VIP"}
+                  {currentPlan ? currentPlan.name : "No VIP"}
                 </Typography>
-                <Typography variant="body2">{nextPlan.plan_name}</Typography>
+                <Typography variant="body2">{nextPlan.name}</Typography>
               </Box>
               <LinearProgress
                 variant="determinate"
@@ -225,19 +225,19 @@ export default function VIPPlanTab() {
                 sx={{ display: "flex", justifyContent: "space-between", mt: 1 }}
               >
                 <Typography variant="caption" color="text.secondary">
-                  ${currentPlan ? currentPlan.account_value_start_usd : 0} USD
+                  ${currentPlan ? currentPlan.startAccountValue : 0} USD
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  ${nextPlan.account_value_start_usd} USD
+                  ${nextPlan.startAccountValue} USD
                 </Typography>
               </Box>
               <Typography variant="body2" sx={{ mt: 1, textAlign: "center" }}>
                 You need $
                 {Math.max(
-                  nextPlan.account_value_start_usd - balance,
+                  nextPlan.startAccountValue - balance,
                   0
                 ).toFixed(2)}{" "}
-                USD more to reach {nextPlan.plan_name}
+                USD more to reach {nextPlan.name}
               </Typography>
             </Box>
           )}
@@ -248,7 +248,7 @@ export default function VIPPlanTab() {
       {currentPlan && (
         <Card sx={{ boxShadow: 1 }}>
           <CardHeader
-            title={`${currentPlan.plan_name} Benefits`}
+            title={`${currentPlan.name} Benefits`}
             titleTypographyProps={{ variant: "h6", fontWeight: 500 }}
           />
           <CardContent>
@@ -259,7 +259,7 @@ export default function VIPPlanTab() {
                 </ListItemIcon>
                 <ListItemText
                   primary="Daily Interest Rate"
-                  secondary={`${currentPlan.interest_daily_percent}% daily interest on your balance`}
+                  secondary={`${currentPlan.dailyTasksRewardPercentage}% daily interest on your balance`}
                 />
               </ListItem>
               <Divider component="li" />
@@ -270,7 +270,7 @@ export default function VIPPlanTab() {
                 </ListItemIcon>
                 <ListItemText
                   primary="Referral Rewards"
-                  secondary={`$${currentPlan.reward_per_user_deposit_usd.toFixed(
+                  secondary={`$${currentPlan.uplineDepositReward.toFixed(
                     2
                   )} USD for each user deposit you refer`}
                 />
@@ -283,7 +283,7 @@ export default function VIPPlanTab() {
                 </ListItemIcon>
                 <ListItemText
                   primary="Team Earnings"
-                  secondary={`$${currentPlan.interest_from_each_direct_active_user_usd.toFixed(
+                  secondary={`$${currentPlan.promotionReward.toFixed(
                     3
                   )} USD from each direct active team member`}
                 />
@@ -297,8 +297,8 @@ export default function VIPPlanTab() {
                 <ListItemText
                   primary="Daily Tasks"
                   secondary={`${
-                    currentPlan.daily_tasks_count_allowed
-                  } tasks allowed daily, earning $${currentPlan.daily_tasks_reward_usd.toFixed(
+                    currentPlan.dailyTasksCountAllowed
+                  } tasks allowed daily, earning $${currentPlan.dailyTasksRewardPercentage.toFixed(
                     2
                   )} USD per task`}
                 />
@@ -352,7 +352,7 @@ export default function VIPPlanTab() {
                     }}
                   >
                     <Typography variant="h6" sx={{ fontWeight: 500 }}>
-                      {plan.plan_name}
+                      {plan.name}
                     </Typography>
                   </Box>
 
@@ -361,8 +361,8 @@ export default function VIPPlanTab() {
                     color="text.secondary"
                     sx={{ mb: 2 }}
                   >
-                    ${plan.account_value_start_usd} - $
-                    {plan.account_value_end_usd} USD
+                    ${plan.startAccountValue} - $
+                    {plan.endAccountValue} USD
                   </Typography>
 
                   <Divider sx={{ mb: 2 }} />
@@ -375,7 +375,7 @@ export default function VIPPlanTab() {
                         sx={{ mr: 1 }}
                       />
                       <Typography variant="body2">
-                        {plan.interest_daily_percent}% Daily Interest
+                        {plan.dailyTasksRewardPercentage}% Daily Interest
                       </Typography>
                     </Box>
 
@@ -386,7 +386,7 @@ export default function VIPPlanTab() {
                         sx={{ mr: 1 }}
                       />
                       <Typography variant="body2">
-                        ${plan.reward_per_user_deposit_usd.toFixed(2)} Per
+                        ${plan.uplineDepositReward.toFixed(2)} Per
                         Referral
                       </Typography>
                     </Box>
@@ -398,7 +398,7 @@ export default function VIPPlanTab() {
                         sx={{ mr: 1 }}
                       />
                       <Typography variant="body2">
-                        {plan.daily_tasks_count_allowed} Daily Tasks
+                        {plan.dailyTasksCountAllowed} Daily Tasks
                       </Typography>
                     </Box>
 
@@ -409,7 +409,7 @@ export default function VIPPlanTab() {
                         sx={{ mr: 1 }}
                       />
                       <Typography variant="body2">
-                        Min. {plan.active_members_above} Team Members
+                        Min. {plan.startActiveMembers} Team Members
                       </Typography>
                     </Box>
                   </Box>

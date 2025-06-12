@@ -19,7 +19,7 @@ export async function GET() {
         const taskDone = (await DailyTaskModel.find({ date: currentDate, userId: user?.id }));
 
         const vipLevel = await getVipLevel(user?.id);
-        const taskLimit = vipLevel.daily_tasks_count_allowed;
+        const taskLimit = vipLevel.dailyTasksCountAllowed;
 
         if (taskDone.length >= taskLimit) {
             return NextResponse.json({ error: 'Task limit reached' }, { status: 400 });
@@ -28,7 +28,7 @@ export async function GET() {
         const newTask = new DailyTaskModel({
             date: currentDate,
             userId: user?.id,
-            vipLevel: vipLevel.plan_name,
+            vipLevel: vipLevel.name,
             taskIndex: taskDone.length + 1,
             isCompleted: false
         });

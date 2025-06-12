@@ -1,0 +1,80 @@
+[
+    {
+        "level": 1,
+        "name": "VIP 1",
+        "startAccountValue": 50,
+        "endAccountValue": 99,
+        "startActiveMembers": 0,
+        "endActiveMembers": 5,
+        "promotionReward": 3,
+        "uplineDepositAmount": 100,
+        "uplineDepositReward": 1,
+        "dailyTasksCountAllowed": 4,
+        "dailyTasksRewardPercentage": 2
+    },
+    {
+        "level": 2,
+        "name": "VIP 2",
+        "startAccountValue": 100,
+        "endAccountValue": 500,
+        "startActiveMembers": 6,
+        "endActiveMembers": 10,
+        "promotionReward": 20,
+        "uplineDepositAmount": 100,
+        "uplineDepositReward": 1.5,
+        "dailyTasksCountAllowed": 5,
+        "dailyTasksRewardPercentage": 2.5
+    },
+    {
+        "level": 3,
+        "name": "VIP 3",
+        "startAccountValue": 501,
+        "endAccountValue": 2000,
+        "startActiveMembers": 11,
+        "endActiveMembers": 20,
+        "promotionReward": 30,
+        "uplineDepositAmount": 100,
+        "uplineDepositReward": 2,
+        "dailyTasksCountAllowed": 6,
+        "dailyTasksRewardPercentage": 3
+    },
+    {
+        "level": 4,
+        "name": "VIP 4",
+        "startAccountValue": 2001,
+        "endAccountValue": 5000,
+        "startActiveMembers": 21,
+        "endActiveMembers": 30,
+        "promotionReward": 50,
+        "uplineDepositAmount": 100,
+        "uplineDepositReward": 2.5,
+        "dailyTasksCountAllowed": 7,
+        "dailyTasksRewardPercentage": 3.5
+    },
+    {
+        "level": 5,
+        "name": "VIP 5",
+        "startAccountValue": 5001,
+        "endAccountValue": 10000,
+        "startActiveMembers": 31,
+        "endActiveMembers": 40,
+        "promotionReward": 100,
+        "uplineDepositAmount": 100,
+        "uplineDepositReward": 3,
+        "dailyTasksCountAllowed": 8,
+        "dailyTasksRewardPercentage": 4
+    },
+    {
+        "level": 6,
+        "name": "VIP 6",
+        "startAccountValue": 10001,
+        "endAccountValue": 30000,
+        "startActiveMembers": 41,
+        "endActiveMembers": 50,
+        "promotionReward": 200,
+        "uplineDepositAmount": 100,
+        "uplineDepositReward": 3.5,
+        "dailyTasksCountAllowed": 9,
+        "dailyTasksRewardPercentage": 4.5
+    }
+]

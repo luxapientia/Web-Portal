@@ -19,7 +19,7 @@ export async function GET() {
         const taskDone = (await DailyTaskModel.find({ date: currentDate, userId: user?.id })) as DailyTask[];
 
         const vipLevel = await getVipLevel(user?.id);
-        const taskLimit = vipLevel.daily_tasks_count_allowed;
+        const taskLimit = vipLevel.dailyTasksCountAllowed;
 
 
         return NextResponse.json({

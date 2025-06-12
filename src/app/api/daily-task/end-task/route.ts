@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
             success: true,
             data: {
-                reward: vipLevel.daily_tasks_reward_usd,
+                reward: vipLevel.dailyTasksRewardPercentage,
                 tasks
             }
         });

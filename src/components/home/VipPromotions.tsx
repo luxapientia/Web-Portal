@@ -1,11 +1,11 @@
 import { Box, Typography, Stack } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
-import { Plan } from '@/models/Plan';
+import { InterestMatrix } from '@/models/InterestMatrix';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 export default function VipPromotions() {
-  const [vipLevel, setVipLevel] = useState<Plan | null>(null);
+  const [vipLevel, setVipLevel] = useState<InterestMatrix | null>(null);
   const [vipLevelIndex, setVipLevelIndex] = useState<number>(0);
 
   useEffect(() => {
@@ -17,7 +17,7 @@ export default function VipPromotions() {
           throw new Error(data.error || 'Failed to fetch VIP level');
         }
         setVipLevel(data.vipLevel);
-        const vipLevelName = data.vipLevel.plan_name;
+        const vipLevelName = data.vipLevel.name;
         const index = vipLevelName.split(' ')[1];
         setVipLevelIndex(parseInt(index));
       } catch {
@@ -96,7 +96,7 @@ export default function VipPromotions() {
       <Box sx={{ position: 'relative', zIndex: 2, width: '100%' }}>
         {renderStars()}
         <Typography variant="h5" fontWeight={800} mt={1} color="#222" sx={{ fontSize: { xs: '1.5rem', md: '2rem' } }}>
-          {vipLevel?.plan_name}
+          {vipLevel?.name}
         </Typography>
         <Typography variant="subtitle1" color="#ff9800" fontWeight={700} sx={{ fontSize: { xs: '1rem', md: '1.25rem' } }}>
           Promotions

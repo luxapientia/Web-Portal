@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { User, UserModel } from '@/models/User';
+import { UserModel } from '@/models/User';
 import { authOptions } from '@/config';
 import { getServerSession } from 'next-auth';
+import { FilterQuery } from 'mongoose';
+import { User } from '@/models/User';
 
 export async function GET(request: NextRequest) {
     try {
@@ -24,7 +26,7 @@ export async function GET(request: NextRequest) {
         const sortOrder = searchParams.get('sortOrder');
 
         // Build filter query
-        const query: any = {};
+        const query: FilterQuery<User> = {};
 
         if (name) {
             query.name = { $regex: name, $options: 'i' };
@@ -43,7 +45,7 @@ export async function GET(request: NextRequest) {
         }
 
         // Build sort query
-        const sortQuery: any = {};
+        const sortQuery: FilterQuery<User> = {};
         if (sortBy && sortOrder) {
             sortQuery[sortBy] = sortOrder === 'asc' ? 1 : -1;
         } else {

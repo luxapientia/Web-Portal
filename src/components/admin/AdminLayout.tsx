@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Box, Stack, IconButton, Drawer, useMediaQuery, useTheme, AppBar, Toolbar } from '@mui/material';
+import { Box, IconButton, Drawer, useMediaQuery, useTheme, AppBar, Toolbar } from '@mui/material';
 import { Menu as MenuIcon } from '@mui/icons-material';
 import Navigation from './Navigation';
 
@@ -123,7 +123,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 }}
             >
                 <Navigation
-                    isMobile
                     activeMenu={activeMenu}
                     onMenuSelect={handleMenuSelect}
                 />

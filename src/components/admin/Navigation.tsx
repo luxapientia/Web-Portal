@@ -44,12 +44,11 @@ export const menuItems = [
 ];
 
 interface NavigationProps {
-    isMobile?: boolean;
     activeMenu: string;
     onMenuSelect: (menu: string) => void;
 }
 
-export default function Navigation({ isMobile = false, activeMenu, onMenuSelect }: NavigationProps) {
+export default function Navigation({ activeMenu, onMenuSelect }: NavigationProps) {
     return (
         <Stack 
             spacing={1} 

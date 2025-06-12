@@ -48,7 +48,8 @@ export async function GET() {
             totalDeposit: totalDepositLogs.reduce((acc, log) => acc + log.amount, 0),
             vipLevel: vipLevel,
         });
-    } catch {
+    } catch (error) {
+        console.error('Failed to get account asset', error);
         return NextResponse.json({ error: 'Failed to get account asset'  }, { status: 500 });
     }
 } 
