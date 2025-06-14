@@ -42,13 +42,10 @@ export async function POST(request: NextRequest) {
 
         const newTransaction: any = {
             transactionId,
-            fromAddress: txDetails.fromAddress,
-            toAddress: txDetails.toAddress,
-            status: txDetails.status,
+            fromAddress: fromAddress,
+            toAddress: toAddress,
             type: 'deposit',
-            amount: txDetails.amount,
             startDate: new Date(),
-            releaseDate: txDetails.confirmedAt,
             remarks: `${user.name} deposited ${txDetails.amount} ${token} from ${txDetails.fromAddress} to ${txDetails.toAddress}`,
             token: token,
             chain: chain,
