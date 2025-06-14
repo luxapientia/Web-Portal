@@ -19,10 +19,13 @@ export interface Transaction extends Document {
   toUserId?: string,
   type: TransactionType,
   amount: number,
+  amountInUSD: number,
+  token: string,
+  chain: string,
   startDate: Date,
   releaseDate?: Date,
-  status: 'pending' | 'success' | 'failed' | 'in_review',
-  remarks: string
+  status: 'pending' | 'success' | 'failed' | 'in_review' | 'rejected',
+  remarks?: string
 }
 
 const TransactionSchema: Schema = new Schema({
@@ -33,10 +36,19 @@ const TransactionSchema: Schema = new Schema({
   toUserId: { type: String, required: false },
   type: { type: String, required: true },
   amount: { type: Number, required: true },
+  amountInUSD: { type: Number, required: true },
+  token: { 
+    type: String, 
+    required: true,
+  },
+  chain: { 
+    type: String, 
+    required: true,
+  },
   startDate: { type: Date, required: true },
   releaseDate: { type: Date, required: false },
   status: { type: String, required: true, default: 'pending' },
-  remarks: { type: String, required: true }
+  remarks: { type: String, required: false }
 }, {
   timestamps: true,
   collection: TransactionCollection
