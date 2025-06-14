@@ -5,12 +5,20 @@ import { authOptions, config } from '@/config';
 import { getServerSession } from 'next-auth';
 import { walletService } from '@/services/Wallet';
 import { TransactionDetails } from '@/services/Wallet';
+import { UserModel } from '@/models/User';
+import { User } from '@/models/User';
+import { CryptoPriceModel } from '@/models/CryptoPrice';
 
 export async function POST(request: NextRequest) {
     try {
         const session = await getServerSession(authOptions);
         if (!session?.user?.email) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const user = await UserModel.findOne({ email: session.user.email }) as User;    
+        if (!user) {
+            return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
         const { chain, token, transactionId, fromAddress, toAddress } = await request.json();
@@ -31,7 +39,9 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Transaction not started' }, { status: 400 });
         }
 
-        const transaction = await TransactionModel.create({
+        const cryptoPrice = await CryptoPriceModel.find({ symbol: token }).sort({ timestamp: -1 }).limit(1);
+
+        const newTransaction: any = {
             transactionId,
             fromAddress: txDetails.fromAddress,
             toAddress: txDetails.toAddress,
@@ -40,8 +50,17 @@ export async function POST(request: NextRequest) {
             amount: txDetails.amount,
             startDate: new Date(),
             releaseDate: txDetails.confirmedAt,
-            remarks: 'Deposit'
-        });
+            remarks: `${user.name} deposited ${txDetails.amount} ${token} from ${txDetails.fromAddress} to ${txDetails.toAddress}`,
+            token: token,
+            chain: chain,
+            fromUserId: user._id,
+        }
+
+        if (txDetails.amount) {
+            newTransaction.amountInUSD = txDetails.amount * (cryptoPrice[0]?.price || 1);
+        }
+
+        const transaction = await TransactionModel.create(newTransaction);
 
         return NextResponse.json({ success: true, data: { transaction } });
     } catch (error) {
