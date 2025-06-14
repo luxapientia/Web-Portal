@@ -115,7 +115,7 @@ export default function DepositPage() {
                 setIsModalOpen(false);
                 setTransactionId('');
                 setUserWalletAddress('');
-                router.push('/wallet/transactions');
+                // router.push('/wallet/transactions');
             } else {
                 toast.error(data.data.error || 'Failed to submit deposit');
             }
