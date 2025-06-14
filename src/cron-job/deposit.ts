@@ -1,6 +1,9 @@
 import cron from 'node-cron';
-import { TransactionModel } from '../models/Transaction';
+import { Transaction, TransactionModel } from '../models/Transaction';
 import { walletService } from '../services/Wallet';
+import { UserModel } from '@/models/User';
+import { CryptoPriceModel } from '@/models/CryptoPrice';
+import { User } from '@/models/User';
 
 // Function to check transaction status
 async function checkPendingTransactions() {
@@ -9,7 +12,7 @@ async function checkPendingTransactions() {
         const pendingTransactions = await TransactionModel.find({
             status: 'pending',
             type: 'deposit'
-        });
+        }) as Transaction[];
 
         console.log(`[${new Date().toISOString()}] Checking ${pendingTransactions.length} pending transactions...`);
 
@@ -38,6 +41,25 @@ async function checkPendingTransactions() {
                         } else if (txDetails.toAddress !== transaction.toAddress) {
                             transaction.status = 'rejected';
                             transaction.rejectReason = `The wallet address ${transaction.toAddress} you sent the funds to is not the same as the wallet address we provided`;
+                        }
+
+                        if(txDetails.token !== transaction.token){
+                            transaction.status = 'rejected';
+                            transaction.rejectReason = `The token ${txDetails.token} you provided is not the same as the token ${transaction.token} we provided`;
+                        }
+
+                        if(transaction.status === 'success'){
+                            const cryptoPrice = await CryptoPriceModel.find({ symbol: txDetails.token || 'USDT' }).sort({ timestamp: -1 }).limit(1);
+                            transaction.token = txDetails.token || 'USDT';
+                            transaction.amount = txDetails.amount || 0;
+                            transaction.amountInUSD = transaction.amount * (cryptoPrice[0]?.price || 1);
+                            const user = await UserModel.findById(transaction.fromUserId) as User;
+                            
+                            if(user){
+                                user.accountValue.totalDeposited += transaction.amountInUSD;
+                                user.accountValue.totalAssetValue += transaction.amountInUSD;
+                                await user.save();
+                            }
                         }
 
                         transaction.releaseDate = new Date();
