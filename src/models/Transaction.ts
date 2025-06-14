@@ -26,7 +26,7 @@ export interface Transaction extends Document {
   releaseDate?: Date,
   status: 'pending' | 'success' | 'rejected',
   remarks?: string,
-  rejectionReason?: string,
+  rejectReason?: string,
 }
 
 const TransactionSchema: Schema = new Schema({
@@ -50,7 +50,7 @@ const TransactionSchema: Schema = new Schema({
   releaseDate: { type: Date, required: false },
   status: { type: String, required: true, default: 'pending' },
   remarks: { type: String, required: false },
-  rejectionReason: { type: String, required: false },
+  rejectReason: { type: String, required: false },
 }, {
   timestamps: true,
   collection: TransactionCollection
