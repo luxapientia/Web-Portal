@@ -23,9 +23,9 @@ export interface User extends Document {
     selfie: string;
   };
   withdrawalWallet?: {
-    type: string;
-    id: string;
-  };
+    chain: string;
+    address: string;
+  }[];
   accountValue: {
     totalAssetValue: number,
     totalWithdrawable: number,
@@ -58,12 +58,12 @@ const UserSchema: Schema = new Schema({
     selfie: { type: String, required: true }
   },
   withdrawalWallet: {
-    type: {
-      type: String
-    },
-    id: {
-      type: String
-    }
+    type: [{
+      chain: { type: String, required: true },
+      address: { type: String, required: true }
+    }],
+    required: false,
+    default: []
   },
   accountValue: {
     totalAssetValue: { type: Number, required: true, default: 0 },
