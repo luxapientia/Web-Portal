@@ -6,6 +6,7 @@ import * as dotenv from 'dotenv';
 import { PriceSyncService } from './src/services/PriceSync';
 import { config } from './src/config';
 import init_db from './src/init/init_db';
+import depositCron from './src/cron-job/deposit';
 
 // Load environment variables from .env.local
 dotenv.config({ path: '.env.local' });
@@ -53,6 +54,8 @@ async function startServer() {
     setInterval(async () => {
       priceSyncService.syncPrices();
     }, 1000 * config.cryptoMarket.priceSyncInterval);
+
+    depositCron.start();
   } catch (err) {
     console.error(`Failed to start server: ${err instanceof Error ? err.message : 'Unknown error'}`);
     process.exit(1);
