@@ -1,59 +1,165 @@
 'use client';
 
-import { Box, Container, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, IconButton, useTheme, TextField, MenuItem } from '@mui/material';
+import { useState, useEffect } from 'react';
+import { 
+    Box, 
+    Container, 
+    Typography, 
+    Paper, 
+    Table, 
+    TableBody, 
+    TableCell, 
+    TableContainer, 
+    TableHead, 
+    TableRow, 
+    Chip, 
+    IconButton, 
+    useTheme, 
+    TextField, 
+    MenuItem,
+    TablePagination,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Button,
+    CircularProgress,
+    Stack
+} from '@mui/material';
 import Layout from '@/components/layout/Layout';
-import { History as HistoryIcon, ArrowBack as ArrowBackIcon } from '@mui/icons-material';
-import { useState } from 'react';
+import { 
+    History as HistoryIcon, 
+    ArrowBack as ArrowBackIcon,
+    Visibility as VisibilityIcon,
+    ArrowDownward as ArrowDownwardIcon,
+    ArrowUpward as ArrowUpwardIcon,
+    UnfoldMore as UnfoldMoreIcon
+} from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
+import CopyButton from '@/components/common/CopyButton';
+import { format } from 'date-fns';
+
+interface Transaction {
+    _id: string;
+    transactionId: string;
+    fromAddress?: string;
+    toAddress?: string;
+    fromUserId?: string;
+    toUserId?: string;
+    type: 'transfer' | 'withdraw' | 'interest_deposit' | 'trust_deposit' | 'deposit';
+    amount?: number;
+    amountInUSD?: number;
+    token: string;
+    chain: string;
+    startDate: Date;
+    releaseDate?: Date;
+    status: 'pending' | 'success' | 'failed' | 'in_review' | 'rejected';
+    remarks?: string;
+    rejectionReason?: string;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+type SortField = 'createdAt' | 'amountInUSD';
 
 export default function HistoryPage() {
     const theme = useTheme();
     const router = useRouter();
-    const [filter, setFilter] = useState('all');
+    
+    // State
+    const [statusFilter, setStatusFilter] = useState('all');
+    const [typeFilter, setTypeFilter] = useState('all');
+    const [transactionIdFilter, setTransactionIdFilter] = useState('');
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [total, setTotal] = useState(0);
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+    const [detailsOpen, setDetailsOpen] = useState(false);
+    const [sortField, setSortField] = useState<SortField>('createdAt');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-    // Mock data for transaction history
-    const transactions = [
-        {
-            id: '1',
-            type: 'deposit',
-            amount: 1000,
-            date: '2024-03-15',
-            status: 'completed',
-            description: 'Bank deposit',
-        },
-        {
-            id: '2',
-            type: 'withdraw',
-            amount: -500,
-            date: '2024-03-14',
-            status: 'completed',
-            description: 'ATM withdrawal',
-        },
-        {
-            id: '3',
-            type: 'transfer',
-            amount: -200,
-            date: '2024-03-13',
-            status: 'completed',
-            description: 'Transfer to John',
-        },
-        {
-            id: '4',
-            type: 'deposit',
-            amount: 300,
-            date: '2024-03-12',
-            status: 'pending',
-            description: 'Check deposit',
-        },
-    ];
+    // Fetch transactions
+    const fetchTransactions = async () => {
+        try {
+            setLoading(true);
+            const response = await fetch(
+                `/api/wallet/transactions?page=${page}&limit=${rowsPerPage}&status=${statusFilter}&type=${typeFilter}&transactionId=${transactionIdFilter}&sortField=${sortField}&sortOrder=${sortOrder}`
+            );
+            const data = await response.json();
+            
+            if (data.success) {
+                setTransactions(data.data.transactions);
+                setTotal(data.data.total);
+            } else {
+                toast.error(data.error || 'Failed to fetch transactions');
+            }
+        } catch (error) {
+            console.error('Error fetching transactions:', error);
+            toast.error('Failed to fetch transactions');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchTransactions();
+    }, [page, rowsPerPage, statusFilter, typeFilter, transactionIdFilter, sortField, sortOrder]);
+
+    const handleSort = (field: SortField) => {
+        if (sortField === field) {
+            setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc');
+        } else {
+            setSortField(field);
+            setSortOrder('desc');
+        }
+    };
+
+    const getSortIcon = (field: SortField) => {
+        if (sortField !== field) {
+            return <UnfoldMoreIcon fontSize="small" sx={{ opacity: 0.3 }} />;
+        }
+        return sortOrder === 'desc' ? (
+            <ArrowDownwardIcon fontSize="small" sx={{ opacity: 0.7 }} />
+        ) : (
+            <ArrowUpwardIcon fontSize="small" sx={{ opacity: 0.7 }} />
+        );
+    };
+
+    const SortableTableCell = ({ field, label }: { field: SortField, label: string }) => (
+        <TableCell>
+            <Box 
+                sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: 0.5, 
+                    cursor: 'pointer',
+                    justifyContent: 'center',
+                    '&:hover': {
+                        '& .MuiSvgIcon-root': {
+                            opacity: '1 !important'
+                        }
+                    }
+                }} 
+                onClick={() => handleSort(field)}
+            >
+                {label}
+                {getSortIcon(field)}
+            </Box>
+        </TableCell>
+    );
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'completed':
+            case 'success':
                 return 'success';
             case 'pending':
+            case 'in_review':
                 return 'warning';
             case 'failed':
+            case 'rejected':
                 return 'error';
             default:
                 return 'default';
@@ -63,6 +169,8 @@ export default function HistoryPage() {
     const getTypeColor = (type: string) => {
         switch (type) {
             case 'deposit':
+            case 'interest_deposit':
+            case 'trust_deposit':
                 return '#4CAF50';
             case 'withdraw':
                 return '#F44336';
@@ -73,19 +181,23 @@ export default function HistoryPage() {
         }
     };
 
-    const filteredTransactions = transactions.filter(
-        (transaction) => filter === 'all' || transaction.type === filter
-    );
+    const handleChangePage = (event: unknown, newPage: number) => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
+
+    const handleViewDetails = (transaction: Transaction) => {
+        setSelectedTransaction(transaction);
+        setDetailsOpen(true);
+    };
 
     return (
         <Layout>
-            <Container
-                maxWidth="md"
-                sx={{
-                    py: { xs: 2, md: 4 },
-                    position: 'relative',
-                }}
-            >
+            <Container maxWidth="lg" sx={{ py: { xs: 2, md: 4 }, position: 'relative' }}>
                 <Paper
                     elevation={0}
                     sx={{
@@ -129,7 +241,7 @@ export default function HistoryPage() {
                             <ArrowBackIcon />
                         </IconButton>
 
-                        {/* Title Section */}
+                        {/* Title Section with Filters */}
                         <Box sx={{ textAlign: 'center', mb: 4, mt: { xs: 3, md: 4 } }}>
                             <HistoryIcon 
                                 sx={{ 
@@ -160,48 +272,76 @@ export default function HistoryPage() {
                                     maxWidth: '400px',
                                     margin: '0 auto',
                                     lineHeight: 1.6,
+                                    mb: 3
                                 }}
                             >
                                 View and track all your transactions
                             </Typography>
-                        </Box>
 
-                        {/* Filter Section */}
-                        <Box sx={{ mb: 3 }}>
-                            <TextField
-                                select
-                                fullWidth
-                                label="Filter by Type"
-                                value={filter}
-                                onChange={(e) => setFilter(e.target.value)}
-                                sx={{
-                                    maxWidth: 200,
-                                    '& .MuiOutlinedInput-root': {
-                                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                                        transition: 'all 0.2s ease',
-                                        '&:hover': {
-                                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                        },
-                                        '&.Mui-focused': {
-                                            backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                                        }
-                                    },
-                                    '& .MuiOutlinedInput-notchedOutline': {
-                                        borderColor: 'rgba(255, 255, 255, 0.2)',
-                                    },
-                                    '& .MuiInputLabel-root': {
-                                        color: 'rgba(255, 255, 255, 0.7)',
-                                    },
-                                    '& .MuiSelect-icon': {
-                                        color: 'rgba(255, 255, 255, 0.7)',
-                                    }
-                                }}
+                            {/* Filters */}
+                            <Stack 
+                                direction={{ xs: 'column', sm: 'row' }} 
+                                spacing={2} 
+                                justifyContent="center"
+                                alignItems="center"
                             >
-                                <MenuItem value="all">All Transactions</MenuItem>
-                                <MenuItem value="deposit">Deposits</MenuItem>
-                                <MenuItem value="withdraw">Withdrawals</MenuItem>
-                                <MenuItem value="transfer">Transfers</MenuItem>
-                            </TextField>
+                                <TextField
+                                    label="Transaction ID"
+                                    value={transactionIdFilter}
+                                    onChange={(e) => {
+                                        setTransactionIdFilter(e.target.value);
+                                        setPage(0);
+                                    }}
+                                    sx={{
+                                        width: { xs: '100%', sm: 200 },
+                                        '& .MuiOutlinedInput-root': {
+                                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                        }
+                                    }}
+                                />
+                                <TextField
+                                    select
+                                    label="Type"
+                                    value={typeFilter}
+                                    onChange={(e) => {
+                                        setTypeFilter(e.target.value);
+                                        setPage(0);
+                                    }}
+                                    sx={{
+                                        width: { xs: '100%', sm: 200 },
+                                        '& .MuiOutlinedInput-root': {
+                                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                        }
+                                    }}
+                                >
+                                    <MenuItem value="all">All Types</MenuItem>
+                                    <MenuItem value="deposit">Deposit</MenuItem>
+                                    <MenuItem value="withdraw">Withdraw</MenuItem>
+                                    <MenuItem value="transfer">Transfer</MenuItem>
+                                </TextField>
+                                <TextField
+                                    select
+                                    label="Status"
+                                    value={statusFilter}
+                                    onChange={(e) => {
+                                        setStatusFilter(e.target.value);
+                                        setPage(0);
+                                    }}
+                                    sx={{
+                                        width: { xs: '100%', sm: 200 },
+                                        '& .MuiOutlinedInput-root': {
+                                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                        }
+                                    }}
+                                >
+                                    <MenuItem value="all">All Status</MenuItem>
+                                    <MenuItem value="pending">Pending</MenuItem>
+                                    <MenuItem value="success">Success</MenuItem>
+                                    <MenuItem value="failed">Failed</MenuItem>
+                                    <MenuItem value="in_review">In Review</MenuItem>
+                                    <MenuItem value="rejected">Rejected</MenuItem>
+                                </TextField>
+                            </Stack>
                         </Box>
 
                         {/* Transactions Table */}
@@ -221,67 +361,336 @@ export default function HistoryPage() {
                             <Table>
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell>Date</TableCell>
-                                        <TableCell>Type</TableCell>
-                                        <TableCell>Description</TableCell>
-                                        <TableCell align="right">Amount</TableCell>
-                                        <TableCell align="right">Status</TableCell>
+                                        <TableCell align="center">Type</TableCell>
+                                        <TableCell align="center">Transaction ID</TableCell>
+                                        <TableCell align="center">
+                                            <Box 
+                                                sx={{ 
+                                                    display: 'flex', 
+                                                    alignItems: 'center', 
+                                                    gap: 0.5, 
+                                                    cursor: 'pointer',
+                                                    justifyContent: 'center',
+                                                    '&:hover': {
+                                                        '& .MuiSvgIcon-root': {
+                                                            opacity: '1 !important'
+                                                        }
+                                                    }
+                                                }} 
+                                                onClick={() => handleSort('amountInUSD')}
+                                            >
+                                                Amount
+                                                {getSortIcon('amountInUSD')}
+                                            </Box>
+                                        </TableCell>
+                                        <TableCell align="center">Status</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {filteredTransactions.map((transaction) => (
-                                        <TableRow
-                                            key={transaction.id}
-                                            sx={{
-                                                transition: 'background-color 0.2s ease',
-                                                '&:hover': {
-                                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                                },
-                                            }}
-                                        >
-                                            <TableCell>{transaction.date}</TableCell>
-                                            <TableCell>
-                                                <Typography
-                                                    sx={{
-                                                        color: getTypeColor(transaction.type),
-                                                        textTransform: 'capitalize',
-                                                        fontWeight: 500,
-                                                    }}
-                                                >
-                                                    {transaction.type}
-                                                </Typography>
-                                            </TableCell>
-                                            <TableCell>{transaction.description}</TableCell>
-                                            <TableCell align="right">
-                                                <Typography
-                                                    sx={{
-                                                        color: transaction.amount >= 0 ? '#4CAF50' : '#F44336',
-                                                        fontWeight: 500,
-                                                    }}
-                                                >
-                                                    {transaction.amount >= 0 ? '+' : ''}
-                                                    ${Math.abs(transaction.amount).toFixed(2)}
-                                                </Typography>
-                                            </TableCell>
-                                            <TableCell align="right">
-                                                <Chip
-                                                    label={transaction.status}
-                                                    color={getStatusColor(transaction.status)}
-                                                    size="small"
-                                                    sx={{
-                                                        textTransform: 'capitalize',
-                                                        fontWeight: 500,
-                                                    }}
-                                                />
+                                    {loading ? (
+                                        <TableRow>
+                                            <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
+                                                <CircularProgress size={40} />
                                             </TableCell>
                                         </TableRow>
-                                    ))}
+                                    ) : transactions.length === 0 ? (
+                                        <TableRow>
+                                            <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
+                                                <Typography variant="body1" color="text.secondary">
+                                                    No transactions found
+                                                </Typography>
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : (
+                                        transactions.map((transaction) => (
+                                            <TableRow
+                                                key={transaction._id}
+                                                sx={{
+                                                    transition: 'background-color 0.2s ease',
+                                                    '&:hover': {
+                                                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                                    },
+                                                }}
+                                            >
+                                                <TableCell align="center">
+                                                    <Typography
+                                                        sx={{
+                                                            color: getTypeColor(transaction.type),
+                                                            textTransform: 'capitalize',
+                                                            fontWeight: 500,
+                                                        }}
+                                                    >
+                                                        {transaction.type.replace('_', ' ')}
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'center' }}>
+                                                        <Typography
+                                                            sx={{
+                                                                maxWidth: 100,
+                                                                overflow: 'hidden',
+                                                                textOverflow: 'ellipsis',
+                                                            }}
+                                                        >
+                                                            {transaction.transactionId}
+                                                        </Typography>
+                                                        <CopyButton 
+                                                            text={transaction.transactionId}
+                                                            size="small"
+                                                        />
+                                                    </Box>
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    <Typography
+                                                        sx={{
+                                                            color: transaction.type.includes('withdraw') ? '#F44336' : '#4CAF50',
+                                                            fontWeight: 500,
+                                                        }}
+                                                    >
+                                                        {transaction.type.includes('withdraw') ? '-' : '+'}
+                                                        ${transaction.amountInUSD?.toFixed(2) || '0.00'}
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    <Chip
+                                                        label={transaction.status.replace('_', ' ')}
+                                                        color={getStatusColor(transaction.status)}
+                                                        size="small"
+                                                        sx={{
+                                                            textTransform: 'capitalize',
+                                                            fontWeight: 500,
+                                                        }}
+                                                    />
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    <IconButton
+                                                        onClick={() => handleViewDetails(transaction)}
+                                                        size="small"
+                                                        sx={{
+                                                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                                            '&:hover': {
+                                                                backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                                            },
+                                                        }}
+                                                    >
+                                                        <VisibilityIcon fontSize="small" />
+                                                    </IconButton>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    )}
                                 </TableBody>
                             </Table>
+                            <TablePagination
+                                component="div"
+                                count={total}
+                                page={page}
+                                onPageChange={handleChangePage}
+                                rowsPerPage={rowsPerPage}
+                                onRowsPerPageChange={handleChangeRowsPerPage}
+                                rowsPerPageOptions={[5, 10, 25, 50]}
+                            />
                         </TableContainer>
                     </Box>
                 </Paper>
             </Container>
+
+            {/* Transaction Details Dialog */}
+            <Dialog
+                open={detailsOpen}
+                onClose={() => setDetailsOpen(false)}
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle>
+                    Transaction Details
+                    <IconButton
+                        onClick={() => setDetailsOpen(false)}
+                        sx={{
+                            position: 'absolute',
+                            right: 8,
+                            top: 8,
+                        }}
+                    >
+                        <ArrowBackIcon />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent dividers>
+                    {selectedTransaction && (
+                        <Stack spacing={2}>
+                            <Box>
+                                <Typography variant="subtitle2" color="text.secondary">
+                                    Transaction ID
+                                </Typography>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+                                    <Typography variant="body1">
+                                        {selectedTransaction.transactionId}
+                                    </Typography>
+                                    <CopyButton 
+                                        text={selectedTransaction.transactionId}
+                                        size="small"
+                                    />
+                                </Box>
+                            </Box>
+
+                            <Stack direction="row" spacing={2}>
+                                <Box flex={1}>
+                                    <Typography variant="subtitle2" color="text.secondary">
+                                        Type
+                                    </Typography>
+                                    <Typography
+                                        variant="body1"
+                                        sx={{
+                                            textTransform: 'capitalize',
+                                            fontWeight: 500,
+                                            mt: 0.5
+                                        }}
+                                    >
+                                        {selectedTransaction.type.replace('_', ' ')}
+                                    </Typography>
+                                </Box>
+
+                                <Box flex={1}>
+                                    <Typography variant="subtitle2" color="text.secondary">
+                                        Status
+                                    </Typography>
+                                    <Chip
+                                        label={selectedTransaction.status.replace('_', ' ')}
+                                        color={getStatusColor(selectedTransaction.status)}
+                                        size="small"
+                                        sx={{
+                                            textTransform: 'capitalize',
+                                            fontWeight: 500,
+                                            mt: 0.5
+                                        }}
+                                    />
+                                </Box>
+                            </Stack>
+
+                            <Stack direction="row" spacing={2}>
+                                <Box flex={1}>
+                                    <Typography variant="subtitle2" color="text.secondary">
+                                        Token Amount
+                                    </Typography>
+                                    <Stack direction="row" spacing={0.5} alignItems="center" sx={{ mt: 0.5 }}>
+                                        <Typography
+                                            variant="body1"
+                                            sx={{
+                                                fontWeight: 500,
+                                            }}
+                                        >
+                                            {selectedTransaction.amount?.toFixed(6) || '-'} {selectedTransaction.token}
+                                        </Typography>
+                                        <Typography
+                                            variant="caption"
+                                            sx={{
+                                                color: 'text.secondary',
+                                            }}
+                                        >
+                                            ({selectedTransaction.chain})
+                                        </Typography>
+                                    </Stack>
+                                </Box>
+
+                                <Box flex={1}>
+                                    <Typography variant="subtitle2" color="text.secondary">
+                                        USD Amount
+                                    </Typography>
+                                    <Typography
+                                        variant="body1"
+                                        sx={{
+                                            color: selectedTransaction.type.includes('withdraw') ? '#F44336' : '#4CAF50',
+                                            fontWeight: 500,
+                                            mt: 0.5
+                                        }}
+                                    >
+                                        {selectedTransaction.type.includes('withdraw') ? '-' : '+'}
+                                        ${selectedTransaction.amountInUSD?.toFixed(2) || '0.00'}
+                                    </Typography>
+                                </Box>
+                            </Stack>
+
+                            <Box>
+                                <Typography variant="subtitle2" color="text.secondary">
+                                    Date
+                                </Typography>
+                                <Typography variant="body1" sx={{ mt: 0.5 }}>
+                                    {format(new Date(selectedTransaction.createdAt), 'MMM dd, yyyy HH:mm')}
+                                </Typography>
+                            </Box>
+
+                            {selectedTransaction.fromAddress && (
+                                <Box>
+                                    <Typography variant="subtitle2" color="text.secondary">
+                                        From Address
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+                                        <Typography
+                                            variant="body1"
+                                            sx={{
+                                                wordBreak: 'break-all'
+                                            }}
+                                        >
+                                            {selectedTransaction.fromAddress}
+                                        </Typography>
+                                        <CopyButton 
+                                            text={selectedTransaction.fromAddress}
+                                            size="small"
+                                        />
+                                    </Box>
+                                </Box>
+                            )}
+
+                            {selectedTransaction.toAddress && (
+                                <Box>
+                                    <Typography variant="subtitle2" color="text.secondary">
+                                        To Address
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+                                        <Typography
+                                            variant="body1"
+                                            sx={{
+                                                wordBreak: 'break-all'
+                                            }}
+                                        >
+                                            {selectedTransaction.toAddress}
+                                        </Typography>
+                                        <CopyButton 
+                                            text={selectedTransaction.toAddress}
+                                            size="small"
+                                        />
+                                    </Box>
+                                </Box>
+                            )}
+
+                            {selectedTransaction.remarks && (
+                                <Box>
+                                    <Typography variant="subtitle2" color="text.secondary">
+                                        Remarks
+                                    </Typography>
+                                    <Typography variant="body1" sx={{ mt: 0.5 }}>
+                                        {selectedTransaction.remarks}
+                                    </Typography>
+                                </Box>
+                            )}
+
+                            {selectedTransaction.rejectionReason && (
+                                <Box>
+                                    <Typography variant="subtitle2" sx={{ color: 'error.main' }}>
+                                        Rejection Reason
+                                    </Typography>
+                                    <Typography variant="body1" sx={{ color: 'error.main', mt: 0.5 }}>
+                                        {selectedTransaction.rejectionReason}
+                                    </Typography>
+                                </Box>
+                            )}
+                        </Stack>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setDetailsOpen(false)}>Close</Button>
+                </DialogActions>
+            </Dialog>
         </Layout>
     );
 } 
