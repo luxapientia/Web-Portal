@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
-export const WalletTransactionCollection = 'wallet_transactions';
+export const TransactionCollection = 'transactions';
 
 // Transaction types
 export type TransactionType =
@@ -10,33 +10,39 @@ export type TransactionType =
   | 'trust_deposit'
   | 'deposit'
 
-export interface WalletTransaction extends Document {
+export interface Transaction extends Document {
   _id: string,
   transactionId: string,
+  fromAddress?: string,
+  toAddress?: string,
   fromUserId?: string,
   toUserId?: string,
   type: TransactionType,
   amount: number,
   startDate: Date,
   releaseDate?: Date,
+  status: 'pending' | 'success' | 'failed' | 'in_review',
   remarks: string
 }
 
-const WalletTransactionSchema: Schema = new Schema({
+const TransactionSchema: Schema = new Schema({
   transactionId: { type: String, required: true },
+  fromAddress: { type: String, required: false },
+  toAddress: { type: String, required: false },
   fromUserId: { type: String, required: false },
   toUserId: { type: String, required: false },
   type: { type: String, required: true },
   amount: { type: Number, required: true },
   startDate: { type: Date, required: true },
   releaseDate: { type: Date, required: false },
+  status: { type: String, required: true, default: 'pending' },
   remarks: { type: String, required: true }
 }, {
   timestamps: true,
-  collection: WalletTransactionCollection
+  collection: TransactionCollection
 });
 
-export const WalletTransactionModel = mongoose.models[WalletTransactionCollection] || mongoose.model<WalletTransaction>(WalletTransactionCollection, WalletTransactionSchema);
+export const TransactionModel = mongoose.models[TransactionCollection] || mongoose.model<Transaction>(TransactionCollection, TransactionSchema);
 
-export type CreateWalletTransactionInput = Omit<WalletTransaction, '_id' | 'createdAt' | 'updatedAt'>;
-export type WalletTransactionWithoutId = Omit<WalletTransaction, '_id'>;
+export type CreateTransactionInput = Omit<Transaction, '_id' | 'createdAt' | 'updatedAt'>;
+export type TransactionWithoutId = Omit<Transaction, '_id'>;
