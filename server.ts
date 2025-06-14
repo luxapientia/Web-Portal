@@ -3,10 +3,10 @@ import { parse } from 'url';
 import next from 'next';
 import mongoose from 'mongoose';
 import * as dotenv from 'dotenv';
-import { PriceSyncService } from './src/services/PriceSync';
 import { config } from './src/config';
 import init_db from './src/init/init_db';
 import depositCron from './src/cron-job/deposit';
+import priceSyncCron from './src/cron-job/priceSync';
 
 // Load environment variables from .env.local
 dotenv.config({ path: '.env.local' });
@@ -16,7 +16,7 @@ const dev = config.server.nodeEnv !== 'production';
 const app = next({ dev, hostname: config.server.hostname, port: parseInt(config.server.port as string) });
 const handle = app.getRequestHandler();
 
-const priceSyncService = new PriceSyncService();
+
 
 async function startServer() {
   try {
@@ -50,13 +50,10 @@ async function startServer() {
       console.log(`> Ready on http://${config.server.hostname}:${config.server.port}`);
     });
 
-    await priceSyncService.syncPrices();
-    setInterval(async () => {
-      priceSyncService.syncPrices();
-    }, 1000 * config.cryptoMarket.priceSyncInterval);
 
     depositCron.start();
-  } catch (err) {
+    priceSyncCron.start();
+    } catch (err) {
     console.error(`Failed to start server: ${err instanceof Error ? err.message : 'Unknown error'}`);
     process.exit(1);
   }

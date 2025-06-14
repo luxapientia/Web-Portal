@@ -103,3 +103,5 @@ export class PriceSyncService {
     }
   }
 } 
+
+export const priceSyncService = new PriceSyncService();
