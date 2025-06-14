@@ -214,7 +214,7 @@ export async function POST(request: Request) {
     const supportedChains = Object.keys(config.wallet.supportedChains);
     for (const chain of supportedChains) {
       const wallet = await walletService.generateWalletCredentials(chain);
-      const supportedTokens = config.wallet.supportedChains[chain as keyof typeof config.wallet.supportedChains].supportedTokens;
+      const supportedTokens = config.wallet.supportedChains[chain as keyof typeof config.wallet.supportedChains].supportedTokens.map(val => val.token);
       for (const token of supportedTokens) {
         await WalletModel.create({
           userId: result._id,
