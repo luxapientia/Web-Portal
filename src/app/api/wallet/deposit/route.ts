@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Wallet, WalletModel, WalletWithoutKeys } from '@/models/Wallet';
+import { WalletModel } from '@/models/Wallet';
 import { TransactionModel } from '@/models/Transaction';
-import { authOptions, config } from '@/config';
+import { authOptions } from '@/config';
 import { getServerSession } from 'next-auth';
 import { walletService } from '@/services/Wallet';
-import { TransactionDetails } from '@/services/Wallet';
 import { UserModel } from '@/models/User';
 import { User } from '@/models/User';
 import { CryptoPriceModel } from '@/models/CryptoPrice';
