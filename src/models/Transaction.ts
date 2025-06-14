@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { User } from './User';
 
 export const TransactionCollection = 'transactions';
 
@@ -56,7 +57,12 @@ const TransactionSchema: Schema = new Schema({
   collection: TransactionCollection
 });
 
-export const TransactionModel = mongoose.models[TransactionCollection] || mongoose.model<Transaction>(TransactionCollection, TransactionSchema);
+export interface TransactionWithRef extends Transaction {
+  fromUser?: User,
+  toUser?: User,
+}
+
+export const TransactionModel = mongoose.models[TransactionCollection] || mongoose.model<TransactionWithRef>(TransactionCollection, TransactionSchema);
 
 export type CreateTransactionInput = Omit<Transaction, '_id' | 'createdAt' | 'updatedAt'>;
 export type TransactionWithoutId = Omit<Transaction, '_id'>;
