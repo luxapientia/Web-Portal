@@ -111,25 +111,44 @@ export const config = {
   // Wallet Configuration
   wallet: {
     supportedChains: {
-      BSC: {
+      Binance: {
         type: 'EVM',
-        rpcUrl: 'https://bsc-dataseed.binance.org',
-        chainId: 56,
-        supportedTokens: ['USDT', 'USDC']
+        rpcUrl: 'https://old-solemn-voice.bsc.quiknode.pro/e7f53c4a2fd92bbd38d04616df0d58ac3f246294',
+        chainId: 96,
+        supportedTokens: [{
+          token: 'USDT',
+          contractAddress: '0x55d398326f99059fF775485246999027B3197955'
+        },
+        {
+          token: 'USDC',
+          contractAddress: '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d'
+        }]
       },
       Ethereum: {
         type: 'EVM',
-        rpcUrl: 'https://mainnet.infura.io/v3/572fc7760a434384b1f5b69a84081198', // Replace with your Infura Project ID
-        chainId: 1,
-        supportedTokens: ['USDT', 'USDC']
+        rpcUrl: 'https://newest-divine-haze.quiknode.pro/e22762b1bd855a85c5a39e5cfd8bf99b697c624b',
+        chainId: 11155111,
+        supportedTokens: [{
+          token: 'USDT',
+          contractAddress: '0xdAC17F958D2ee523a2206206994597C13D831ec7'
+        }, {
+          token: 'USDC',
+          contractAddress: '0xA0b86991C6218B36c1d19D4a2e9Eb0cE3606eB48'
+        }]
       },
-      TRON: {
+      Tron: {
         type: 'TRON',
         rpcUrl: 'https://api.trongrid.io',
         tronWeb: {
           fullHost: 'https://api.trongrid.io'
         },
-        supportedTokens: ['USDT', 'USDC']
+        supportedTokens: [{
+          token: 'USDT',
+          contractAddress: 'TXLAQ63Xg1NAzckPwKHvzw7CSEmLMEqcdj'
+        }, {
+          token: 'USDC',
+          contractAddress: 'TEkxiTehnzSmSe2XqrBj4w32RUN966rdz8'
+        }]
       }
     },
     encryption: {
@@ -160,7 +179,7 @@ export const config = {
       .split(',')
       .map(s => s.trim()),
   }
-}; 
+};
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -176,7 +195,7 @@ export const authOptions: NextAuthOptions = {
           // If accessToken is provided, verify it and return user
           if (credentials?.accessToken && credentials.email) {
             const user = await UserModel.findOne({ email: credentials.email });
-            
+
             if (!user) {
               throw new Error('User not found');
             }
