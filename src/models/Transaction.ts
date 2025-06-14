@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
-import { User } from './User';
+import { User, UserCollection } from './User';
 
 export const TransactionCollection = 'transactions';
 
@@ -34,8 +34,8 @@ const TransactionSchema: Schema = new Schema({
   transactionId: { type: String, required: true },
   fromAddress: { type: String, required: false },
   toAddress: { type: String, required: false },
-  fromUserId: { type: String, required: false, ref: 'users' },
-  toUserId: { type: String, required: false, ref: 'users' },
+  fromUserId: { type: String, required: false, ref: UserCollection },
+  toUserId: { type: String, required: false, ref: UserCollection },
   type: { type: String, required: true },
   amount: { type: Number, required: false },
   amountInUSD: { type: Number, required: false },
