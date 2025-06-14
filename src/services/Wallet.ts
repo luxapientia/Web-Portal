@@ -7,8 +7,8 @@ import { WalletCredentials } from '../schemas/wallet.schema';
 import { config } from '../config';
 
 export interface TransactionDetails {
-    status: 'notStarted' | 'pending' | 'complete' | 'failed';
-    chain: 'BSC' | 'Ethereum' | 'TRON';
+    status: 'notStarted' | 'pending' | 'success' | 'failed';
+    chain: 'Binance' | 'Ethereum' | 'Tron';
     fromAddress?: string;         // sender address
     toAddress?: string;           // recipient address
     token?: string;               // e.g., 'USDT', 'USDC', 'ETH', etc.
@@ -157,7 +157,7 @@ export class WalletService {
         }
     }
 
-    public async getEvmTxDetails(txHash: string, chain: 'BSC' | 'Ethereum'): Promise<TransactionDetails> {
+    public async getEvmTxDetails(txHash: string, chain: 'Binance' | 'Ethereum'): Promise<TransactionDetails> {
         const ERC20_ABI = [
             'function symbol() view returns (string)',
             'function decimals() view returns (uint8)',
@@ -169,8 +169,11 @@ export class WalletService {
             throw new Error(`Unsupported chain: ${chain}`);
         }
 
+        console.log(config.wallet.supportedChains[chain as keyof typeof config.wallet.supportedChains].rpcUrl, '----------------')
+
         const provider = new ethers.providers.JsonRpcProvider(config.wallet.supportedChains[chain as keyof typeof config.wallet.supportedChains].rpcUrl);
         const tx = await provider.getTransaction(txHash);
+
         if (!tx) {
             return { status: 'notStarted', chain: chain, rawTxHash: txHash };
         }
@@ -194,7 +197,7 @@ export class WalletService {
 
         if (!log) {
             return {
-                status: 'complete',
+                status: 'success',
                 chain: chain,
                 rawTxHash: txHash,
                 fromAddress: tx.from,
@@ -216,7 +219,7 @@ export class WalletService {
         ]);
 
         return {
-            status: 'complete',
+            status: 'success',
             chain: chain,
             rawTxHash: txHash,
             fromAddress: parsedLog.args.from,
@@ -237,36 +240,77 @@ export class WalletService {
             eventServer: 'https://api.someotherevent.io',
             privateKey: 'AD71C52E0FC0AB0DFB13B3B911624D4C1AB7BDEFAD93F36B6EF97DC955577509'
         });
+    
         const tx = await tronWeb.trx.getTransaction(txHash).catch(() => null);
-        if (!tx) return { status: 'notStarted', chain: 'TRON', rawTxHash: txHash };
-
-        const info = await tronWeb.trx.getTransactionInfo(txHash).catch(() => null);
+        if (!tx) return { status: 'notStarted', chain: 'Tron', rawTxHash: txHash };
+    
         const status = tx.ret?.[0]?.contractRet;
-
-        if (!info) return { status: 'pending', chain: 'TRON', rawTxHash: txHash };
-        if (status !== 'SUCCESS') return { status: 'failed', chain: 'TRON', rawTxHash: txHash };
-
+        const info = await tronWeb.trx.getTransactionInfo(txHash).catch(() => null);
+        if (!info) return { status: 'pending', chain: 'Tron', rawTxHash: txHash };
+        if (status !== 'SUCCESS') return { status: 'failed', chain: 'Tron', rawTxHash: txHash };
+    
+        const contractType = tx.raw_data.contract[0].type;
         const contractValue = tx.raw_data.contract[0].parameter.value;
-        const from = tronWeb.address.fromHex(contractValue.owner_address);
-        const to = tronWeb.address.fromHex(contractValue.to_address);
-        const tokenContract = tronWeb.address.fromHex(contractValue.contract_address);
-        const amountRaw = contractValue.amount;
-
-        const contract = await tronWeb.contract().at(tokenContract);
-        const [symbol, decimals] = await Promise.all([
-            contract.symbol().call(),
-            contract.decimals().call()
-        ]);
-
+    
+        let from: string;
+        let to: string;
+        let token: string | null = null;
+        let tokenContract: string | null = null;
+        let amount: number | null = null;
+        let decimals: number | null = null;
+    
+        if (contractType === "TransferContract") {
+            // Native TRX transfer
+            from = tronWeb.address.fromHex(contractValue.owner_address);
+            to = tronWeb.address.fromHex(contractValue.to_address);
+            amount = contractValue.amount / 1e6; // TRX has 6 decimals
+            token = "TRX";
+            tokenContract = null;
+            decimals = 6;
+    
+        } else if (contractType === "TriggerSmartContract") {
+            // Likely TRC20 transfer
+            from = tronWeb.address.fromHex(contractValue.owner_address);
+            tokenContract = tronWeb.address.fromHex(contractValue.contract_address);
+    
+            const data = contractValue.data;
+            const method = data.substring(0, 8);
+    
+            if (method !== 'a9059cbb') {
+                // Not a TRC20 transfer function
+                return { status: 'failed', chain: 'Tron', rawTxHash: txHash };
+            }
+    
+            const toHex = '41' + data.substring(8 + 24, 8 + 64);
+            to = tronWeb.address.fromHex(toHex);
+    
+            const amountHex = data.substring(8 + 64, 8 + 128);
+            const amountRaw = BigInt('0x' + amountHex);
+    
+            // Fetch token symbol and decimals from contract
+            const contract = await tronWeb.contract().at(tokenContract);
+            const [symbolResult, decimalsResult] = await Promise.all([
+                contract.symbol().call(),
+                contract.decimals().call()
+            ]);
+    
+            token = symbolResult;
+            decimals = parseInt(decimalsResult);
+            amount = Number(amountRaw) / (10 ** decimals);
+        } else {
+            // Unknown contract type
+            return { status: 'failed', chain: 'Tron', rawTxHash: txHash };
+        }
+    
         return {
-            status: 'complete',
-            chain: 'TRON',
+            status: 'success',
+            chain: 'Tron',
             rawTxHash: txHash,
             fromAddress: from,
             toAddress: to,
-            token: symbol,
-            tokenContract,
-            amount: amountRaw / 10 ** decimals,
+            token: token || undefined,
+            tokenContract: tokenContract || undefined,
+            amount,
             decimals,
             fee: (info.fee / 1e6).toString(),
             blockNumber: info.blockNumber,
@@ -274,7 +318,7 @@ export class WalletService {
         };
     }
 
-    public async getTxDetails(txHash: string, chain: 'BSC' | 'Ethereum' | 'TRON'): Promise<TransactionDetails> {
+    public async getTxDetails(txHash: string, chain: 'Binance' | 'Ethereum' | 'Tron'): Promise<TransactionDetails> {
         const walletConfig = config.wallet.supportedChains[chain as keyof typeof config.wallet.supportedChains];
         if (!walletConfig) {
             throw new Error(`Unsupported chain: ${chain}`);
@@ -282,7 +326,7 @@ export class WalletService {
 
         switch (walletConfig.type) {
             case 'EVM':
-                return this.getEvmTxDetails(txHash, chain as 'BSC' | 'Ethereum');
+                return this.getEvmTxDetails(txHash, chain as 'Binance' | 'Ethereum');
             case 'TRON':
                 return this.getTronTxDetails(txHash);
             default:
