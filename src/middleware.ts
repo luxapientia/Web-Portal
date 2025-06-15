@@ -47,6 +47,10 @@ export async function middleware(req: NextRequest) {
         }
     }
 
+    if(req.nextUrl.pathname == '/admin') {
+        return NextResponse.redirect(new URL('/admin/dashboard', req.url));
+    }
+
     return NextResponse.next();
 }
 
