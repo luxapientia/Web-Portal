@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -11,15 +11,20 @@ import {
   Alert,
   IconButton,
   Tooltip,
+  Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
-import { EditOutlined, SaveOutlined, CloseOutlined, ContentCopy } from "@mui/icons-material";
+import { EditOutlined, SaveOutlined, CloseOutlined, ContentCopy, Add as AddIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import toast from "react-hot-toast";
-import { User } from "@/schemas/auth.schema";
+import { User } from "@/models/User";
 
-type WalletInfo = {
-  type: string;
-  id: string;
-};
+interface WalletAddress {
+  chain: string;
+  address: string;
+}
 
 interface WalletInfoTabProps {
   userData: User;
@@ -28,20 +33,57 @@ interface WalletInfoTabProps {
 export function WalletInfoTab({ userData }: WalletInfoTabProps) {
   const [loading, setLoading] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [walletInfo, setWalletInfo] = useState<WalletInfo>({
-    type: "",
-    id: "",
-  });
+  const [walletAddresses, setWalletAddresses] = useState<WalletAddress[]>([]);
+  const [supportedChains, setSupportedChains] = useState<string[]>([]);
 
-  const handleWalletChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setWalletInfo((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  useEffect(() => {
+    fetchSupportedChains();
+    if (userData?.withdrawalWallet) {
+      setWalletAddresses(userData.withdrawalWallet);
+    }
+  }, [userData]);
+
+  const fetchSupportedChains = async () => {
+    try {
+      const response = await fetch('/api/wallet');
+      if (!response.ok) {
+        toast.error('Failed to fetch supported chains');
+        return;
+      }
+      const data = await response.json();
+      if (data.success) {
+        const chains = data.data.supportedChains.map((chain: { chain: string }) => chain.chain);
+        setSupportedChains(chains);
+      }
+    } catch (error) {
+      console.error('Error fetching supported chains:', error);
+      toast.error('Failed to fetch supported chains');
+    }
+  };
+
+  const handleAddWallet = () => {
+    setWalletAddresses([...walletAddresses, { chain: '', address: '' }]);
+  };
+
+  const handleRemoveWallet = (index: number) => {
+    const newWallets = walletAddresses.filter((_, i) => i !== index);
+    setWalletAddresses(newWallets);
+  };
+
+  const handleWalletChange = (index: number, field: keyof WalletAddress, value: string) => {
+    const newWallets = [...walletAddresses];
+    newWallets[index] = {
+      ...newWallets[index],
+      [field]: value
+    };
+    setWalletAddresses(newWallets);
   };
 
   const handleEditToggle = () => {
+    if (editMode) {
+      // Reset to original values when canceling
+      setWalletAddresses(userData?.withdrawalWallet || []);
+    }
     setEditMode(!editMode);
   };
 
@@ -49,33 +91,40 @@ export function WalletInfoTab({ userData }: WalletInfoTabProps) {
     try {
       setLoading(true);
       
-      // Prepare data for submission - only wallet info
-      const walletData = {
-        withdrawalWallet: walletInfo.type && walletInfo.id ? walletInfo : undefined
-      };
+      // Validate wallet addresses
+      const invalidWallets = walletAddresses.filter(wallet => !wallet.chain || !wallet.address);
+      if (invalidWallets.length > 0) {
+        toast.error('Please fill in all wallet information');
+        return;
+      }
+
+      // Check for duplicate chains
+      const chains = walletAddresses.map(w => w.chain);
+      if (new Set(chains).size !== chains.length) {
+        toast.error('Duplicate chains are not allowed');
+        return;
+      }
       
-      // Update user profile
       const response = await fetch('/api/profile/wallet', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(walletData),
+        body: JSON.stringify({
+          withdrawalWallet: walletAddresses
+        }),
       });
 
-      if (response) {
-        const data = await response.json();
-        if (data.success) {
-          toast.success('Wallet information updated successfully!');
-          
-          // Update user data
-          if (data.user) {
-            setWalletInfo(data.user);
-          }
-          setEditMode(false);
-        } else {
-          throw new Error(data.error || 'Failed to update wallet information');
-        }
+      if (!response.ok) {
+        throw new Error('Failed to update wallet information');
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        toast.success('Wallet information updated successfully!');
+        setEditMode(false);
+      } else {
+        throw new Error(data.error || 'Failed to update wallet information');
       }
     } catch (error) {
       console.error('Error updating wallet information:', error);
@@ -106,55 +155,92 @@ export function WalletInfoTab({ userData }: WalletInfoTabProps) {
         <Box sx={{ width: { xs: "100%", md: "50%" } }}>
           <Card sx={{ boxShadow: 1, position: "relative" }}>
             <CardHeader
-              title="Withdrawal Wallet"
+              title="Withdrawal Wallets"
               titleTypographyProps={{ variant: "h6", fontWeight: 500 }}
             />
             <CardContent>
-              <Stack spacing={2}>
-                <TextField
-                  select
-                  fullWidth
-                  label="Wallet Type"
-                  name="type"
-                  value={walletInfo.type}
-                  onChange={handleWalletChange}
-                  disabled={!editMode || loading}
-                  SelectProps={{ native: true }}
-                  variant="outlined"
-                  InputProps={{ sx: { borderRadius: 1 } }}
-                >
-                  <option value=""></option>
-                  <option value="crypto">USDT(Ethereum), USDT(Tron)</option>
-                </TextField>
-
-                <TextField
-                  fullWidth
-                  label="Wallet ID / Account Number"
-                  name="id"
-                  value={walletInfo.id}
-                  onChange={handleWalletChange}
-                  disabled={!editMode || loading}
-                  helperText="Enter your wallet address, bank account, or mobile money number"
-                  variant="outlined"
-                  InputProps={{ 
-                    sx: { borderRadius: 1 },
-                    endAdornment: !editMode && walletInfo.id ? (
-                      <Tooltip title="Copy to clipboard">
-                        <IconButton
-                          edge="end"
-                          size="small"
-                          onClick={() => {
-                            navigator.clipboard.writeText(walletInfo.id);
-                            toast.success("Wallet address copied to clipboard!");
-                          }}
+              <Stack spacing={3}>
+                {walletAddresses.map((wallet, index) => (
+                  <Box key={index} sx={{ position: 'relative' }}>
+                    <Stack spacing={2}>
+                      <FormControl fullWidth>
+                        <InputLabel>Chain</InputLabel>
+                        <Select
+                          value={wallet.chain}
+                          label="Chain"
+                          onChange={(e) => handleWalletChange(index, 'chain', e.target.value)}
+                          disabled={!editMode || loading}
                         >
-                          <ContentCopy fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    ) : null
-                  }}
-                />
+                          {supportedChains.map((chain) => (
+                            <MenuItem 
+                              key={chain} 
+                              value={chain}
+                              disabled={walletAddresses.some((w, i) => i !== index && w.chain === chain)}
+                            >
+                              {chain}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+
+                      <TextField
+                        fullWidth
+                        label="Wallet Address"
+                        value={wallet.address}
+                        onChange={(e) => handleWalletChange(index, 'address', e.target.value)}
+                        disabled={!editMode || loading}
+                        placeholder={`Enter your ${wallet.chain || 'selected chain'} wallet address`}
+                        InputProps={{ 
+                          sx: { borderRadius: 1 },
+                          endAdornment: !editMode && wallet.address ? (
+                            <Tooltip title="Copy to clipboard">
+                              <IconButton
+                                edge="end"
+                                size="small"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(wallet.address);
+                                  toast.success("Wallet address copied to clipboard!");
+                                }}
+                              >
+                                <ContentCopy fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          ) : null
+                        }}
+                      />
+                    </Stack>
+                    {editMode && walletAddresses.length > 1 && (
+                      <IconButton
+                        size="small"
+                        onClick={() => handleRemoveWallet(index)}
+                        sx={{
+                          position: 'absolute',
+                          top: 0,
+                          right: -36,
+                          color: 'error.main'
+                        }}
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    )}
+                  </Box>
+                ))}
+
+                {editMode && (
+                  <Button
+                    startIcon={<AddIcon />}
+                    onClick={handleAddWallet}
+                    disabled={loading}
+                    sx={{
+                      alignSelf: 'flex-start',
+                      mt: 1
+                    }}
+                  >
+                    Add Wallet
+                  </Button>
+                )}
               </Stack>
+
               <Box
                 sx={{
                   mt: 4,
@@ -198,7 +284,7 @@ export function WalletInfoTab({ userData }: WalletInfoTabProps) {
                         boxShadow: "none",
                         transition: "background-color 0.3s ease",
                         "&:hover": {
-                          backgroundColor: "rgba(25, 118, 210, 0.08)", // primary light hover
+                          backgroundColor: "rgba(25, 118, 210, 0.08)",
                           boxShadow: "none",
                         },
                       }}
@@ -212,7 +298,7 @@ export function WalletInfoTab({ userData }: WalletInfoTabProps) {
                     </IconButton>
                   </>
                 ) : (
-                  <Tooltip title="Edit Wallet">
+                  <Tooltip title="Edit Wallets">
                     <IconButton
                       color="primary"
                       onClick={handleEditToggle}
@@ -247,16 +333,16 @@ export function WalletInfoTab({ userData }: WalletInfoTabProps) {
             />
             <CardContent>
               <Typography variant="body2" paragraph>
-                Set up your withdrawal wallet to receive payments and
+                Set up your withdrawal wallets to receive payments and
                 withdrawals from your account.
               </Typography>
               <Typography variant="body2" paragraph>
-                Make sure to provide accurate information to avoid delays in
-                processing your withdrawals.
+                Make sure to provide accurate wallet addresses for each blockchain network
+                to avoid delays in processing your withdrawals.
               </Typography>
               <Alert severity="info" sx={{ mt: 2 }}>
-                Your withdrawal wallet information will be verified before you
-                can make withdrawals.
+                Your withdrawal wallet addresses will be verified before you
+                can make withdrawals. Please ensure they are correct.
               </Alert>
             </CardContent>
           </Card>
