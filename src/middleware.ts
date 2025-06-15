@@ -34,6 +34,18 @@ export async function middleware(req: NextRequest) {
     if (!token) {
         return NextResponse.redirect(new URL('/auth/login', req.url));
     }
+    
+    if (req.nextUrl.pathname.startsWith('/admin')) {
+        if (token.role !== 'admin') {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+    }
+
+    if(req.nextUrl.pathname.startsWith('/api/admin')) {
+        if (token.role !== 'admin') {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+    }
 
     return NextResponse.next();
 }
@@ -51,5 +63,7 @@ export const config = {
         '/api/:path*',
         '/dashboard',
         '/home/:path*',
+        '/admin/:path*',
+        '/wallet/:path*',
     ],
 }; 
