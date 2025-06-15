@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ObjectId } from 'mongodb';
-import { UserModel } from '@/models/User';
-import { walletInfoSchema } from '@/schemas/auth.schema';
+import { User, UserModel } from '@/models/User';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/config';
 
 /**
  * Wallet information API route
@@ -12,17 +13,19 @@ import { walletInfoSchema } from '@/schemas/auth.schema';
 export async function PUT(request: NextRequest) {
   try {
     // Get user data from request headers (set by middleware)
-    const userHeader = request.headers.get('user');
-    if (!userHeader) {
-      return NextResponse.json({ error: 'User data not found' }, { status: 401 });
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const userData = JSON.parse(userHeader);
-    const userId = userData.id;
-    
+    const user = await UserModel.findOne({ _id: new ObjectId(session.user.id) }) as User;
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
     // Parse request body
     const body = await request.json();
-    
+
     // Validate wallet info
     if (!body.withdrawalWallet) {
       return NextResponse.json(
@@ -31,46 +34,15 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    try {
-      // Validate wallet info using zod schema
-      walletInfoSchema.parse(body.withdrawalWallet);
-    } catch (error) {
-      console.log(error)
-      return NextResponse.json(
-        { success: false, error: 'Invalid wallet information format' },
-        { status: 400 }
-      );
-    }
+    const newWithdrawWallet = body.withdrawalWallet.map((wallet: { chain: string; address: string }) => ({
+      chain: wallet.chain,
+      address: wallet.address
+    }));
 
-    // Update user's wallet info
-    const result = await UserModel.updateOne(
-      { _id: new ObjectId(userId) },
-      { 
-        $set: { 
-          withdrawalWallet: body.withdrawalWallet,
-          updatedAt: new Date()
-        } 
-      }
-    );
+    user.withdrawalWallet = newWithdrawWallet;
+    await user.save();
 
-    if (result.matchedCount === 0) {
-      return NextResponse.json(
-        { success: false, error: 'User not found' },
-        { status: 404 }
-      );
-    }
-
-    // Get updated user data
-    const updatedUser = await UserModel.findOne(
-      { _id: new ObjectId(userId) },
-      { projection: { password: 0 } }
-    );
-
-    return NextResponse.json({
-      success: true,
-      message: 'Wallet information updated successfully',
-      user: updatedUser
-    });
+    return NextResponse.json({ success: true, data: { withdrawalWallet: user.withdrawalWallet || [] } });
   } catch (error) {
     console.error('Error updating wallet information:', error);
     return NextResponse.json(
@@ -80,36 +52,19 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    // Get user data from request headers (set by middleware)
-    const userHeader = request.headers.get('user');
-    if (!userHeader) {
-      return NextResponse.json({ error: 'User data not found' }, { status: 401 });
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const userData = JSON.parse(userHeader);
-    const userId = userData.id;
-    
-    // Connect to database
-    
-    // Get user data
-    const user = await UserModel.findOne(
-      { _id: new ObjectId(userId) },
-      { projection: { withdrawalWallet: 1 } }
-    );
-
+    const user = await UserModel.findOne({ _id: new ObjectId(session.user.id) }) as User;
     if (!user) {
-      return NextResponse.json(
-        { success: false, error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    return NextResponse.json({
-      success: true,
-      withdrawalWallet: user.withdrawalWallet || null
-    });
+    return NextResponse.json({ success: true, data: { withdrawalWallet: user.withdrawalWallet || [] } });
   } catch (error) {
     console.error('Error fetching wallet information:', error);
     return NextResponse.json(
