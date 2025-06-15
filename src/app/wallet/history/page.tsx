@@ -1,21 +1,21 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-    Box, 
-    Container, 
-    Typography, 
-    Paper, 
-    Table, 
-    TableBody, 
-    TableCell, 
-    TableContainer, 
-    TableHead, 
-    TableRow, 
-    Chip, 
-    IconButton, 
-    useTheme, 
-    TextField, 
+import {
+    Box,
+    Container,
+    Typography,
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Chip,
+    IconButton,
+    useTheme,
+    TextField,
     MenuItem,
     TablePagination,
     Dialog,
@@ -27,8 +27,8 @@ import {
     Stack
 } from '@mui/material';
 import Layout from '@/components/layout/Layout';
-import { 
-    History as HistoryIcon, 
+import {
+    History as HistoryIcon,
     ArrowBack as ArrowBackIcon,
     Visibility as VisibilityIcon,
     ArrowDownward as ArrowDownwardIcon,
@@ -39,34 +39,14 @@ import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import CopyButton from '@/components/common/CopyButton';
 import { format } from 'date-fns';
-
-interface Transaction {
-    _id: string;
-    transactionId: string;
-    fromAddress?: string;
-    toAddress?: string;
-    fromUserId?: string;
-    toUserId?: string;
-    type: 'transfer' | 'withdraw' | 'interest_deposit' | 'trust_deposit' | 'deposit';
-    amount?: number;
-    amountInUSD?: number;
-    token: string;
-    chain: string;
-    startDate: Date;
-    releaseDate?: Date;
-    status: 'pending' | 'success' | 'failed' | 'failed' | 'rejected';
-    remarks?: string;
-    rejectionReason?: string;
-    createdAt: Date;
-    updatedAt: Date;
-}
+import { Transaction } from '@/models/Transaction';
 
 type SortField = 'createdAt' | 'amountInUSD';
 
 export default function HistoryPage() {
     const theme = useTheme();
     const router = useRouter();
-    
+
     // State
     const [statusFilter, setStatusFilter] = useState('all');
     const [typeFilter, setTypeFilter] = useState('all');
@@ -88,7 +68,7 @@ export default function HistoryPage() {
                 `/api/wallet/transactions?page=${page}&limit=${rowsPerPage}&status=${statusFilter}&type=${typeFilter}&sortField=${sortField}&sortOrder=${sortOrder}`
             );
             const data = await response.json();
-            
+
             if (data.success) {
                 setTransactions(data.data.transactions);
                 setTotal(data.data.total);
@@ -127,41 +107,22 @@ export default function HistoryPage() {
         );
     };
 
-    const SortableTableCell = ({ field, label }: { field: SortField, label: string }) => (
-        <TableCell>
-            <Box 
-                sx={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: 0.5, 
-                    cursor: 'pointer',
-                    justifyContent: 'center',
-                    '&:hover': {
-                        '& .MuiSvgIcon-root': {
-                            opacity: '1 !important'
-                        }
-                    }
-                }} 
-                onClick={() => handleSort(field)}
-            >
-                {label}
-                {getSortIcon(field)}
-            </Box>
-        </TableCell>
-    );
-
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'success':
-                return 'success';
-            case 'pending':
-                return 'warning';
-            case 'failed':
-                return 'error';
+                return { color: 'success', bg: '#E8F5E9', textColor: '#2E7D32' };
+            case 'requested':
+                return { color: 'info', bg: '#E3F2FD', textColor: '#1976D2' };
+            case 'approved':
+                return { color: 'warning', bg: '#FFF8E1', textColor: '#ED6C02' };
             case 'rejected':
-                return 'error';
+                return { color: 'error', bg: '#FFF4F4', textColor: '#D32F2F' };
+            case 'pending':
+                return { color: 'warning', bg: '#FFF3E0', textColor: '#ED6C02' };
+            case 'failed':
+                return { color: 'error', bg: '#FFEBEE', textColor: '#D32F2F' };
             default:
-                return 'default';
+                return { color: 'default', bg: '#F5F5F5', textColor: '#757575' };
         }
     };
 
@@ -253,13 +214,13 @@ export default function HistoryPage() {
 
                         {/* Title Section with Filters */}
                         <Box sx={{ textAlign: 'center', mb: 4, mt: { xs: 3, md: 4 } }}>
-                            <HistoryIcon 
-                                sx={{ 
-                                    fontSize: 48, 
+                            <HistoryIcon
+                                sx={{
+                                    fontSize: 48,
                                     color: 'primary.main',
                                     mb: 2,
                                     filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2))',
-                                }} 
+                                }}
                             />
                             <Typography
                                 variant="h4"
@@ -275,8 +236,8 @@ export default function HistoryPage() {
                             >
                                 Transaction History
                             </Typography>
-                            <Typography 
-                                variant="body1" 
+                            <Typography
+                                variant="body1"
                                 color="text.secondary"
                                 sx={{
                                     maxWidth: '400px',
@@ -289,9 +250,9 @@ export default function HistoryPage() {
                             </Typography>
 
                             {/* Filters */}
-                            <Stack 
-                                direction={{ xs: 'column', sm: 'row' }} 
-                                spacing={2} 
+                            <Stack
+                                direction={{ xs: 'column', sm: 'row' }}
+                                spacing={2}
                                 justifyContent="center"
                                 alignItems="center"
                             >
@@ -335,6 +296,7 @@ export default function HistoryPage() {
                                     <MenuItem value="success">Success</MenuItem>
                                     <MenuItem value="failed">Failed</MenuItem>
                                     <MenuItem value="rejected">Rejected</MenuItem>
+                                    <MenuItem value="requested">Requested</MenuItem>
                                 </TextField>
                             </Stack>
                         </Box>
@@ -359,11 +321,11 @@ export default function HistoryPage() {
                                         <TableCell align="center">Type</TableCell>
                                         <TableCell align="center">Transaction ID</TableCell>
                                         <TableCell align="center">
-                                            <Box 
-                                                sx={{ 
-                                                    display: 'flex', 
-                                                    alignItems: 'center', 
-                                                    gap: 0.5, 
+                                            <Box
+                                                sx={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: 0.5,
                                                     cursor: 'pointer',
                                                     justifyContent: 'center',
                                                     '&:hover': {
@@ -371,7 +333,7 @@ export default function HistoryPage() {
                                                             opacity: '1 !important'
                                                         }
                                                     }
-                                                }} 
+                                                }}
                                                 onClick={() => handleSort('amountInUSD')}
                                             >
                                                 Amount
@@ -429,7 +391,7 @@ export default function HistoryPage() {
                                                         >
                                                             {transaction.transactionId}
                                                         </Typography>
-                                                        <CopyButton 
+                                                        <CopyButton
                                                             text={transaction.transactionId}
                                                             size="small"
                                                         />
@@ -448,12 +410,16 @@ export default function HistoryPage() {
                                                 </TableCell>
                                                 <TableCell align="center">
                                                     <Chip
-                                                        label={transaction.status.replace('_', ' ')}
-                                                        color={getStatusColor(transaction.status)}
-                                                        size="small"
+                                                        label={transaction.status.toUpperCase()}
                                                         sx={{
-                                                            textTransform: 'capitalize',
+                                                            backgroundColor: getStatusColor(transaction.status).bg,
+                                                            color: getStatusColor(transaction.status).textColor,
+                                                            height: '24px',
+                                                            fontSize: { xs: '0.7rem', sm: '0.75rem', md: '0.8rem' },
                                                             fontWeight: 500,
+                                                            '&:hover': {
+                                                                backgroundColor: getStatusColor(transaction.status).bg,
+                                                            },
                                                         }}
                                                     />
                                                 </TableCell>
@@ -521,7 +487,7 @@ export default function HistoryPage() {
                                     <Typography variant="body1">
                                         {selectedTransaction.transactionId}
                                     </Typography>
-                                    <CopyButton 
+                                    <CopyButton
                                         text={selectedTransaction.transactionId}
                                         size="small"
                                     />
@@ -550,13 +516,16 @@ export default function HistoryPage() {
                                         Status
                                     </Typography>
                                     <Chip
-                                        label={selectedTransaction.status.replace('_', ' ')}
-                                        color={getStatusColor(selectedTransaction.status)}
-                                        size="small"
+                                        label={selectedTransaction.status.toUpperCase()}
                                         sx={{
-                                            textTransform: 'capitalize',
+                                            backgroundColor: getStatusColor(selectedTransaction.status).bg,
+                                            color: getStatusColor(selectedTransaction.status).textColor,
+                                            height: '24px',
+                                            fontSize: { xs: '0.7rem', sm: '0.75rem', md: '0.8rem' },
                                             fontWeight: 500,
-                                            mt: 0.5
+                                            '&:hover': {
+                                                backgroundColor: getStatusColor(selectedTransaction.status).bg,
+                                            },
                                         }}
                                     />
                                 </Box>
@@ -605,14 +574,16 @@ export default function HistoryPage() {
                                 </Box>
                             </Stack>
 
-                            <Box>
-                                <Typography variant="subtitle2" color="text.secondary">
-                                    Date
-                                </Typography>
-                                <Typography variant="body1" sx={{ mt: 0.5 }}>
-                                    {format(new Date(selectedTransaction.createdAt), 'MMM dd, yyyy HH:mm')}
-                                </Typography>
-                            </Box>
+                            {selectedTransaction.releaseDate && (
+                                <Box>
+                                    <Typography variant="subtitle2" color="text.secondary">
+                                        Release Date
+                                    </Typography>
+                                    <Typography variant="body1" sx={{ mt: 0.5 }}>
+                                        {format(new Date(selectedTransaction.releaseDate), 'MMM dd, yyyy HH:mm')}
+                                    </Typography>
+                                </Box>
+                            )}
 
                             {selectedTransaction.fromAddress && (
                                 <Box>
@@ -628,7 +599,7 @@ export default function HistoryPage() {
                                         >
                                             {selectedTransaction.fromAddress}
                                         </Typography>
-                                        <CopyButton 
+                                        <CopyButton
                                             text={selectedTransaction.fromAddress}
                                             size="small"
                                         />
@@ -650,7 +621,7 @@ export default function HistoryPage() {
                                         >
                                             {selectedTransaction.toAddress}
                                         </Typography>
-                                        <CopyButton 
+                                        <CopyButton
                                             text={selectedTransaction.toAddress}
                                             size="small"
                                         />
@@ -669,13 +640,13 @@ export default function HistoryPage() {
                                 </Box>
                             )}
 
-                            {selectedTransaction.rejectionReason && (
+                            {selectedTransaction.rejectReason && (
                                 <Box>
                                     <Typography variant="subtitle2" sx={{ color: 'error.main' }}>
                                         Rejection Reason
                                     </Typography>
                                     <Typography variant="body1" sx={{ color: 'error.main', mt: 0.5 }}>
-                                        {selectedTransaction.rejectionReason}
+                                        {selectedTransaction.rejectReason}
                                     </Typography>
                                 </Box>
                             )}
