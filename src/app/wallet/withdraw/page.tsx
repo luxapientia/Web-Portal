@@ -1,26 +1,150 @@
 'use client';
 
-import { Box, Container, Typography, Paper, TextField, Button, InputAdornment, MenuItem, useTheme, IconButton } from '@mui/material';
+import { Box, Container, Typography, Paper, TextField, Button, InputAdornment, MenuItem, useTheme, IconButton, FormControl, InputLabel, Select, CircularProgress } from '@mui/material';
 import Layout from '@/components/layout/Layout';
-import { MoneyOff as WithdrawIcon, ArrowBack as ArrowBackIcon } from '@mui/icons-material';
-import { useState } from 'react';
+import { 
+    MoneyOff as WithdrawIcon, 
+    ArrowBack as ArrowBackIcon,
+    AccountBalance as BalanceIcon,
+    AccessTime as TimeIcon 
+} from '@mui/icons-material';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
+import { User } from '@/models/User';
+
+interface WithdrawalWallet {
+    chain: string;
+    address: string;
+}
 
 export default function WithdrawPage() {
     const theme = useTheme();
     const router = useRouter();
     const [amount, setAmount] = useState('');
-    const [bankAccount, setBankAccount] = useState('');
-    const [note, setNote] = useState('');
+    const [walletAddress, setWalletAddress] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [userWallets, setUserWallets] = useState<WithdrawalWallet[]>([]);
+    const [supportedChain_Tokens, setSupportedChain_Tokens] = useState<{ chain: string, token: string }[]>([]);
+    const [selectedChain_Token, setSelectedChain_Token] = useState<{ chain: string, token: string } | null>(null);
+    const [withdrawableBalance, setWithdrawableBalance] = useState(0);
 
-    const bankAccounts = [
-        { id: '1', name: 'Main Checking Account', number: '**** 1234' },
-        { id: '2', name: 'Savings Account', number: '**** 5678' },
-    ];
+    useEffect(() => {
+        fetchWithdrawWallets();
+        fetchSupportedChains();
+        fetchUserData();
+    }, []);
 
-    const handleWithdraw = () => {
-        // Handle withdraw logic here
-        console.log('Withdraw amount:', amount);
+    const fetchWithdrawWallets = async () => {
+        try {
+            const response = await fetch('/api/profile/wallet');
+            if (!response.ok) {
+                toast.error('Failed to fetch user data');
+                return;
+            }
+            const data = await response.json();
+            if (data.success) {
+                if (data.data.withdrawalWallet) {
+                    setUserWallets(data.data.withdrawalWallet);
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching user data:', error);
+            toast.error('Failed to fetch user data');
+        }
+    };
+
+    const fetchUserData = async () => {
+        try {
+            const response = await fetch('/api/auth/me');
+            if (!response.ok) {
+                toast.error('Failed to fetch user data');
+                return;
+            }
+            const data = await response.json();
+            const userData = data as User;
+            setWithdrawableBalance(userData.accountValue.totalWithdrawable);
+        } catch (error) {
+            console.error('Error fetching balance:', error);
+        }
+    }
+
+    const fetchSupportedChains = async () => {
+        try {
+            const response = await fetch('/api/wallet');
+            if (!response.ok) {
+                toast.error('Failed to fetch supported chains');
+                return;
+            }
+            const data = await response.json();
+            if (data.success) {
+                const newSupportedChain_Tokens: { chain: string, token: string }[] = [];
+                data.data.supportedChains.forEach((chain: { chain: string, tokens: string[] }) => {
+                    chain.tokens.forEach((token: string) => {
+                        newSupportedChain_Tokens.push({ chain: chain.chain, token: token });
+                    });
+                });
+                setSupportedChain_Tokens(newSupportedChain_Tokens);
+            }
+        } catch (error) {
+            console.error('Error fetching supported chains:', error);
+            toast.error('Failed to fetch supported chains');
+        }
+    };
+
+    useEffect(() => {
+        if (selectedChain_Token && userWallets.length > 0) {
+            const savedWallet = userWallets.find(wallet => wallet.chain === selectedChain_Token.chain);
+            if (savedWallet) {
+                setWalletAddress(savedWallet.address);
+            } else {
+                setWalletAddress('');
+            }
+        }
+    }, [selectedChain_Token, userWallets]);
+
+    const handleWithdrawRequest = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedChain_Token || !amount || !walletAddress) {
+            toast.error('Please fill in all required fields');
+            return;
+        }
+
+        // Check if amount is greater than balance
+        if (parseFloat(amount) > withdrawableBalance) {
+            toast.error('Insufficient balance');
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            const response = await fetch('/api/wallet/withdraw', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    chain: selectedChain_Token.chain,
+                    token: selectedChain_Token.token,
+                    amount: parseFloat(amount),
+                    toAddress: walletAddress.trim()
+                }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                toast.success('Withdraw request submitted successfully');
+                router.push('/wallet/history');
+            } else {
+                toast.error(data.error || 'Failed to submit withdraw request');
+            }
+        } catch (error) {
+            console.error('Error submitting withdrawal:', error);
+            toast.error('Failed to submit withdraw request');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -81,39 +205,76 @@ export default function WithdrawPage() {
                         </IconButton>
 
                         {/* Title Section */}
-                        <Box sx={{ textAlign: 'center', mb: 4, mt: { xs: 3, md: 4 } }}>
-                            <WithdrawIcon 
-                                sx={{ 
-                                    fontSize: 48, 
-                                    color: 'primary.main',
-                                    mb: 2,
-                                    filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2))',
-                                }} 
-                            />
-                            <Typography
-                                variant="h4"
+                        <Box sx={{
+                            textAlign: 'center',
+                            mb: 4,
+                            mt: { xs: 3, md: 4 },
+                            position: 'relative',
+                            '&::after': {
+                                content: '""',
+                                position: 'absolute',
+                                bottom: -16,
+                                left: '50%',
+                                transform: 'translateX(-50%)',
+                                width: '120px',
+                                height: '4px',
+                                borderRadius: '2px',
+                                background: 'linear-gradient(90deg, #2196F3, #66BB6A)',
+                            }
+                        }}>
+                            <Box
                                 sx={{
-                                    fontWeight: 700,
-                                    background: 'linear-gradient(90deg, #1976D2, #2E7D32)',
-                                    backgroundClip: 'text',
-                                    WebkitBackgroundClip: 'text',
-                                    color: 'transparent',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: 2,
                                     mb: 1,
-                                    textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                                    px: 3,
+                                    py: 1.5,
+                                    borderRadius: '40px',
+                                    background: 'rgba(255, 255, 255, 0.15)',
+                                    backdropFilter: 'blur(10px)',
+                                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                                    boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
                                 }}
                             >
-                                Withdraw Funds
-                            </Typography>
-                            <Typography 
-                                variant="body1" 
+                                <WithdrawIcon
+                                    sx={{
+                                        fontSize: { xs: 32, md: 36 },
+                                        color: 'primary.main',
+                                        filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.15))'
+                                    }}
+                                />
+                                <Typography
+                                    variant="h4"
+                                    sx={{
+                                        fontWeight: 800,
+                                        fontSize: { xs: '1.75rem', md: '2.25rem' },
+                                        background: 'linear-gradient(90deg, #1976D2, #2E7D32)',
+                                        backgroundClip: 'text',
+                                        WebkitBackgroundClip: 'text',
+                                        color: 'transparent',
+                                        letterSpacing: '0.5px',
+                                        textShadow: '0 2px 4px rgba(0,0,0,0.05)'
+                                    }}
+                                >
+                                    Withdraw Funds
+                                </Typography>
+                            </Box>
+                            <Typography
+                                variant="body1"
                                 color="text.secondary"
                                 sx={{
                                     maxWidth: '400px',
                                     margin: '0 auto',
+                                    mt: 2,
+                                    fontSize: { xs: '0.875rem', md: '1rem' },
+                                    fontWeight: 500,
+                                    letterSpacing: '0.3px',
                                     lineHeight: 1.6,
+                                    opacity: 0.85
                                 }}
                             >
-                                Withdraw your funds to your linked bank account
+                                Withdraw your funds to your wallet address
                             </Typography>
                         </Box>
 
@@ -131,53 +292,52 @@ export default function WithdrawPage() {
                         >
                             <Box
                                 component="form"
-                                onSubmit={(e) => {
-                                    e.preventDefault();
-                                    handleWithdraw();
-                                }}
+                                onSubmit={handleWithdrawRequest}
                                 sx={{
                                     display: 'flex',
                                     flexDirection: 'column',
                                     gap: 3,
                                 }}
                             >
-                                <TextField
-                                    select
-                                    fullWidth
-                                    label="Bank Account"
-                                    value={bankAccount}
-                                    onChange={(e) => setBankAccount(e.target.value)}
-                                    sx={{
-                                        '& .MuiOutlinedInput-root': {
-                                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                                            transition: 'all 0.2s ease',
-                                            '&:hover': {
-                                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                <FormControl fullWidth size="small" variant="outlined">
+                                    <InputLabel id="chain-token-select-label" shrink>Select Chain & Token</InputLabel>
+                                    <Select
+                                        labelId="chain-token-select-label"
+                                        label="Select Chain & Token"
+                                        value={selectedChain_Token ? JSON.stringify(selectedChain_Token) : ''}
+                                        onChange={(e) => {
+                                            const parsed = JSON.parse(e.target.value);
+                                            setSelectedChain_Token(parsed);
+                                        }}
+                                        displayEmpty
+                                        renderValue={(selected) => {
+                                            if (!selected) return '';
+                                            const { chain, token } = JSON.parse(selected as string);
+                                            return (
+                                                <div>
+                                                    <strong>{chain}</strong> – {token}
+                                                </div>
+                                            );
+                                        }}
+                                        MenuProps={{
+                                            PaperProps: {
+                                                style: {
+                                                    maxHeight: 300,
+                                                    borderRadius: 8,
+                                                },
                                             },
-                                            '&.Mui-focused': {
-                                                backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                                            }
-                                        },
-                                        '& .MuiOutlinedInput-notchedOutline': {
-                                            borderColor: 'rgba(255, 255, 255, 0.2)',
-                                        },
-                                        '& .MuiInputLabel-root': {
-                                            color: 'rgba(255, 255, 255, 0.7)',
-                                        },
-                                        '& .MuiSelect-icon': {
-                                            color: 'rgba(255, 255, 255, 0.7)',
-                                        }
-                                    }}
-                                >
-                                    <MenuItem value="">
-                                        <em>Select a bank account</em>
-                                    </MenuItem>
-                                    {bankAccounts.map((account) => (
-                                        <MenuItem key={account.id} value={account.id}>
-                                            {account.name} ({account.number})
-                                        </MenuItem>
-                                    ))}
-                                </TextField>
+                                        }}
+                                    >
+                                        {supportedChain_Tokens.map((ct, index) => (
+                                            <MenuItem key={index} value={JSON.stringify(ct)}>
+                                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                    <span style={{ fontWeight: 600 }}>{ct.chain}</span>
+                                                    <span style={{ fontSize: 12, color: '#666' }}>{ct.token}</span>
+                                                </div>
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
 
                                 <TextField
                                     fullWidth
@@ -186,9 +346,12 @@ export default function WithdrawPage() {
                                     type="number"
                                     value={amount}
                                     onChange={(e) => setAmount(e.target.value)}
+                                    disabled={isSubmitting}
                                     InputProps={{
                                         startAdornment: (
-                                            <InputAdornment position="start">$</InputAdornment>
+                                            <InputAdornment position="start">
+                                                $
+                                            </InputAdornment>
                                         ),
                                     }}
                                     sx={{
@@ -201,27 +364,18 @@ export default function WithdrawPage() {
                                             '&.Mui-focused': {
                                                 backgroundColor: 'rgba(255, 255, 255, 0.15)',
                                             }
-                                        },
-                                        '& .MuiOutlinedInput-notchedOutline': {
-                                            borderColor: 'rgba(255, 255, 255, 0.2)',
-                                        },
-                                        '& .MuiInputLabel-root': {
-                                            color: 'rgba(255, 255, 255, 0.7)',
-                                        },
-                                        '& .MuiInputAdornment-root': {
-                                            color: 'rgba(255, 255, 255, 0.7)',
-                                        },
+                                        }
                                     }}
                                 />
 
                                 <TextField
                                     fullWidth
-                                    label="Note (Optional)"
+                                    label="Wallet Address"
                                     variant="outlined"
-                                    multiline
-                                    rows={2}
-                                    value={note}
-                                    onChange={(e) => setNote(e.target.value)}
+                                    value={walletAddress}
+                                    onChange={(e) => setWalletAddress(e.target.value)}
+                                    disabled={isSubmitting}
+                                    placeholder={`Enter your ${selectedChain_Token?.chain || ''} wallet address`}
                                     sx={{
                                         '& .MuiOutlinedInput-root': {
                                             backgroundColor: 'rgba(255, 255, 255, 0.05)',
@@ -232,56 +386,59 @@ export default function WithdrawPage() {
                                             '&.Mui-focused': {
                                                 backgroundColor: 'rgba(255, 255, 255, 0.15)',
                                             }
-                                        },
-                                        '& .MuiOutlinedInput-notchedOutline': {
-                                            borderColor: 'rgba(255, 255, 255, 0.2)',
-                                        },
-                                        '& .MuiInputLabel-root': {
-                                            color: 'rgba(255, 255, 255, 0.7)',
-                                        },
+                                        }
                                     }}
                                 />
 
-                                <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column' }}>
-                                    <Button
-                                        fullWidth
-                                        variant="contained"
-                                        size="large"
-                                        type="submit"
-                                        sx={{
-                                            py: 1.5,
-                                            background: 'linear-gradient(90deg, #1976D2, #2E7D32)',
-                                            transition: 'all 0.3s ease',
-                                            '&:hover': {
-                                                background: 'linear-gradient(90deg, #1565C0, #2E7D32)',
-                                                transform: 'translateY(-2px)',
-                                                boxShadow: '0 6px 20px rgba(25, 118, 210, 0.3)',
-                                            },
-                                            '&:active': {
-                                                transform: 'translateY(0)',
-                                            }
-                                        }}
-                                    >
-                                        Withdraw Now
-                                    </Button>
+                                <Button
+                                    fullWidth
+                                    variant="contained"
+                                    size="large"
+                                    type="submit"
+                                    disabled={isSubmitting || !selectedChain_Token || !amount || !walletAddress}
+                                    sx={{
+                                        py: 1.5,
+                                        background: 'linear-gradient(90deg, #1976D2, #2E7D32)',
+                                        transition: 'all 0.3s ease',
+                                        '&:hover': {
+                                            background: 'linear-gradient(90deg, #1565C0, #2E7D32)',
+                                            transform: 'translateY(-2px)',
+                                            boxShadow: '0 6px 20px rgba(25, 118, 210, 0.3)',
+                                        },
+                                        '&:active': {
+                                            transform: 'translateY(0)',
+                                        }
+                                    }}
+                                >
+                                    {isSubmitting ? (
+                                        <CircularProgress size={24} color="inherit" />
+                                    ) : (
+                                        'Request Withdraw'
+                                    )}
+                                </Button>
 
-                                    <Paper
-                                        elevation={0}
-                                        sx={{
-                                            p: 2,
-                                            background: 'rgba(25, 118, 210, 0.1)',
-                                            borderRadius: 2,
-                                            border: '1px solid rgba(25, 118, 210, 0.2)',
-                                        }}
-                                    >
-                                        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                                            💳 <strong>Available balance:</strong> $5,000
-                                        </Typography>
+                                <Paper
+                                    elevation={0}
+                                    sx={{
+                                        p: 2,
+                                        background: 'rgba(25, 118, 210, 0.1)',
+                                        borderRadius: 2,
+                                        border: '1px solid rgba(25, 118, 210, 0.2)',
+                                    }}
+                                >
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                                        <BalanceIcon sx={{ color: 'primary.main', fontSize: 20 }} />
                                         <Typography variant="body2" color="text.secondary">
-                                            ⏱️ Processing time: 1-2 business days
+                                            <strong>Withdrawable balance:</strong> ${withdrawableBalance.toFixed(2)}
                                         </Typography>
-                                    </Paper>
-                                </Box>
+                                    </Box>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <TimeIcon sx={{ color: 'primary.main', fontSize: 20 }} />
+                                        <Typography variant="body2" color="text.secondary">
+                                            <strong>Processing time:</strong> 1-2 business days
+                                        </Typography>
+                                    </Box>
+                                </Paper>
                             </Box>
                         </Paper>
                     </Box>
