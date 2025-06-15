@@ -5,7 +5,7 @@ import bcrypt from 'bcryptjs';
 import { UserModel } from '../models/User';
 
 
-dotenv.config();
+dotenv.config({ path: '.env.local' });
 
 // Extend the built-in session types
 declare module 'next-auth' {
@@ -53,7 +53,7 @@ export const config = {
 
   // Database Configuration
   mongodb: {
-    url: process.env.MONGODB_URL || 'mongodb://localhost:27017/web_portal',
+    url: process.env.MONGODB_URI || 'mongodb://localhost:27017/web_portal',
     options: {
       useNewUrlParser: true,
       useUnifiedTopology: true
