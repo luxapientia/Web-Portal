@@ -12,11 +12,33 @@ import {
     AccountBalance as BankIcon,
     TrendingUp as TrendingUpIcon
 } from '@mui/icons-material';
+import toast from 'react-hot-toast';
+import { useEffect, useState } from 'react';
+import { User } from '@/models/User';
 
 export default function WalletPage() {
     const theme = useTheme();
     const router = useRouter();
+    const [user, setUser] = useState<User | null>(null);
 
+    useEffect(() => {
+        fetchUser();
+    }, []);
+    
+    const fetchUser = async () => {
+        try {
+            const response = await fetch('/api/auth/me');
+            if (!response.ok) {
+                toast.error('Failed to fetch user');
+                return;
+            }
+            const data = await response.json();
+            setUser(data);
+        } catch (error) {
+            console.error('Error fetching user:', error);
+            toast.error('Failed to fetch user');
+        }
+    };
     const actions = [
         {
             title: 'Deposit',
@@ -205,25 +227,14 @@ export default function WalletPage() {
                                 </Box>
                                 <Box sx={{ display: 'flex', alignItems: 'baseline', mb: 1 }}>
                                     <Typography variant="h4" fontWeight="bold">
-                                        $1,234.56
+                                        ${user?.accountValue.totalAssetValue?.toFixed(2) || '0.00'}
                                     </Typography>
                                     <Typography variant="subtitle2" sx={{ ml: 1, opacity: 0.8 }}>
                                         USD
                                     </Typography>
                                 </Box>
-                                <Box sx={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 0.5,
-                                    color: '#4CAF50'
-                                }}>
-                                    <TrendingUpIcon sx={{ fontSize: 20 }} />
-                                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                                        +2.5% this month
-                                    </Typography>
-                                </Box>
                                 <Typography variant="body2" sx={{ mt: 2, opacity: 0.8 }}>
-                                    Available for withdrawal: $1,000.00
+                                    Available for withdrawal: ${user?.accountValue.totalWithdrawable?.toFixed(2) || '0.00'}
                                 </Typography>
                             </Box>
                         </Paper>
@@ -275,25 +286,14 @@ export default function WalletPage() {
                                 </Box>
                                 <Box sx={{ display: 'flex', alignItems: 'baseline', mb: 1 }}>
                                     <Typography variant="h4" fontWeight="bold">
-                                        $5,678.90
+                                        ${user?.accountValue.totalInTrustFund?.toFixed(2) || '0.00'}
                                     </Typography>
                                     <Typography variant="subtitle2" sx={{ ml: 1, opacity: 0.8 }}>
                                         USD
                                     </Typography>
                                 </Box>
-                                <Box sx={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 0.5,
-                                    color: '#E8F5E9'
-                                }}>
-                                    <TrendingUpIcon sx={{ fontSize: 20 }} />
-                                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                                        +5.8% this month
-                                    </Typography>
-                                </Box>
                                 <Typography variant="body2" sx={{ mt: 2, opacity: 0.8 }}>
-                                    Locked until: Jan 1, 2025
+                                    Released: ${user?.accountValue.totalTrustReleased?.toFixed(2) || '0.00'}
                                 </Typography>
                             </Box>
                         </Paper>
