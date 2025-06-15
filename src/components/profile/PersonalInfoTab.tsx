@@ -25,7 +25,7 @@ import {
   Close as CloseIcon,
   ContentCopy,
 } from "@mui/icons-material";
-import { User } from "@/schemas/auth.schema";
+import { User } from "@/models/User";
 import toast from "react-hot-toast";
 import { signIn, useSession } from "next-auth/react";
 

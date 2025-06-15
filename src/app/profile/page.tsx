@@ -20,7 +20,7 @@ import {
   Stars,
 } from '@mui/icons-material';
 import Layout from '@/components/layout/Layout';
-import { User } from '@/schemas/auth.schema';
+import { User } from '@/models/User';
 import { 
   PersonalInfoTab, 
   WalletInfoTab,
