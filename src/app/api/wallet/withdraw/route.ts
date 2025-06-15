@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ObjectId } from 'mongodb';
 import { TransactionModel } from '@/models/Transaction';
 import { UserModel } from '@/models/User';
 import { authOptions } from '@/config';

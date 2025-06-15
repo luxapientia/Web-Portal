@@ -54,7 +54,7 @@ interface NavigationProps {
     onMenuSelect: (menu: string) => void;
 }
 
-export default function Navigation({ activeMenu, onMenuSelect }: NavigationProps) {
+export default function Navigation({ onMenuSelect }: NavigationProps) {
     const router = useRouter();
     const pathname = usePathname();
 

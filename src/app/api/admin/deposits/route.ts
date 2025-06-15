@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/config';
-import { TransactionModel } from '@/models/Transaction';
+import { Transaction, TransactionModel } from '@/models/Transaction';
+import { FilterQuery } from 'mongoose';
 
 export async function GET(request: NextRequest) {
     try {
@@ -23,8 +24,8 @@ export async function GET(request: NextRequest) {
         const sortBy = searchParams.get('sortBy');
         const sortOrder = searchParams.get('sortOrder');
 
+        const query: FilterQuery<Transaction> = { type: 'deposit' };
         // Build filter query
-        const query: any = { type: 'deposit' };
 
         if (transactionId) {
             query.transactionId = { $regex: transactionId, $options: 'i' };
@@ -47,7 +48,7 @@ export async function GET(request: NextRequest) {
         }
 
         // Build sort query
-        const sortQuery: any = {};
+        const sortQuery: FilterQuery<Transaction> = {};
         if (sortBy && sortOrder) {
             sortQuery[sortBy] = sortOrder === 'asc' ? 1 : -1;
         } else {

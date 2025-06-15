@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/config';
-import { TransactionModel } from '@/models/Transaction';
+import { Transaction, TransactionModel } from '@/models/Transaction';
+import { FilterQuery } from 'mongoose';
 
 export async function GET(req: NextRequest) {
     try {
@@ -29,7 +30,7 @@ export async function GET(req: NextRequest) {
         const sortOrder = searchParams.get('sortOrder');
 
         // Build query
-        const query: any = {
+        const query: FilterQuery<Transaction> = {
             type: 'withdraw', // Only get withdrawal transactions
         };
 
@@ -50,7 +51,7 @@ export async function GET(req: NextRequest) {
         }
 
         // Build sort object
-        const sortOptions: any = {};
+        const sortOptions: FilterQuery<Transaction> = {};
         if (sortBy && sortOrder) {
             sortOptions[sortBy] = sortOrder === 'asc' ? 1 : -1;
         } else {

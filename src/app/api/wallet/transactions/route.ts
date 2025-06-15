@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/config';
-import { TransactionModel } from '@/models/Transaction';
+import { Transaction, TransactionModel } from '@/models/Transaction';
 import { UserModel } from '@/models/User';
+import { FilterQuery } from 'mongoose';
 
 export async function GET(request: NextRequest) {
     try {
@@ -27,7 +28,7 @@ export async function GET(request: NextRequest) {
         const sortOrder = searchParams.get('sortOrder') || 'desc';
 
         // Build query
-        const query: any = {
+        const query: FilterQuery<Transaction> = {
             $or: [
                 { fromUserId: user._id },
                 { toUserId: user._id }
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest) {
         const total = await TransactionModel.countDocuments(query);
 
         // Build sort object
-        const sort: any = {};
+        const sort: FilterQuery<Transaction> = {};
         sort[sortField] = sortOrder === 'asc' ? 1 : -1;
 
         // Get transactions with pagination and sorting

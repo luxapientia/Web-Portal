@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Container, Typography, Paper, TextField, Button, InputAdornment, useTheme, IconButton, Select, MenuItem, InputLabel, FormControl, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress } from '@mui/material';
+import { Box, Container, Typography, Paper, TextField, Button, useTheme, IconButton, Select, MenuItem, InputLabel, FormControl, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress } from '@mui/material';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import QRCode from 'qrcode'
 import toast from 'react-hot-toast';
@@ -51,7 +51,7 @@ export default function DepositPage() {
                 setCopied(true);
                 toast.success('Address copied to clipboard!');
                 setTimeout(() => setCopied(false), 2000);
-            } catch (err) {
+            } catch {
                 toast.error('Failed to copy address');
             }
         }

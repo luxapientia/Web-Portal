@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/config';
 import { TransactionModel, Transaction } from '@/models/Transaction';
-import { walletService } from '@/services/Wallet';
 
 export async function POST(req: NextRequest) {
     try {

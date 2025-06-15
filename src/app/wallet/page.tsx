@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Container, Typography, Paper, Button, useTheme, Stack } from '@mui/material';
+import { Box, Container, Typography, Paper, useTheme, Stack } from '@mui/material';
 import Layout from '@/components/layout/Layout';
 import { useRouter } from 'next/navigation';
 import {
@@ -10,7 +10,6 @@ import {
     Upload as WithdrawIcon,
     History as HistoryIcon,
     AccountBalance as BankIcon,
-    TrendingUp as TrendingUpIcon
 } from '@mui/icons-material';
 import toast from 'react-hot-toast';
 import { useEffect, useState } from 'react';

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { WalletModel } from '@/models/Wallet';
-import { TransactionModel } from '@/models/Transaction';
+import { Transaction, TransactionModel } from '@/models/Transaction';
 import { authOptions } from '@/config';
 import { getServerSession } from 'next-auth';
 import { walletService } from '@/services/Wallet';
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
 
         const cryptoPrice = await CryptoPriceModel.find({ symbol: token }).sort({ timestamp: -1 }).limit(1);
 
-        const newTransaction: any = {
+        const newTransaction: Partial<Transaction> = {
             transactionId,
             fromAddress: fromAddress,
             toAddress: toAddress,
