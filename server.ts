@@ -6,6 +6,7 @@ import * as dotenv from 'dotenv';
 import { config } from './src/config';
 import init_db from './src/init/init_db';
 import depositCron from './src/cron-job/deposit';
+import withdrawCron from './src/cron-job/withdraw';
 import priceSyncCron from './src/cron-job/priceSync';
 
 // Load environment variables from .env.local
@@ -53,6 +54,7 @@ async function startServer() {
 
     depositCron.start();
     priceSyncCron.start();
+    withdrawCron.start();
     } catch (err) {
     console.error(`Failed to start server: ${err instanceof Error ? err.message : 'Unknown error'}`);
     process.exit(1);

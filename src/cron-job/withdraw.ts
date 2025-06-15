@@ -10,7 +10,7 @@ async function checkPendingTransactions() {
         // Get all pending transactions
         const pendingTransactions = await TransactionModel.find({
             status: 'pending',
-            type: 'deposit'
+            type: 'withdraw'
         }) as Transaction[];
 
         console.log(`[${new Date().toISOString()}] Checking ${pendingTransactions.length} pending transactions...`);
@@ -30,20 +30,20 @@ async function checkPendingTransactions() {
                         if (txDetails.amount) {
                             transaction.amount = txDetails.amount;
                         }
-
+                        
                         if(txDetails.token !== transaction.token){
                             transaction.status = 'failed';
-                            transaction.rejectReason = `The token ${txDetails.token} you provided is not the same as the token ${transaction.token} we provided`;
+                            transaction.rejectReason = `The token ${txDetails.token} is not the same as the token ${transaction.token} user requested`;
                         }
                         if (txDetails.fromAddress !== transaction.fromAddress && txDetails.toAddress !== transaction.toAddress) {
                             transaction.status = 'failed';
-                            transaction.rejectReason = `The wallet address ${transaction.fromAddress} you provided is not the same as the real transaction fromAddress ${txDetails.fromAddress} and the wallet address ${transaction.toAddress} you sent the funds to is not the same as the wallet address we provided`;
+                            transaction.rejectReason = `The Platform wallet address ${transaction.fromAddress} is not the same as the real transaction fromAddress ${txDetails.fromAddress} and your wallet address ${transaction.toAddress} is not the same as the real transaction toAddress ${txDetails.toAddress}`;
                         } else if (txDetails.fromAddress !== transaction.fromAddress) {
                             transaction.status = 'failed';
-                            transaction.rejectReason = `The wallet address ${transaction.fromAddress} you provided is not the same as the real transaction fromAddress ${txDetails.fromAddress}`;
+                            transaction.rejectReason = `The Platform wallet address ${transaction.fromAddress} is not the same as the real transaction fromAddress ${txDetails.fromAddress}`;
                         } else if (txDetails.toAddress !== transaction.toAddress) {
                             transaction.status = 'failed';
-                            transaction.rejectReason = `The wallet address ${transaction.toAddress} you sent the funds to is not the same as the wallet address we provided`;
+                            transaction.rejectReason = `The Platform wallet address ${transaction.toAddress} is not the same as the real transaction toAddress ${txDetails.toAddress}`;
                         }
 
 
@@ -55,8 +55,8 @@ async function checkPendingTransactions() {
                             const user = await UserModel.findById(transaction.fromUserId) as User;
                             
                             if(user){
-                                user.accountValue.totalDeposited += transaction.amountInUSD;
-                                user.accountValue.totalAssetValue += transaction.amountInUSD;
+                                user.accountValue.totalWithdrawable -= transaction.amountInUSD;
+                                user.accountValue.totalAssetValue -= transaction.amountInUSD;
                                 await user.save();
                             }
                             transaction.releaseDate = new Date();
