@@ -34,14 +34,14 @@ export const menuItems = [
         path: '/admin/interest-setup'
     },
     { 
-        title: 'Deposit Approvals', 
+        title: 'Deposit', 
         icon: <AccountBalanceIcon />, 
         color: '#9C27B0',
         description: 'Review and approve deposit requests',
         path: '/admin/deposits'
     },
     { 
-        title: 'Withdraw Approvals', 
+        title: 'Withdraw', 
         icon: <MonetizationOnIcon />, 
         color: '#F44336',
         description: 'Process withdrawal requests',
