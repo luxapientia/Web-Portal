@@ -57,9 +57,9 @@ const TransactionSchema: Schema = new Schema({
   collection: TransactionCollection
 });
 
-export interface TransactionWithRef extends Transaction {
-  fromUser?: User,
-  toUser?: User,
+export interface TransactionWithRef extends Omit<Transaction, 'fromUserId' | 'toUserId'> {
+  fromUserId?: User,
+  toUserId?: User,
 }
 
 export const TransactionModel = mongoose.models[TransactionCollection] || mongoose.model<TransactionWithRef>(TransactionCollection, TransactionSchema);
