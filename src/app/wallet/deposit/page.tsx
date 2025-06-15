@@ -19,7 +19,6 @@ import { WalletWithoutKeys } from '@/models/Wallet';
 export default function DepositPage() {
     const theme = useTheme();
     const router = useRouter();
-    const [amount, setAmount] = useState('');
     const [walletAddresses, setWalletAddresses] = useState<WalletWithoutKeys[]>([]);
     const [selectedWallet, setSelectedWallet] = useState<WalletWithoutKeys | null>(null);
     const [qrUrl, setQrUrl] = useState<string | null>(null);
@@ -133,18 +132,23 @@ export default function DepositPage() {
                 maxWidth="sm"
                 sx={{
                     py: { xs: 2, md: 4 },
-                    position: 'relative',
+                    borderRadius: 5,
+                    background: `linear-gradient(135deg, rgba(140, 217, 133, 0.26) 60%, ${theme.palette.primary.light} 100%)`,
+                    backdropFilter: 'blur(16px) saturate(1.2)',
+                    WebkitBackdropFilter: 'blur(16px) saturate(1.2)',
+                    boxShadow: '0 8px 32px 0 rgba(165, 195, 55, 0.12)',
+                    border: '1px solid rgba(231, 133, 36, 0.44)',
                 }}
             >
                 <Paper
                     elevation={0}
                     sx={{
                         borderRadius: 5,
-                        background: `linear-gradient(135deg, rgba(16, 137, 223, 0.42), rgba(43, 216, 193, 0.29))`,
-                        backdropFilter: 'blur(20px) saturate(1.5)',
-                        WebkitBackdropFilter: 'blur(20px) saturate(1.5)',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        backdropFilter: 'blur(10px) saturate(1.5)',
+                        WebkitBackdropFilter: 'blur(10px) saturate(1.5)',
                         boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
-                        border: '1px solid rgba(255, 255, 255, 0.57)',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
                         overflow: 'hidden',
                         position: 'relative',
                         '&::before': {
@@ -154,7 +158,7 @@ export default function DepositPage() {
                             left: 0,
                             right: 0,
                             height: '100%',
-                            background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%)',
+                            background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%)',
                             zIndex: 0,
                         }
                     }}
@@ -180,36 +184,73 @@ export default function DepositPage() {
                         </IconButton>
 
                         {/* Title Section */}
-                        <Box sx={{ textAlign: 'center', mb: 4, mt: { xs: 3, md: 4 } }}>
-                            <AccountBalanceIcon
+                        <Box sx={{ 
+                            textAlign: 'center', 
+                            mb: 4, 
+                            mt: { xs: 3, md: 4 },
+                            position: 'relative',
+                            '&::after': {
+                                content: '""',
+                                position: 'absolute',
+                                bottom: -16,
+                                left: '50%',
+                                transform: 'translateX(-50%)',
+                                width: '120px',
+                                height: '4px',
+                                borderRadius: '2px',
+                                background: 'linear-gradient(90deg, #2196F3, #66BB6A)',
+                            }
+                        }}>
+                            <Box
                                 sx={{
-                                    fontSize: 48,
-                                    color: 'primary.main',
-                                    mb: 2,
-                                    filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2))',
-                                }}
-                            />
-                            <Typography
-                                variant="h4"
-                                sx={{
-                                    fontWeight: 700,
-                                    background: 'linear-gradient(90deg, #1976D2, #2E7D32)',
-                                    backgroundClip: 'text',
-                                    WebkitBackgroundClip: 'text',
-                                    color: 'transparent',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: 2,
                                     mb: 1,
-                                    textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                                    px: 3,
+                                    py: 1.5,
+                                    borderRadius: '40px',
+                                    background: 'rgba(255, 255, 255, 0.15)',
+                                    backdropFilter: 'blur(10px)',
+                                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                                    boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
                                 }}
                             >
-                                Deposit Funds
-                            </Typography>
+                                <AccountBalanceIcon
+                                    sx={{
+                                        fontSize: { xs: 32, md: 36 },
+                                        color: 'primary.main',
+                                        filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.15))'
+                                    }}
+                                />
+                                <Typography
+                                    variant="h4"
+                                    sx={{
+                                        fontWeight: 800,
+                                        fontSize: { xs: '1.75rem', md: '2.25rem' },
+                                        background: 'linear-gradient(90deg, #1976D2, #2E7D32)',
+                                        backgroundClip: 'text',
+                                        WebkitBackgroundClip: 'text',
+                                        color: 'transparent',
+                                        letterSpacing: '0.5px',
+                                        textShadow: '0 2px 4px rgba(0,0,0,0.05)'
+                                    }}
+                                >
+                                    Deposit Funds
+                                </Typography>
+                            </Box>
                             <Typography
                                 variant="body1"
                                 color="text.secondary"
                                 sx={{
                                     maxWidth: '400px',
                                     margin: '0 auto',
+                                    mt: 2,
+                                    fontSize: { xs: '0.875rem', md: '1rem' },
+                                    fontWeight: 500,
+                                    letterSpacing: '0.3px',
                                     lineHeight: 1.6,
+                                    opacity: 0.85
                                 }}
                             >
                                 Add funds to your account securely and instantly

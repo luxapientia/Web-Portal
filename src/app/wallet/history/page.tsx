@@ -70,7 +70,6 @@ export default function HistoryPage() {
     // State
     const [statusFilter, setStatusFilter] = useState('all');
     const [typeFilter, setTypeFilter] = useState('all');
-    const [transactionIdFilter, setTransactionIdFilter] = useState('');
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [total, setTotal] = useState(0);
@@ -86,7 +85,7 @@ export default function HistoryPage() {
         try {
             setLoading(true);
             const response = await fetch(
-                `/api/wallet/transactions?page=${page}&limit=${rowsPerPage}&status=${statusFilter}&type=${typeFilter}&transactionId=${transactionIdFilter}&sortField=${sortField}&sortOrder=${sortOrder}`
+                `/api/wallet/transactions?page=${page}&limit=${rowsPerPage}&status=${statusFilter}&type=${typeFilter}&sortField=${sortField}&sortOrder=${sortOrder}`
             );
             const data = await response.json();
             
@@ -106,7 +105,7 @@ export default function HistoryPage() {
 
     useEffect(() => {
         fetchTransactions();
-    }, [page, rowsPerPage, statusFilter, typeFilter, transactionIdFilter, sortField, sortOrder]);
+    }, [page, rowsPerPage, statusFilter, typeFilter, sortField, sortOrder]);
 
     const handleSort = (field: SortField) => {
         if (sortField === field) {
@@ -197,16 +196,27 @@ export default function HistoryPage() {
 
     return (
         <Layout>
-            <Container maxWidth="lg" sx={{ py: { xs: 2, md: 4 }, position: 'relative' }}>
+            <Container
+                maxWidth="md"
+                sx={{
+                    py: { xs: 2, md: 4 },
+                    borderRadius: 5,
+                    background: `linear-gradient(135deg, rgba(140, 217, 133, 0.26) 60%, ${theme.palette.primary.light} 100%)`,
+                    backdropFilter: 'blur(16px) saturate(1.2)',
+                    WebkitBackdropFilter: 'blur(16px) saturate(1.2)',
+                    boxShadow: '0 8px 32px 0 rgba(165, 195, 55, 0.12)',
+                    border: '1px solid rgba(231, 133, 36, 0.44)',
+                }}
+            >
                 <Paper
                     elevation={0}
                     sx={{
                         borderRadius: 5,
-                        background: `linear-gradient(135deg, rgba(16, 137, 223, 0.42), rgba(43, 216, 193, 0.29))`,
-                        backdropFilter: 'blur(20px) saturate(1.5)',
-                        WebkitBackdropFilter: 'blur(20px) saturate(1.5)',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        backdropFilter: 'blur(10px) saturate(1.5)',
+                        WebkitBackdropFilter: 'blur(10px) saturate(1.5)',
                         boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
-                        border: '1px solid rgba(255, 255, 255, 0.57)',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
                         overflow: 'hidden',
                         position: 'relative',
                         '&::before': {
@@ -216,7 +226,7 @@ export default function HistoryPage() {
                             left: 0,
                             right: 0,
                             height: '100%',
-                            background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%)',
+                            background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%)',
                             zIndex: 0,
                         }
                     }}
@@ -285,20 +295,6 @@ export default function HistoryPage() {
                                 justifyContent="center"
                                 alignItems="center"
                             >
-                                <TextField
-                                    label="Transaction ID"
-                                    value={transactionIdFilter}
-                                    onChange={(e) => {
-                                        setTransactionIdFilter(e.target.value);
-                                        setPage(0);
-                                    }}
-                                    sx={{
-                                        width: { xs: '100%', sm: 200 },
-                                        '& .MuiOutlinedInput-root': {
-                                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                                        }
-                                    }}
-                                />
                                 <TextField
                                     select
                                     label="Type"
