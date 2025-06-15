@@ -54,7 +54,7 @@ interface Transaction {
     chain: string;
     startDate: Date;
     releaseDate?: Date;
-    status: 'pending' | 'success' | 'failed' | 'in_review' | 'rejected';
+    status: 'pending' | 'success' | 'failed' | 'failed' | 'rejected';
     remarks?: string;
     rejectionReason?: string;
     createdAt: Date;
@@ -155,9 +155,9 @@ export default function HistoryPage() {
             case 'success':
                 return 'success';
             case 'pending':
-            case 'in_review':
                 return 'warning';
             case 'failed':
+                return 'error';
             case 'rejected':
                 return 'error';
             default:
@@ -334,7 +334,6 @@ export default function HistoryPage() {
                                     <MenuItem value="pending">Pending</MenuItem>
                                     <MenuItem value="success">Success</MenuItem>
                                     <MenuItem value="failed">Failed</MenuItem>
-                                    <MenuItem value="in_review">In Review</MenuItem>
                                     <MenuItem value="rejected">Rejected</MenuItem>
                                 </TextField>
                             </Stack>
