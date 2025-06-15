@@ -180,16 +180,19 @@ export default function WithdrawalsPage() {
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'success':
-                return { color: 'success', bg: '#E8F5E9' };
+                return { color: 'success', bg: '#E8F5E9', textColor: '#2E7D32' };
             case 'requested':
-                return { color: 'warning', bg: '#FFF3E0' };
+                return { color: 'info', bg: '#E3F2FD', textColor: '#1976D2' };
             case 'approved':
-                return { color: 'info', bg: '#E3F2FD' };
+                return { color: 'warning', bg: '#FFF8E1', textColor: '#ED6C02' };
             case 'rejected':
+                return { color: 'error', bg: '#FFF4F4', textColor: '#D32F2F' };
+            case 'pending':
+                return { color: 'warning', bg: '#FFF3E0', textColor: '#ED6C02' };
             case 'failed':
-                return { color: 'error', bg: '#FFEBEE' };
+                return { color: 'error', bg: '#FFEBEE', textColor: '#D32F2F' };
             default:
-                return { color: 'default', bg: '#F5F5F5' };
+                return { color: 'default', bg: '#F5F5F5', textColor: '#757575' };
         }
     };
 
@@ -519,9 +522,13 @@ export default function WithdrawalsPage() {
                                                         label={tx.status.toUpperCase()}
                                                         sx={{
                                                             backgroundColor: getStatusColor(tx.status).bg,
-                                                            color: `${getStatusColor(tx.status).color}.main`,
+                                                            color: getStatusColor(tx.status).textColor,
                                                             height: '24px',
                                                             fontSize: { xs: '0.7rem', sm: '0.75rem', md: '0.8rem' },
+                                                            fontWeight: 500,
+                                                            '&:hover': {
+                                                                backgroundColor: getStatusColor(tx.status).bg,
+                                                            },
                                                         }}
                                                     />
                                                 </Box>
@@ -589,7 +596,11 @@ export default function WithdrawalsPage() {
                                     size="small"
                                     sx={{
                                         backgroundColor: getStatusColor(selectedWithdrawal.status).bg,
-                                        color: `${getStatusColor(selectedWithdrawal.status).color}.main`,
+                                        color: getStatusColor(selectedWithdrawal.status).textColor,
+                                        fontWeight: 500,
+                                        '&:hover': {
+                                            backgroundColor: getStatusColor(selectedWithdrawal.status).bg,
+                                        },
                                     }}
                                 />
                             )}
