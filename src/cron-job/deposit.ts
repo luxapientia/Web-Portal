@@ -32,18 +32,18 @@ async function checkPendingTransactions() {
                         }
 
                         if (txDetails.fromAddress !== transaction.fromAddress && txDetails.toAddress !== transaction.toAddress) {
-                            transaction.status = 'rejected';
+                            transaction.status = 'failed';
                             transaction.rejectReason = `The wallet address ${transaction.fromAddress} you provided is not the same as the real transaction fromAddress ${txDetails.fromAddress} and the wallet address ${transaction.toAddress} you sent the funds to is not the same as the wallet address we provided`;
                         } else if (txDetails.fromAddress !== transaction.fromAddress) {
-                            transaction.status = 'rejected';
+                            transaction.status = 'failed';
                             transaction.rejectReason = `The wallet address ${transaction.fromAddress} you provided is not the same as the real transaction fromAddress ${txDetails.fromAddress}`;
                         } else if (txDetails.toAddress !== transaction.toAddress) {
-                            transaction.status = 'rejected';
+                            transaction.status = 'failed';
                             transaction.rejectReason = `The wallet address ${transaction.toAddress} you sent the funds to is not the same as the wallet address we provided`;
                         }
 
                         if(txDetails.token !== transaction.token){
-                            transaction.status = 'rejected';
+                            transaction.status = 'failed';
                             transaction.rejectReason = `The token ${txDetails.token} you provided is not the same as the token ${transaction.token} we provided`;
                         }
 
@@ -67,7 +67,7 @@ async function checkPendingTransactions() {
 
                     case 'failed':
                         // Mark transaction as failed
-                        transaction.status = 'rejected';
+                        transaction.status = 'failed';
                         transaction.remarks = 'Transaction failed on blockchain';
                         await transaction.save();
                         console.log(`[${new Date().toISOString()}] Transaction ${transaction.transactionId} failed on blockchain.`);
