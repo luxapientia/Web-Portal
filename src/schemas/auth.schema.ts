@@ -131,9 +131,9 @@ export const loginSchema = z.object({
 });
 
 export const walletInfoSchema = z.object({
-  id: z.string(),
-  type: z.string()
-});
+  chain: z.string(),
+  address: z.string()
+}).array();
 
 // ============= Auth Context Schemas =============
 export const userSchema = z.object({
