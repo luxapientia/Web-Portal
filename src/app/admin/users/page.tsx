@@ -23,6 +23,7 @@ import {
     TextField,
     Avatar,
     CircularProgress,
+    Skeleton,
 } from '@mui/material';
 import {
     FilterList as FilterIcon,
@@ -408,78 +409,108 @@ export default function UserManagementPage() {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {users.length === 0 && (
+                            {loading ? (
+                                // Loading skeleton
+                                [...Array(5)].map((_, index) => (
+                                    <TableRow key={`skeleton-${index}`}>
+                                        <TableCell>
+                                            <Stack direction="row" spacing={2} alignItems="center">
+                                                <Skeleton variant="circular" width={40} height={40} />
+                                                <Box>
+                                                    <Skeleton width={120} />
+                                                </Box>
+                                            </Stack>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Stack spacing={0.5}>
+                                                <Skeleton width={150} />
+                                                <Skeleton width={100} />
+                                            </Stack>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Skeleton width={80} />
+                                        </TableCell>
+                                        <TableCell>
+                                            <Skeleton width={80} />
+                                        </TableCell>
+                                        <TableCell>
+                                            <Skeleton width={100} />
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ) : users.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={6} sx={{ textAlign: 'center' }}>
                                         No users found
                                     </TableCell>
                                 </TableRow>
-                            )}
-                            {users.map((user: User, index: number) => (
-                                <TableRow 
-                                    key={index}
-                                    hover
-                                    sx={{
-                                        '&:last-child td, &:last-child th': { border: 0 },
-                                        transition: 'background-color 0.2s',
-                                    }}
-                                >
-                                    <TableCell>
-                                        <Stack direction="row" spacing={2} alignItems="center">
-                                            <Avatar 
-                                                sx={{ width: 40, height: 40 }}
-                                            >
-                                                {user.name.charAt(0)}
-                                            </Avatar>
-                                            <Box>
-                                                <Typography variant="subtitle2">
-                                                    {user.name}
+                            ) : (
+                                users.map((user: User, index: number) => (
+                                    <TableRow 
+                                        key={index}
+                                        hover
+                                        sx={{
+                                            '&:last-child td, &:last-child th': { border: 0 },
+                                            transition: 'background-color 0.2s',
+                                        }}
+                                    >
+                                        <TableCell>
+                                            <Stack direction="row" spacing={2} alignItems="center">
+                                                <Avatar 
+                                                    sx={{ width: 40, height: 40 }}
+                                                >
+                                                    {user.name.charAt(0)}
+                                                </Avatar>
+                                                <Box>
+                                                    <Typography variant="subtitle2">
+                                                        {user.name}
+                                                    </Typography>
+                                                </Box>
+                                            </Stack>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Stack spacing={0.5}>
+                                                <Typography variant="body2">{user.email}</Typography>
+                                                <Typography variant="caption" color="text.secondary">
+                                                    {user.phone}
                                                 </Typography>
-                                            </Box>
-                                        </Stack>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Stack spacing={0.5}>
-                                            <Typography variant="body2">{user.email}</Typography>
-                                            <Typography variant="caption" color="text.secondary">
-                                                {user.phone}
+                                            </Stack>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Chip
+                                                label={user.role}
+                                                size="small"
+                                                color={user.role === 'admin' ? 'primary' : 'default'}
+                                                sx={{ 
+                                                    fontWeight: 500,
+                                                    textTransform: 'capitalize',
+                                                    cursor: 'pointer',
+                                                }}
+                                                onClick={() => handleRoleToggle(user._id)}
+                                            />
+                                        </TableCell>
+                                        <TableCell>
+                                            <Chip
+                                                label={user.status}
+                                                size="small"
+                                                sx={{
+                                                    bgcolor: getStatusColor(user.status).bg,
+                                                    color: `${getStatusColor(user.status).color}.main`,
+                                                    fontWeight: 500,
+                                                    textTransform: 'capitalize',
+                                                    cursor: 'pointer',
+                                                }}
+                                                onClick={() => handleStatusToggle(user._id)}
+                                            />
+                                        </TableCell>
+                                        <TableCell>
+                                            <Typography variant="body2">
+                                                {new Date(user.createdAt).toLocaleDateString()}
                                             </Typography>
-                                        </Stack>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Chip
-                                            label={user.role}
-                                            size="small"
-                                            color={user.role === 'admin' ? 'primary' : 'default'}
-                                            sx={{ 
-                                                fontWeight: 500,
-                                                textTransform: 'capitalize',
-                                                cursor: 'pointer',
-                                            }}
-                                            onClick={() => handleRoleToggle(user._id)}
-                                        />
-                                    </TableCell>
-                                    <TableCell>
-                                        <Chip
-                                            label={user.status}
-                                            size="small"
-                                            sx={{
-                                                bgcolor: getStatusColor(user.status).bg,
-                                                color: `${getStatusColor(user.status).color}.main`,
-                                                fontWeight: 500,
-                                                textTransform: 'capitalize',
-                                                cursor: 'pointer',
-                                            }}
-                                            onClick={() => handleStatusToggle(user._id)}
-                                        />
-                                    </TableCell>
-                                    <TableCell>
-                                        <Typography variant="body2">
-                                            {new Date(user.createdAt).toLocaleDateString()}
-                                        </Typography>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
                         </TableBody>
                     </Table>
                     <TablePagination

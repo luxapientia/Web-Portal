@@ -28,6 +28,7 @@ import {
     DialogTitle,
     DialogContent,
     DialogActions,
+    Skeleton,
 } from '@mui/material';
 import {
     FilterList as FilterIcon,
@@ -450,11 +451,55 @@ export default function WithdrawalsPage() {
                             </TableHead>
                             <TableBody>
                                 {loading ? (
-                                    <TableRow>
-                                        <TableCell colSpan={4} align="center" sx={{ py: 8 }}>
-                                            <CircularProgress size={40} />
-                                        </TableCell>
-                                    </TableRow>
+                                    // Loading skeleton
+                                    [...Array(5)].map((_, index) => (
+                                        <TableRow key={`skeleton-${index}`}>
+                                            <TableCell>
+                                                <Box sx={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    gap: 1,
+                                                }}>
+                                                    <Box sx={{
+                                                        fontFamily: 'monospace',
+                                                        bgcolor: 'grey.50',
+                                                        p: 0.5,
+                                                        borderRadius: 0.5,
+                                                    }}>
+                                                        <Skeleton width={120} />
+                                                    </Box>
+                                                </Box>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Box sx={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                }}>
+                                                    <Skeleton width={80} />
+                                                </Box>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Box sx={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center'
+                                                }}>
+                                                    <Skeleton width={100} />
+                                                </Box>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Box sx={{
+                                                    display: 'flex',
+                                                    justifyContent: 'center',
+                                                    alignItems: 'center',
+                                                }}>
+                                                    <Skeleton width={40} />
+                                                </Box>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
                                 ) : transactions.length === 0 ? (
                                     <TableRow>
                                         <TableCell

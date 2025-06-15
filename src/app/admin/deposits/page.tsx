@@ -28,6 +28,7 @@ import {
     DialogTitle,
     DialogContent,
     DialogActions,
+    Skeleton,
 } from '@mui/material';
 import {
     FilterList as FilterIcon,
@@ -343,11 +344,16 @@ export default function DepositPage() {
                             </TableHead>
                             <TableBody>
                                 {loading ? (
-                                    <TableRow>
-                                        <TableCell colSpan={8} align="center" sx={{ py: 8 }}>
-                                            <CircularProgress size={40} />
-                                        </TableCell>
-                                    </TableRow>
+                                    // Loading skeleton
+                                    [...Array(5)].map((_, index) => (
+                                        <TableRow key={`skeleton-${index}`}>
+                                            {[...Array(4)].map((_, cellIndex) => (
+                                                <TableCell key={`cell-${cellIndex}`} align="center">
+                                                    <Skeleton animation="wave" />
+                                                </TableCell>
+                                            ))}
+                                        </TableRow>
+                                    ))
                                 ) : transactions.length === 0 ? (
                                     <TableRow>
                                         <TableCell
