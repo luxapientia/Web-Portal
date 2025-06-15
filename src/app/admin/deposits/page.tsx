@@ -24,7 +24,6 @@ import {
     CircularProgress,
     Button,
     Tooltip,
-    ButtonGroup,
     Dialog,
     DialogTitle,
     DialogContent,
@@ -34,13 +33,8 @@ import {
     FilterList as FilterIcon,
     ArrowUpward as ArrowUpwardIcon,
     ArrowDownward as ArrowDownwardIcon,
-    CheckCircle as CheckCircleIcon,
-    Cancel as CancelIcon,
-    Done as DoneIcon,
-    Close as CloseIcon,
-    ContentCopy as ContentCopyIcon,
-    CheckCircleOutline as CheckCircleOutlineIcon,
     Visibility as VisibilityIcon,
+    Close as CloseIcon,
 } from '@mui/icons-material';
 import toast from 'react-hot-toast';
 import AdminLayout from '@/components/admin/AdminLayout';
@@ -379,13 +373,13 @@ export default function DepositPage() {
                                             }}
                                         >
                                             <TableCell>
-                                                <Box sx={{ 
-                                                    display: 'flex', 
+                                                <Box sx={{
+                                                    display: 'flex',
                                                     alignItems: 'center',
                                                     justifyContent: 'center',
                                                     gap: 1,
                                                 }}>
-                                                    <Box sx={{ 
+                                                    <Box sx={{
                                                         fontFamily: 'monospace',
                                                         fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.875rem' },
                                                         bgcolor: 'grey.50',
@@ -584,15 +578,15 @@ export default function DepositPage() {
                                                 From Address
                                             </Typography>
                                             {selectedDeposit.fromAddress ? (
-                                                <Box sx={{ 
-                                                    display: 'flex', 
-                                                    alignItems: 'center', 
-                                                    gap: 1, 
-                                                    mt: 0.5 
+                                                <Box sx={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: 1,
+                                                    mt: 0.5
                                                 }}>
-                                                    <Typography 
-                                                        variant="body2" 
-                                                        sx={{ 
+                                                    <Typography
+                                                        variant="body2"
+                                                        sx={{
                                                             fontFamily: 'monospace',
                                                             bgcolor: 'grey.50',
                                                             p: 0.5,
@@ -622,15 +616,15 @@ export default function DepositPage() {
                                                 To Address
                                             </Typography>
                                             {selectedDeposit.toAddress ? (
-                                                <Box sx={{ 
-                                                    display: 'flex', 
-                                                    alignItems: 'center', 
-                                                    gap: 1, 
-                                                    mt: 0.5 
+                                                <Box sx={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: 1,
+                                                    mt: 0.5
                                                 }}>
-                                                    <Typography 
-                                                        variant="body2" 
-                                                        sx={{ 
+                                                    <Typography
+                                                        variant="body2"
+                                                        sx={{
                                                             fontFamily: 'monospace',
                                                             bgcolor: 'grey.50',
                                                             p: 0.5,
@@ -720,8 +714,36 @@ export default function DepositPage() {
                             </Box>
                         )}
                     </DialogContent>
-                    <DialogActions sx={{ px: 3, pb: 2 }}>
-                        <Button onClick={handleDetailsClose} color="primary">
+                    <DialogActions sx={{
+                        px: 3,
+                        pb: 2,
+                        display: 'flex',
+                        gap: 1,
+                        '& > button': {
+                            minWidth: '120px',
+                            display: 'flex',
+                            gap: 1,
+                            alignItems: 'center',
+                            borderRadius: '8px',
+                            textTransform: 'none',
+                            padding: '8px 16px',
+                        }
+                    }}>
+                        <Button
+                            onClick={handleDetailsClose}
+                            color="inherit"
+                            variant="outlined"
+                            startIcon={<CloseIcon />}
+                            sx={{
+                                marginLeft: 'auto',
+                                borderColor: 'grey.300',
+                                color: 'grey.700',
+                                '&:hover': {
+                                    borderColor: 'grey.400',
+                                    backgroundColor: 'grey.50',
+                                },
+                            }}
+                        >
                             Close
                         </Button>
                     </DialogActions>
