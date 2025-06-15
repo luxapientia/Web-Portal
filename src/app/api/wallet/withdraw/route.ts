@@ -65,6 +65,7 @@ export async function POST(request: NextRequest) {
             amountInUSD: amount,
             token: token,
             chain: chain,
+            fromAddress: fromWallet.address,
             toAddress: toAddress,
             remarks: `${user.name} requested a withdraw of ${amount} ${token} from ${chain} chain`,
             startDate: new Date()
