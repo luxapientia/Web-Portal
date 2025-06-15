@@ -25,7 +25,7 @@ export interface Transaction extends Document {
   chain: string,
   startDate: Date,
   releaseDate?: Date,
-  status: 'pending' | 'success' | 'rejected' | 'requested',
+  status: 'pending' | 'success' | 'rejected' | 'requested' | 'failed',
   remarks?: string,
   rejectReason?: string,
 }
