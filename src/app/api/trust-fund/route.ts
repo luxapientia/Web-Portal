@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import { User, UserModel } from '@/models/User';
-import { ObjectId } from 'mongodb';
 import { authOptions } from '@/config';
 import { getServerSession } from 'next-auth';
 import { TrustFund, TrustFundModel } from '@/models/TrustFund';
+import { Transaction, TransactionModel } from '@/models/Transaction';
 
 export async function GET() {
     try {
@@ -12,17 +12,26 @@ export async function GET() {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const user = await UserModel.findOne({ _id: new ObjectId(session.user.id) }) as User;
+        const user = await UserModel.findById(session.user.id) as User;
         if (!user) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
         const lockedFunds = await TrustFundModel.find({ userId: user.id, endDate: { $gt: new Date() } }) as TrustFund[];
-        const accountValue = user.accountValue.totalAssetValue;
-        const totalLockedFunds = lockedFunds.reduce((acc, fund) => acc + fund.amount, 0);
-        const totalAvailableFunds = accountValue - totalLockedFunds;
+        const totalAvailableFunds = user.accountValue.totalWithdrawable;
 
-        return NextResponse.json({ success: true, data: { lockedFunds, totalAvailableFunds } });
+        const currentWithdrawTransactions = await TransactionModel.find({
+            fromUserId: user._id,
+            type: 'withdraw',
+            $or: [
+                { releaseDate: { $exists: false } },
+                { releaseDate: { $gte: new Date() } }
+            ]
+        }) as Transaction[];
+
+        const trustFundable = currentWithdrawTransactions.length == 0 && totalAvailableFunds > 0;
+
+        return NextResponse.json({ success: true, data: { lockedFunds, totalAvailableFunds, trustFundable } });
     } catch (error) {
         console.error('Team members error:', error);
         return NextResponse.json(
