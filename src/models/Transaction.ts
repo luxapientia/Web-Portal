@@ -31,7 +31,7 @@ export interface Transaction extends Document {
 }
 
 const TransactionSchema: Schema = new Schema({
-  transactionId: { type: String, required: true },
+  transactionId: { type: String, required: false },
   fromAddress: { type: String, required: false },
   toAddress: { type: String, required: false },
   fromUserId: { type: String, required: false, ref: UserCollection },
@@ -41,11 +41,11 @@ const TransactionSchema: Schema = new Schema({
   amountInUSD: { type: Number, required: false },
   token: { 
     type: String, 
-    required: true,
+    required: false,
   },
   chain: { 
     type: String, 
-    required: true,
+    required: false,
   },
   startDate: { type: Date, required: true },
   releaseDate: { type: Date, required: false },
