@@ -27,11 +27,11 @@ export const menuItems = [
         path: '/admin/users'
     },
     { 
-        title: 'Interest Setup', 
+        title: 'Platform Settings', 
         icon: <PaidIcon />, 
         color: '#FF9800',
         description: 'Configure interest rates and terms',
-        path: '/admin/interest-setup'
+        path: '/admin/platform-setting'
     },
     { 
         title: 'Deposit', 

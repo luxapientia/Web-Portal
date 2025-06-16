@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import { Box, Container, Tab, Tabs, Typography } from '@mui/material';
-import InterestMatrixTable from '@/components/admin/interest-setup/InterestMatrixTable';
-import TrustPlanTable from '@/components/admin/interest-setup/TrustPlanTable';
-import FeeSetting from '@/components/admin/interest-setup/FeeSetting';
+import InterestMatrixTable from '@/components/admin/platform-setting/InterestMatrixTable';
+import TrustPlanTable from '@/components/admin/platform-setting/TrustPlanTable';
+import TransferSetting from '@/components/admin/platform-setting/TransferSetting';
+import WithdrawSetting from '@/components/admin/platform-setting/WithdrawSetting';
+import PromotionSetting from '@/components/admin/platform-setting/PromotionSetting';
 import AdminLayout from '@/components/admin/AdminLayout';
 
 interface TabPanelProps {
@@ -62,9 +64,19 @@ export default function InterestSetupPage() {
                                 aria-controls="interest-tabpanel-1"
                             />
                             <Tab 
-                                label="Platform Fees" 
+                                label="Transfer Settings" 
                                 id="interest-tab-2"
                                 aria-controls="interest-tabpanel-2"
+                            />
+                            <Tab 
+                                label="Withdraw Settings" 
+                                id="interest-tab-3"
+                                aria-controls="interest-tabpanel-3"
+                            />
+                            <Tab 
+                                label="Promotion Settings" 
+                                id="interest-tab-4"
+                                aria-controls="interest-tabpanel-4"
                             />
                         </Tabs>
                     </Box>
@@ -76,7 +88,13 @@ export default function InterestSetupPage() {
                         <TrustPlanTable />
                     </TabPanel>
                     <TabPanel value={tabValue} index={2}>
-                        <FeeSetting />
+                        <TransferSetting />
+                    </TabPanel>
+                    <TabPanel value={tabValue} index={3}>
+                        <WithdrawSetting />
+                    </TabPanel>
+                    <TabPanel value={tabValue} index={4}>
+                        <PromotionSetting />
                     </TabPanel>
                 </Box>
             </Container>

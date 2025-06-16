@@ -9,5 +9,7 @@
   "dailyTransferMaxLimit": 20000,
   "dailyNumOfTransferLimit": 5,
   "withdrawMaxLimit": 20000,
-  "withdrawPeriod": 3
+  "withdrawPeriod": 3,
+  "firstDepositBonusPercentage": 100,
+  "firstDepositBonusPeriod": 180
 }

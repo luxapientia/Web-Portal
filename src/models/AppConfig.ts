@@ -10,6 +10,8 @@ export interface AppConfig extends Document {
   dailyNumOfTransferLimit: number;
   withdrawMaxLimit: number;
   withdrawPeriod: number;
+  firstDepositBonusPercentage: number;
+  firstDepositBonusPeriod: number;
 }
 
 const AppConfigSchema: Schema = new Schema({
@@ -20,6 +22,8 @@ const AppConfigSchema: Schema = new Schema({
   dailyNumOfTransferLimit: { type: Number, required: true },
   withdrawMaxLimit: { type: Number, required: true },
   withdrawPeriod: { type: Number, required: true },
+  firstDepositBonusPercentage: { type: Number, required: true },
+  firstDepositBonusPeriod: { type: Number, required: true },
 }, {
   collection: AppConfigCollection
 });
