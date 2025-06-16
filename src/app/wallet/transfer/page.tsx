@@ -85,7 +85,7 @@ export default function TransferPage() {
                 setNote('');
                 fetchTransferInfo();
             } else {
-                toast.error(data.message);
+                toast.error(data.error);
             }
         } catch (error) {
             console.error('Transfer error:', error);
