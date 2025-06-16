@@ -5,7 +5,7 @@ import { Transaction, TransactionModel } from '@/models/Transaction';
 import { User, UserModel } from '@/models/User';
 import { AppConfig, AppConfigModel } from '@/models/AppConfig';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
     try {
         const session = await getServerSession(authOptions);
         if (!session?.user?.email) {
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
                 transferableAmount
             }
         });
-    } catch (error) {
+    } catch {
         return NextResponse.json(
             { success: false, error: 'Internal Server Error' },
             { status: 500 }
@@ -140,8 +140,7 @@ export async function POST(request: NextRequest) {
                 error: 'Transfer not available'
             })
         }
-    } catch (error) {
-        console.error('Error processing transfer:', error);
+    } catch {
         return NextResponse.json(
             { success: false, error: 'Failed to process transfer' },
             { status: 500 }

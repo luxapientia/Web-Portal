@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Container, Typography, Paper, TextField, Button, InputAdornment, MenuItem, useTheme, IconButton, Alert, Snackbar } from '@mui/material';
+import { Box, Container, Typography, Paper, TextField, Button, InputAdornment, useTheme, IconButton, Alert, Snackbar } from '@mui/material';
 import Layout from '@/components/layout/Layout';
 import { 
     SwapHoriz as TransferIcon, 
@@ -100,13 +100,6 @@ export default function TransferPage() {
         const amountNum = parseFloat(amount);
         return amountNum + transferFee;
     };
-
-    // Mock data for recent recipients
-    const recentRecipients = [
-        { id: '1', name: 'John Doe', email: 'john@example.com' },
-        { id: '2', name: 'Jane Smith', email: 'jane@example.com' },
-        { id: '3', name: 'Mike Johnson', email: 'mike@example.com' },
-    ];
 
     return (
         <Layout>
