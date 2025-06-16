@@ -6,8 +6,8 @@
     "image/png"
   ],
   "transfer_fee": 2,
-  "dailyTransferMaxLimit": 5,
-  "dailyNumOfTransferLimit": 200,
+  "dailyTransferMaxLimit": 20000,
+  "dailyNumOfTransferLimit": 5,
   "withdrawMaxLimit": 20000,
   "withdrawPeriod": 3
 }
