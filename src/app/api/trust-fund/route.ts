@@ -17,7 +17,7 @@ export async function GET() {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
-        const lockedFunds = await TrustFundModel.find({ userId: user.id, endDate: { $gt: new Date() } }) as TrustFund[];
+        const lockedFunds = await TrustFundModel.find({ userId: user.id, released: false }) as TrustFund[];
         const totalAvailableFunds = user.accountValue.totalWithdrawable;
 
         const currentWithdrawTransactions = await TransactionModel.find({
