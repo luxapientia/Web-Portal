@@ -5,6 +5,8 @@ import { User, UserModel } from '../models/User';
 import { CryptoPriceModel } from '../models/CryptoPrice';
 import { InterestReward, InterestRewardModel } from '@/models/InterestReward';
 import { AppConfig, AppConfigModel } from '@/models/AppConfig';
+import { InterestMatrix, InterestMatrixModel } from '@/models/InterestMatrix';
+import { getVipLevel } from '@/controllers';
 
 // Function to check transaction status
 async function checkPendingTransactions() {
@@ -75,6 +77,24 @@ async function checkPendingTransactions() {
                                     user.accountValue.totalDeposited += transaction.amountInUSD;
                                     user.accountValue.totalAssetValue += transaction.amountInUSD + interestReward.amount;
                                     user.accountValue.totalUnreleasedInterest += interestReward.amount;
+
+                                    const invitingUser = await UserModel.findOne({ invitationCode: user.invitationCode }) as User;
+                                    const vipLevel: InterestMatrix = await getVipLevel(invitingUser.id);
+                                    const uplineDepositAmount = vipLevel.uplineDepositAmount;
+                                    if(transaction.amountInUSD >= uplineDepositAmount){
+                                        const uplineDepositReward = vipLevel.uplineDepositReward;
+                                        invitingUser.accountValue.totalAssetValue += uplineDepositReward;
+                                        await InterestRewardModel.create({
+                                            userId: invitingUser.id,
+                                            type: 'uplineDeposit',
+                                            amount: uplineDepositReward,
+                                            startDate: new Date(),
+                                            endDate: new Date(),
+                                            released: true
+                                        }) as InterestReward;
+
+                                        await invitingUser.save();
+                                    }
                                 } else {
                                     user.accountValue.totalDeposited += transaction.amountInUSD;
                                     user.accountValue.totalAssetValue += transaction.amountInUSD;
