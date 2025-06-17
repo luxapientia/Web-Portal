@@ -1,9 +1,9 @@
-import { AppConfig, AppConfigModel } from '@/models/AppConfig';
-import { InterestMatrix, InterestMatrixModel } from '@/models/InterestMatrix';
-import { InterestReward, InterestRewardModel } from '@/models/InterestReward';
-import { TeamCommisionLevel, TeamCommisionLevelModel } from '@/models/TeamCommisionLevel';
-import { Transaction, TransactionModel } from '@/models/Transaction';
-import { User, UserModel } from '@/models/User';
+import { AppConfig, AppConfigModel } from '../models/AppConfig';
+import { InterestMatrix, InterestMatrixModel } from '../models/InterestMatrix';
+import { InterestReward, InterestRewardModel } from '../models/InterestReward';
+import { TeamCommisionLevel, TeamCommisionLevelModel } from '../models/TeamCommisionLevel';
+import { Transaction, TransactionModel } from '../models/Transaction';
+import { User, UserModel } from '../models/User';
 
 export const getVipLevel = async (userId: string): Promise<InterestMatrix> => {
     const user = await UserModel.findById(userId);
