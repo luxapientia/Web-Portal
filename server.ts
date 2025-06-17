@@ -9,6 +9,7 @@ import depositCron from './src/cron-job/deposit';
 import withdrawCron from './src/cron-job/withdraw';
 import trustFundCron from './src/cron-job/trustFund';
 import priceSyncCron from './src/cron-job/priceSync';
+import releaseInterestRewardCron from './src/cron-job/releaseInterestReward';
 
 // Load environment variables from .env.local
 dotenv.config({ path: '.env.local' });
@@ -57,6 +58,7 @@ async function startServer() {
     priceSyncCron.start();
     withdrawCron.start();
     trustFundCron.start();
+    releaseInterestRewardCron.start();
   } catch (err) {
     console.error(`Failed to start server: ${err instanceof Error ? err.message : 'Unknown error'}`);
     process.exit(1);
