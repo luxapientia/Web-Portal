@@ -88,8 +88,8 @@ export default function VipPromotions() {
           position: 'absolute',
           inset: 0,
           bgcolor: 'rgba(82, 137, 226, 0.23)',
-          backdropFilter: 'blur(5px) saturate(1.0)',
-          WebkitBackdropFilter: 'blur(5px) saturate(1.0)',
+          // backdropFilter: 'blur(5px) saturate(1.0)',
+          // WebkitBackdropFilter: 'blur(5px) saturate(1.0)',
           zIndex: 1,
         }}
       />
