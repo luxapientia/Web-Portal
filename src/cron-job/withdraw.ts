@@ -1,8 +1,8 @@
 import cron from 'node-cron';
 import { Transaction, TransactionModel } from '../models/Transaction';
 import { walletService } from '../services/Wallet';
-import { User, UserModel } from '../models/User';
 import { CryptoPriceModel } from '../models/CryptoPrice';
+import { withdraw } from '@/controllers';
 
 // Function to check transaction status
 async function checkPendingTransactions() {
@@ -52,13 +52,7 @@ async function checkPendingTransactions() {
                             transaction.token = txDetails.token || 'USDT';
                             transaction.amount = txDetails.amount || 0;
                             transaction.amountInUSD = transaction.amount * (cryptoPrice[0]?.price || 1);
-                            const user = await UserModel.findById(transaction.fromUserId) as User;
-                            
-                            if(user){
-                                user.accountValue.totalWithdrawable -= transaction.amountInUSD;
-                                user.accountValue.totalAssetValue -= transaction.amountInUSD;
-                                await user.save();
-                            }
+                            await withdraw(transaction.fromUserId as string, transaction.amountInUSD);
                             transaction.releaseDate = new Date();
                         }
 
