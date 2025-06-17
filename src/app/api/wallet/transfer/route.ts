@@ -4,6 +4,7 @@ import { authOptions } from '@/config';
 import { Transaction, TransactionModel } from '@/models/Transaction';
 import { User, UserModel } from '@/models/User';
 import { AppConfig, AppConfigModel } from '@/models/AppConfig';
+import { transfer } from '@/controllers';
 
 export async function GET() {
     try {
@@ -125,12 +126,7 @@ export async function POST(request: NextRequest) {
                 releaseDate: new Date(),
                 status: 'success',
             })
-            user.accountValue.totalAssetValue -= (amount + transferFee);
-            user.accountValue.totalWithdrawable -= (amount + transferFee);
-            recipientUser.accountValue.totalAssetValue += amount;
-            recipientUser.accountValue.totalWithdrawable += amount;
-            await user.save();
-            await recipientUser.save();
+            await transfer(user._id, recipientUser._id, amount, transferFee);
             return NextResponse.json({
                 success: true,
             })
