@@ -4,6 +4,7 @@ import { ActivityLog, ActivityLogModel } from '@/models/ActivityLog';
 import { authOptions } from '@/config';
 import { getServerSession } from 'next-auth';
 import { getVipLevel } from '@/controllers';
+import { InterestReward, InterestRewardModel } from '@/models/InterestReward';
 
 
 export async function GET() {
@@ -20,14 +21,13 @@ export async function GET() {
 
         const accountValue = user.accountValue.totalAssetValue;
         const vipLevel = await getVipLevel(user?.id);
-        const earningTodayLogs = await ActivityLogModel.find({
+        const earningTodayLogs = await InterestRewardModel.find({
             userId: user?.id,
-            createdAt: {
+            startDate: {
                 $gte: new Date(new Date().setHours(0, 0, 0, 0)),
                 $lt: new Date(new Date().setHours(23, 59, 59, 999))
-            },
-            type: { $in: ['earn', 'team_earn'] }
-        }) as ActivityLog[];
+            }
+        }) as InterestReward[];
 
         const totalDepositLogs = await ActivityLogModel.find({
             userId: user?.id,
