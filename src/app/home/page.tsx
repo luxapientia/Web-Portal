@@ -12,7 +12,7 @@ import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import LiveTvIcon from '@mui/icons-material/LiveTv';
 import Layout from "@/components/layout/Layout";
-import RewardReceiveSection from '@/components/home/RewardReceiveSection';
+// import RewardReceiveSection from '@/components/home/RewardReceiveSection';
 import TrustFundSection from '@/components/home/TrustFundSection';
 
 export default function HomePage() {
@@ -82,7 +82,7 @@ export default function HomePage() {
                             </CardContent>
                         </Card>
                     </Box>
-                    <RewardReceiveSection />
+                    {/* <RewardReceiveSection /> */}
 
                     {/* Market Sentiment & Live Activity as Tabs */}
                     <Card sx={{ borderRadius: 4, boxShadow: 3 }}>
