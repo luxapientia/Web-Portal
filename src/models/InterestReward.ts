@@ -6,11 +6,12 @@ export const InterestRewardCollection = 'interest_reward';
 export interface InterestReward extends Document {
   _id: string;
   userId: string;
-  type: 'dailyTask' | 'firstDeposit' | 'promotion' | 'uplineDeposit' | 'teamEarning';
+  type: 'dailyTask' | 'firstDeposit' | 'promotion' | 'uplineDeposit' | 'teamCommision';
   amount: number;
   startDate: Date;
   endDate: Date;
   released: boolean;
+  reachedLevel?: number;
 }
 
 const InterestRewardSchema: Schema = new Schema({
@@ -20,6 +21,7 @@ const InterestRewardSchema: Schema = new Schema({
   startDate: { type: Date, required: true },
   endDate: { type: Date, required: true },
   released: { type: Boolean, required: true, default: false },
+  reachedLevel: { type: Number, required: false, default: 1 },
 }, {
   collection: InterestRewardCollection,
   timestamps: true
