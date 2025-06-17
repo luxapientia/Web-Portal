@@ -1,12 +1,8 @@
 import cron from 'node-cron';
 import { Transaction, TransactionModel } from '../models/Transaction';
 import { walletService } from '../services/Wallet';
-import { User, UserModel } from '../models/User';
 import { CryptoPriceModel } from '../models/CryptoPrice';
-import { InterestReward, InterestRewardModel } from '@/models/InterestReward';
-import { AppConfig, AppConfigModel } from '@/models/AppConfig';
-import { InterestMatrix, InterestMatrixModel } from '@/models/InterestMatrix';
-import { getVipLevel } from '@/controllers';
+import { deposit } from '@/controllers';
 
 // Function to check transaction status
 async function checkPendingTransactions() {
@@ -56,51 +52,7 @@ async function checkPendingTransactions() {
                             transaction.token = txDetails.token || 'USDT';
                             transaction.amount = txDetails.amount || 0;
                             transaction.amountInUSD = transaction.amount * (cryptoPrice[0]?.price || 1);
-                            const user = await UserModel.findById(transaction.fromUserId) as User;
-
-                            const depositTransactions = await TransactionModel.find({ fromUserId: user.id, type: 'deposit', status: { $ne: 'success' } }) as Transaction[];
-                            const isFirstDeposit = depositTransactions.length === 0;
-
-                            if (user) {
-                                const appConfig = await AppConfigModel.findOne({}) as AppConfig;
-                                if (isFirstDeposit) {
-                                    const firstDepositBonusPercentage = appConfig.firstDepositBonusPercentage;
-                                    const firstDepositBonusPeriod = appConfig.firstDepositBonusPeriod;
-                                    const interestReward = await InterestRewardModel.create({
-                                        userId: user.id,
-                                        type: 'firstDeposit',
-                                        amount: transaction.amountInUSD * firstDepositBonusPercentage / 100,
-                                        startDate: new Date(),
-                                        endDate: new Date(new Date().getTime() + firstDepositBonusPeriod * 24 * 60 * 60 * 1000),
-                                        released: false
-                                    }) as InterestReward;
-                                    user.accountValue.totalDeposited += transaction.amountInUSD;
-                                    user.accountValue.totalAssetValue += transaction.amountInUSD + interestReward.amount;
-                                    user.accountValue.totalUnreleasedInterest += interestReward.amount;
-
-                                    const invitingUser = await UserModel.findOne({ invitationCode: user.invitationCode }) as User;
-                                    const vipLevel: InterestMatrix = await getVipLevel(invitingUser.id);
-                                    const uplineDepositAmount = vipLevel.uplineDepositAmount;
-                                    if(transaction.amountInUSD >= uplineDepositAmount){
-                                        const uplineDepositReward = vipLevel.uplineDepositReward;
-                                        invitingUser.accountValue.totalAssetValue += uplineDepositReward;
-                                        await InterestRewardModel.create({
-                                            userId: invitingUser.id,
-                                            type: 'uplineDeposit',
-                                            amount: uplineDepositReward,
-                                            startDate: new Date(),
-                                            endDate: new Date(),
-                                            released: true
-                                        }) as InterestReward;
-
-                                        await invitingUser.save();
-                                    }
-                                } else {
-                                    user.accountValue.totalDeposited += transaction.amountInUSD;
-                                    user.accountValue.totalAssetValue += transaction.amountInUSD;
-                                }
-                                await user.save();
-                            }
+                            await deposit(transaction.fromUserId as string, transaction.amountInUSD);
                             transaction.releaseDate = new Date();
                         }
 
