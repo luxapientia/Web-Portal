@@ -403,102 +403,102 @@ export default function AdminPage() {
                                     </TableRow>
                                 ) : (
                                     recentActivities.map((activity, index) => (
-                                        <TableRow 
-                                            key={index}
-                                            sx={{ 
-                                                '&:hover': { 
-                                                    bgcolor: 'action.hover',
-                                                },
-                                                transition: 'background-color 0.2s ease',
-                                            }}
-                                        >
-                                            <TableCell>
-                                                <Stack 
-                                                    direction="row" 
-                                                    spacing={{ xs: 1, sm: 2 }} 
-                                                    alignItems="center"
-                                                >
-                                                    <Avatar 
-                                                        src={activity.avatar}
-                                                        alt={activity.user}
-                                                        sx={{ 
-                                                            width: { xs: 32, sm: 36 }, 
-                                                            height: { xs: 32, sm: 36 } 
-                                                        }}
-                                                    >
-                                                        {activity.user.charAt(0)}
-                                                    </Avatar>
-                                                    <Box>
-                                                        <Typography 
-                                                            variant={isMobile ? "body2" : "subtitle2"} 
-                                                            fontWeight="medium"
-                                                        >
-                                                            {activity.user}
-                                                        </Typography>
-                                                        <Typography 
-                                                            variant="caption" 
-                                                            color="text.secondary"
-                                                            sx={{ display: { xs: 'none', sm: 'block' } }}
-                                                        >
-                                                            {activity.email}
-                                                        </Typography>
-                                                    </Box>
-                                                </Stack>
-                                            </TableCell>
-                                            <TableCell>
-                                                <Chip
-                                                    label={activity.action}
-                                                    size={isMobile ? "small" : "medium"}
+                                    <TableRow 
+                                        key={index}
+                                        sx={{ 
+                                            '&:hover': { 
+                                                bgcolor: 'action.hover',
+                                            },
+                                            transition: 'background-color 0.2s ease',
+                                        }}
+                                    >
+                                        <TableCell>
+                                            <Stack 
+                                                direction="row" 
+                                                spacing={{ xs: 1, sm: 2 }} 
+                                                alignItems="center"
+                                            >
+                                                <Avatar 
+                                                    src={activity.avatar}
+                                                    alt={activity.user}
                                                     sx={{ 
-                                                        bgcolor: activity.action === 'Deposit' ? 'success.soft' : 'primary.soft',
-                                                        color: activity.action === 'Deposit' ? 'success.main' : 'primary.main',
-                                                        fontWeight: 500,
-                                                    }}
-                                                />
-                                            </TableCell>
-                                            <TableCell>
-                                                <Typography 
-                                                    variant={isMobile ? "body2" : "body1"}
-                                                    sx={{ 
-                                                        fontWeight: 600,
-                                                        color: activity.action === 'Withdrawal' ? 'error.main' : 'success.main',
+                                                        width: { xs: 32, sm: 36 }, 
+                                                        height: { xs: 32, sm: 36 } 
                                                     }}
                                                 >
-                                                    {activity.action === 'Withdrawal' ? `-${activity.amount}` : activity.amount}
-                                                </Typography>
-                                            </TableCell>
-                                            <TableCell>
-                                                <Chip
-                                                    icon={<CircleIcon sx={{ fontSize: isMobile ? '10px !important' : '12px !important' }} />}
-                                                    label={activity.status}
-                                                    size={isMobile ? "small" : "medium"}
-                                                    sx={{ 
-                                                        bgcolor: getStatusColor(activity.status).bgColor,
-                                                        color: getStatusColor(activity.status).color,
-                                                        '& .MuiChip-icon': {
-                                                            color: 'inherit',
-                                                        },
-                                                    }}
-                                                />
-                                            </TableCell>
-                                            <TableCell>
-                                                <Stack spacing={0.5}>
+                                                    {activity.user.charAt(0)}
+                                                </Avatar>
+                                                <Box>
                                                     <Typography 
-                                                        variant={isMobile ? "caption" : "body2"} 
-                                                        color="text.secondary"
+                                                        variant={isMobile ? "body2" : "subtitle2"} 
+                                                        fontWeight="medium"
                                                     >
-                                                        {activity.time}
+                                                        {activity.user}
                                                     </Typography>
                                                     <Typography 
                                                         variant="caption" 
-                                                        color="text.disabled"
+                                                        color="text.secondary"
                                                         sx={{ display: { xs: 'none', sm: 'block' } }}
                                                     >
-                                                        {activity.details}
+                                                        {activity.email}
                                                     </Typography>
-                                                </Stack>
-                                            </TableCell>
-                                        </TableRow>
+                                                </Box>
+                                            </Stack>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Chip
+                                                label={activity.action}
+                                                size={isMobile ? "small" : "medium"}
+                                                sx={{ 
+                                                    bgcolor: activity.action === 'Deposit' ? 'success.soft' : 'primary.soft',
+                                                    color: activity.action === 'Deposit' ? 'success.main' : 'primary.main',
+                                                    fontWeight: 500,
+                                                }}
+                                            />
+                                        </TableCell>
+                                        <TableCell>
+                                            <Typography 
+                                                variant={isMobile ? "body2" : "body1"}
+                                                sx={{ 
+                                                    fontWeight: 600,
+                                                    color: activity.action === 'Withdrawal' ? 'error.main' : 'success.main',
+                                                }}
+                                            >
+                                                {activity.action === 'Withdrawal' ? `-${activity.amount}` : activity.amount}
+                                            </Typography>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Chip
+                                                icon={<CircleIcon sx={{ fontSize: isMobile ? '10px !important' : '12px !important' }} />}
+                                                label={activity.status}
+                                                size={isMobile ? "small" : "medium"}
+                                                sx={{ 
+                                                    bgcolor: getStatusColor(activity.status).bgColor,
+                                                    color: getStatusColor(activity.status).color,
+                                                    '& .MuiChip-icon': {
+                                                        color: 'inherit',
+                                                    },
+                                                }}
+                                            />
+                                        </TableCell>
+                                        <TableCell>
+                                            <Stack spacing={0.5}>
+                                                <Typography 
+                                                    variant={isMobile ? "caption" : "body2"} 
+                                                    color="text.secondary"
+                                                >
+                                                    {activity.time}
+                                                </Typography>
+                                                <Typography 
+                                                    variant="caption" 
+                                                    color="text.disabled"
+                                                    sx={{ display: { xs: 'none', sm: 'block' } }}
+                                                >
+                                                    {activity.details}
+                                                </Typography>
+                                            </Stack>
+                                        </TableCell>
+                                    </TableRow>
                                     ))
                                 )}
                             </TableBody>

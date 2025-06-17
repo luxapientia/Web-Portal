@@ -8,6 +8,7 @@ import TransferSetting from '@/components/admin/platform-setting/TransferSetting
 import WithdrawSetting from '@/components/admin/platform-setting/WithdrawSetting';
 import PromotionSetting from '@/components/admin/platform-setting/PromotionSetting';
 import DomainSetting from '@/components/admin/platform-setting/DomainSetting';
+import SystemWalletSetting from '@/components/admin/platform-setting/SystemWalletSetting';
 import AdminLayout from '@/components/admin/AdminLayout';
 
 interface TabPanelProps {
@@ -47,6 +48,7 @@ export default function InterestSetupPage() {
         { label: "Withdraw Settings", component: <WithdrawSetting /> },
         { label: "Promotion Settings", component: <PromotionSetting /> },
         { label: "Domain Settings", component: <DomainSetting /> },
+        { label: "System Wallets", component: <SystemWalletSetting /> },
     ];
 
     return (
