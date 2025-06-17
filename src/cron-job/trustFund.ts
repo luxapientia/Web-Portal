@@ -1,6 +1,6 @@
 import cron from 'node-cron';
-import { TrustFund, TrustFundModel } from "@/models/TrustFund";
-import { trustFund as trustFundController } from '@/controllers';
+import { TrustFund, TrustFundModel } from '../models/TrustFund';
+import { trustFund as trustFundController } from '../controllers';
 
 async function checkTrustFund() {
     const trustFunds = await TrustFundModel.find({
