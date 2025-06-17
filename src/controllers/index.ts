@@ -241,7 +241,8 @@ export const getPromotionReward = async (userId: string) => {
             amount: currentVipLevel.promotionReward,
             startDate: new Date(),
             endDate: new Date(),
-            released: true
+            released: true,
+            reachedLevel: currentVipLevel.level
         }) as InterestReward;
     }
 }
