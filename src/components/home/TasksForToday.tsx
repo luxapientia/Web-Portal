@@ -10,7 +10,11 @@ import React, { useEffect, useState, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { DailyTask } from '@/models/DailyTask';
 
-export default function TasksForToday() {
+interface TasksForTodayProps {
+  onAccountValueChange?: () => void;
+}
+
+export default function TasksForToday({ onAccountValueChange }: TasksForTodayProps) {
   const [taskLimit, setTaskLimit] = useState<number>(0);
   const [remainingTasks, setRemainingTasks] = useState<number>(0);
   const [tasks, setTasks] = useState<DailyTask[]>([]);
@@ -129,6 +133,10 @@ export default function TasksForToday() {
       toast.success('Task completed successfully!');
       setReward(result.data.reward);
       setTasks(result.data.tasks);
+
+      if (onAccountValueChange) {
+        onAccountValueChange();
+      }
     } catch {
       toast.error('Failed to complete task');
     } finally {

@@ -21,7 +21,8 @@ export default function HomePage() {
     const [tab, setTab] = useState(0);
     const invitationLink = "https://yourapp.com/invite/aeryyeu76";
     const [loading, setLoading] = useState(true);
-
+    const [assetValueKey, setAssetValueKey] = useState(0);
+    const [vipLevelKey, setVipLevelKey] = useState(0);
     useEffect(() => {
         setTimeout(() => setLoading(false), 800);
     }, []);
@@ -33,6 +34,11 @@ export default function HomePage() {
     };
 
     const handleTabChange = (_: unknown, newValue: number) => setTab(newValue);
+
+    const handleAccountValueChange = () => {
+        setAssetValueKey(prev => prev + 1);
+        setVipLevelKey(prev => prev + 1);
+    };
 
     return (
         <Layout>
@@ -50,11 +56,11 @@ export default function HomePage() {
             >
                 <Stack spacing={4}>
                     {/* VIP Promotions */}
-                    <VipPromotions />
+                    <VipPromotions key={vipLevelKey} />
 
                     {/* Financial Overview */}
                     <Stack direction={{ xs: 'column', md: 'row' }} spacing={3}>
-                        <AssetAccountValue />
+                        <AssetAccountValue key={assetValueKey} />
                         <TeamContribution
                             invitationLink={invitationLink}
                             copied={copied}
@@ -77,6 +83,7 @@ export default function HomePage() {
                                     <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 2 }} />
                                 ) : (
                                     <TasksForToday
+                                        onAccountValueChange={handleAccountValueChange}
                                     />
                                 )}
                             </CardContent>
