@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Box, Container, Tab, Tabs, Typography } from '@mui/material';
+import { Box, Container, Tab, Tabs, Typography, useTheme, useMediaQuery } from '@mui/material';
 import InterestMatrixTable from '@/components/admin/platform-setting/InterestMatrixTable';
 import TrustPlanTable from '@/components/admin/platform-setting/TrustPlanTable';
 import TransferSetting from '@/components/admin/platform-setting/TransferSetting';
@@ -35,10 +35,21 @@ function TabPanel(props: TabPanelProps) {
 
 export default function InterestSetupPage() {
     const [tabValue, setTabValue] = useState(0);
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
         setTabValue(newValue);
     };
+
+    const tabConfig = [
+        { label: "Interest Matrix", component: <InterestMatrixTable /> },
+        { label: "Trust Plans", component: <TrustPlanTable /> },
+        { label: "Transfer Settings", component: <TransferSetting /> },
+        { label: "Withdraw Settings", component: <WithdrawSetting /> },
+        { label: "Promotion Settings", component: <PromotionSetting /> },
+        { label: "Domain Settings", component: <DomainSetting /> },
+    ];
 
     return (
         <AdminLayout>
@@ -48,63 +59,51 @@ export default function InterestSetupPage() {
                         Platform Settings
                     </Typography>
                     
-                    <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                    <Box sx={{ 
+                        borderBottom: 1, 
+                        borderColor: 'divider',
+                        width: '100%',
+                        bgcolor: 'background.paper'
+                    }}>
                         <Tabs 
                             value={tabValue} 
                             onChange={handleTabChange}
                             aria-label="platform settings tabs"
+                            variant="scrollable"
+                            scrollButtons="auto"
+                            allowScrollButtonsMobile
+                            sx={{
+                                '& .MuiTabs-scrollButtons': {
+                                    '&.Mui-disabled': { opacity: 0.3 },
+                                },
+                                '& .MuiTab-root': {
+                                    fontSize: { xs: '0.8rem', sm: '0.875rem' },
+                                    minWidth: { xs: 'auto', sm: 160 },
+                                    px: { xs: 1, sm: 2 },
+                                    minHeight: { xs: 48, sm: 56 },
+                                },
+                            }}
                         >
-                            <Tab 
-                                label="Interest Matrix" 
-                                id="interest-tab-0"
-                                aria-controls="interest-tabpanel-0"
-                            />
-                            <Tab 
-                                label="Trust Plans" 
-                                id="interest-tab-1"
-                                aria-controls="interest-tabpanel-1"
-                            />
-                            <Tab 
-                                label="Transfer Settings" 
-                                id="interest-tab-2"
-                                aria-controls="interest-tabpanel-2"
-                            />
-                            <Tab 
-                                label="Withdraw Settings" 
-                                id="interest-tab-3"
-                                aria-controls="interest-tabpanel-3"
-                            />
-                            <Tab 
-                                label="Promotion Settings" 
-                                id="interest-tab-4"
-                                aria-controls="interest-tabpanel-4"
-                            />
-                            <Tab 
-                                label="Domain Settings" 
-                                id="interest-tab-5"
-                                aria-controls="interest-tabpanel-5"
-                            />
+                            {tabConfig.map((tab, index) => (
+                                <Tab 
+                                    key={index}
+                                    label={tab.label}
+                                    id={`interest-tab-${index}`}
+                                    aria-controls={`interest-tabpanel-${index}`}
+                                    sx={{
+                                        textTransform: 'none',
+                                        fontWeight: 600,
+                                    }}
+                                />
+                            ))}
                         </Tabs>
                     </Box>
 
-                    <TabPanel value={tabValue} index={0}>
-                        <InterestMatrixTable />
-                    </TabPanel>
-                    <TabPanel value={tabValue} index={1}>
-                        <TrustPlanTable />
-                    </TabPanel>
-                    <TabPanel value={tabValue} index={2}>
-                        <TransferSetting />
-                    </TabPanel>
-                    <TabPanel value={tabValue} index={3}>
-                        <WithdrawSetting />
-                    </TabPanel>
-                    <TabPanel value={tabValue} index={4}>
-                        <PromotionSetting />
-                    </TabPanel>
-                    <TabPanel value={tabValue} index={5}>
-                        <DomainSetting />
-                    </TabPanel>
+                    {tabConfig.map((tab, index) => (
+                        <TabPanel key={index} value={tabValue} index={index}>
+                            {tab.component}
+                        </TabPanel>
+                    ))}
                 </Box>
             </Container>
         </AdminLayout>
