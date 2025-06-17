@@ -7,6 +7,7 @@ import TrustPlanTable from '@/components/admin/platform-setting/TrustPlanTable';
 import TransferSetting from '@/components/admin/platform-setting/TransferSetting';
 import WithdrawSetting from '@/components/admin/platform-setting/WithdrawSetting';
 import PromotionSetting from '@/components/admin/platform-setting/PromotionSetting';
+import DomainSetting from '@/components/admin/platform-setting/DomainSetting';
 import AdminLayout from '@/components/admin/AdminLayout';
 
 interface TabPanelProps {
@@ -78,6 +79,11 @@ export default function InterestSetupPage() {
                                 id="interest-tab-4"
                                 aria-controls="interest-tabpanel-4"
                             />
+                            <Tab 
+                                label="Domain Settings" 
+                                id="interest-tab-5"
+                                aria-controls="interest-tabpanel-5"
+                            />
                         </Tabs>
                     </Box>
 
@@ -95,6 +101,9 @@ export default function InterestSetupPage() {
                     </TabPanel>
                     <TabPanel value={tabValue} index={4}>
                         <PromotionSetting />
+                    </TabPanel>
+                    <TabPanel value={tabValue} index={5}>
+                        <DomainSetting />
                     </TabPanel>
                 </Box>
             </Container>

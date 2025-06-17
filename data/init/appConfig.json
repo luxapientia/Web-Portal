@@ -11,5 +11,6 @@
   "withdrawMaxLimit": 20000,
   "withdrawPeriod": 3,
   "firstDepositBonusPercentage": 100,
-  "firstDepositBonusPeriod": 180
+  "firstDepositBonusPeriod": 180,
+  "domain": "cryptobit.com"
 }

@@ -12,6 +12,7 @@ export interface AppConfig extends Document {
   withdrawPeriod: number;
   firstDepositBonusPercentage: number;
   firstDepositBonusPeriod: number;
+  domain: string;
 }
 
 const AppConfigSchema: Schema = new Schema({
@@ -24,6 +25,7 @@ const AppConfigSchema: Schema = new Schema({
   withdrawPeriod: { type: Number, required: true },
   firstDepositBonusPercentage: { type: Number, required: true },
   firstDepositBonusPeriod: { type: Number, required: true },
+  domain: { type: String, required: true },
 }, {
   collection: AppConfigCollection
 });
