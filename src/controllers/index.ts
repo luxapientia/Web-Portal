@@ -159,33 +159,32 @@ export const getDailyTaskReward = async (userId: string, rewardPercentage: numbe
     const user = await UserModel.findById(userId) as User;
     const startVipLevel = await getVipLevel(user.id);
 
-    let selfRewardPercentage = rewardPercentage;
+    let selfRewardPercentage = 100;
 
     const level1InvitingUser = await UserModel.findOne({ myInvitationCode: user.invitationCode }) as User;
 
     if (level1InvitingUser) {
-        console.log('==============================');
         const teamCommisionLevel1 = await TeamCommisionLevelModel.findOne({ level: 1 }) as TeamCommisionLevel;
         selfRewardPercentage -= teamCommisionLevel1.percentage;
-        await getTeamCommisionReward(level1InvitingUser.id, user.accountValue.totalAssetValue * teamCommisionLevel1.percentage / 100);
+        await getTeamCommisionReward(level1InvitingUser.id, user.accountValue.totalAssetValue * teamCommisionLevel1.percentage / 100 * rewardPercentage /100);
 
         const level2InvitingUser = await UserModel.findOne({ myInvitationCode: level1InvitingUser.invitationCode }) as User;
         if (level2InvitingUser) {
             const teamCommisionLevel2 = await TeamCommisionLevelModel.findOne({ level: 2 }) as TeamCommisionLevel;
             selfRewardPercentage -= teamCommisionLevel2.percentage;
-            await getTeamCommisionReward(level2InvitingUser.id, user.accountValue.totalAssetValue * teamCommisionLevel2.percentage / 100);
+            await getTeamCommisionReward(level2InvitingUser.id, user.accountValue.totalAssetValue * teamCommisionLevel2.percentage / 100 * rewardPercentage /100);
 
             const level3InvitingUser = await UserModel.findOne({ myInvitationCode: level2InvitingUser.invitationCode }) as User;
             if (level3InvitingUser) {
                 const teamCommisionLevel3 = await TeamCommisionLevelModel.findOne({ level: 3 }) as TeamCommisionLevel;
                 selfRewardPercentage -= teamCommisionLevel3.percentage;
-                await getTeamCommisionReward(level3InvitingUser.id, user.accountValue.totalAssetValue * teamCommisionLevel3.percentage / 100);
+                await getTeamCommisionReward(level3InvitingUser.id, user.accountValue.totalAssetValue * teamCommisionLevel3.percentage / 100 * rewardPercentage /100);
             }
         }
 
     }
 
-    const rewardAmount = user.accountValue.totalAssetValue * selfRewardPercentage / 100;
+    const rewardAmount = user.accountValue.totalAssetValue * rewardPercentage / 100 * selfRewardPercentage / 100;
     user.accountValue.totalAssetValue += rewardAmount;
     user.accountValue.totalReleasedInterest += rewardAmount;
     await user.save();

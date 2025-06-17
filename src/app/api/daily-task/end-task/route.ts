@@ -26,12 +26,12 @@ export async function POST(request: NextRequest) {
 
         const tasks = await DailyTaskModel.find({ userId: user?.id});
 
-        await getDailyTaskReward(user?.id, vipLevel.dailyTasksRewardPercentage);
+        await getDailyTaskReward(user?.id, vipLevel.dailyTasksRewardPercentage / vipLevel.dailyTasksCountAllowed);
 
         return NextResponse.json({
             success: true,
             data: {
-                reward: vipLevel.dailyTasksRewardPercentage,
+                reward: vipLevel.dailyTasksRewardPercentage / vipLevel.dailyTasksCountAllowed,
                 tasks
             }
         });
