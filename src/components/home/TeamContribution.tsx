@@ -4,6 +4,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import QRCode from 'qrcode'
 import toast from 'react-hot-toast';
 
 interface TeamContributionProps {
@@ -16,31 +17,49 @@ export default function TeamContribution({ invitationLink, copied, handleCopy }:
   const user = useSession();
   const router = useRouter();
   const [teamEarnings, setTeamEarnings] = useState<number>(0);
+  const [shareLink, setShareLink] = useState<string>('');
 
   const handleViewTeamStatus = () => {
     router.push('/home/team-contribution');
   };
 
   useEffect(() => {
-
-    const fetchTeamEarnings = async () => {
-      try {
-
-        const response = await fetch('/api/team/earnings');
-        const data = await response.json();
-        if (!response.ok) {
-          throw new Error(data.error || 'Failed to fetch team earnings');
-        }
-        if (data.success) {
-          setTeamEarnings(data.data.teamEarnings);
-        }
-      } catch {
-        toast.error('Failed to fetch team earnings');
-      }
-    };
     fetchTeamEarnings();
-
+    fetchDomain();
   }, []);
+
+  const fetchTeamEarnings = async () => {
+    try {
+
+      const response = await fetch('/api/team/earnings');
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch team earnings');
+      }
+      if (data.success) {
+        setTeamEarnings(data.data.teamEarnings);
+      }
+    } catch {
+      toast.error('Failed to fetch team earnings');
+    }
+  };
+
+  const fetchDomain = async () => {
+    try {
+      const response = await fetch('/api/app-config');
+      const data = await response.json();
+      if (!response.ok) {
+        toast.error('Failed to fetch domain');
+      }
+      const domain = data.domain;
+      QRCode.toDataURL(invitationLink)
+        .then(url => setShareLink(`${domain}/${url}`))
+        .catch(err => console.error('Error generating QR code:', err));
+    } catch (error) {
+      toast.error('Failed to fetch domain');
+    }
+
+  };
 
 
   return (
@@ -75,13 +94,13 @@ export default function TeamContribution({ invitationLink, copied, handleCopy }:
         </Typography>
         <Stack direction="row" spacing={1} alignItems="center" mb={2}>
           <TextField
-            value={invitationLink}
+            value={shareLink}
             InputProps={{
               readOnly: true,
               endAdornment: (
                 <InputAdornment position="end">
                   <Tooltip title={copied ? 'Copied!' : 'Copy'}>
-                    <IconButton onClick={() => handleCopy(invitationLink)}>
+                    <IconButton onClick={() => handleCopy(shareLink)}>
                       <ContentCopyIcon fontSize="small" />
                     </IconButton>
                   </Tooltip>
