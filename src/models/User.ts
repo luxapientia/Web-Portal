@@ -30,7 +30,8 @@ export interface User extends Document {
     totalAssetValue: number,
     totalWithdrawable: number,
     totalDeposited: number,
-    totalInterest: number,
+    totalReleasedInterest: number,
+    totalUnreleasedInterest: number,
     totalTrustReleased: number,
     totalInTrustFund: number
   }
@@ -69,7 +70,8 @@ const UserSchema: Schema = new Schema({
     totalAssetValue: { type: Number, required: true, default: 0 },
     totalWithdrawable: { type: Number, required: true, default: 0 },
     totalDeposited: { type: Number, required: true, default: 0 },
-    totalInterest: { type: Number, required: true, default: 0 },
+    totalReleasedInterest: { type: Number, required: true, default: 0 },
+    totalUnreleasedInterest: { type: Number, required: true, default: 0 },
     totalTrustReleased: { type: Number, required: true, default: 0 },
     totalInTrustFund: { type: Number, required: true, default: 0 }
   }
