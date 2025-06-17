@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Box, Container, Tab, Tabs, Typography, useTheme, useMediaQuery } from '@mui/material';
+import { Box, Container, Tab, Tabs, Typography } from '@mui/material';
 import InterestMatrixTable from '@/components/admin/platform-setting/InterestMatrixTable';
 import TrustPlanTable from '@/components/admin/platform-setting/TrustPlanTable';
 import TransferSetting from '@/components/admin/platform-setting/TransferSetting';
@@ -35,8 +35,6 @@ function TabPanel(props: TabPanelProps) {
 
 export default function InterestSetupPage() {
     const [tabValue, setTabValue] = useState(0);
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
         setTabValue(newValue);
