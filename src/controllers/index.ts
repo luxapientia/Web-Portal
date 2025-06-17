@@ -36,7 +36,7 @@ export const getVipLevel = async (userId: string): Promise<InterestMatrix> => {
     const vipLevel = await InterestMatrixModel.find({
         startAccountValue: { $lte: accountValue },
         startActiveMembers: { $lte: totalActiveMembers },
-    }).sort({ startAccountValue: -1 }).limit(1) as InterestMatrix[];
+    }).sort({ level: -1 }).limit(1) as InterestMatrix[];
 
     if (!vipLevel) {
         const vipLevel1 = await InterestMatrixModel.findOne({level: 1}) as InterestMatrix;
