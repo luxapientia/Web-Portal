@@ -16,6 +16,7 @@ declare module 'next-auth' {
       name: string;
       image?: string;
       role: string;
+      status: string;
       myInvitationCode: string;
     }
   }
@@ -26,6 +27,7 @@ declare module 'next-auth' {
     name: string;
     image?: string;
     role: string;
+    status: string;
     myInvitationCode: string;
   }
 }
@@ -38,6 +40,7 @@ declare module 'next-auth/jwt' {
     name: string;
     image?: string;
     role: string;
+    status: string;
     myInvitationCode: string;
   }
 }
@@ -206,6 +209,7 @@ export const authOptions: NextAuthOptions = {
               name: user.name,
               image: user.image,
               role: user.role,
+              status: user.status,
               myInvitationCode: user.myInvitationCode,
             };
           }
@@ -233,6 +237,7 @@ export const authOptions: NextAuthOptions = {
             name: user.name,
             image: user.image,
             role: user.role,
+            status: user.status,
             myInvitationCode: user.myInvitationCode,
           };
         } catch {
@@ -249,6 +254,7 @@ export const authOptions: NextAuthOptions = {
         token.name = user.name;
         token.image = user.image;
         token.role = user.role;
+        token.status = user.status;
         token.myInvitationCode = user.myInvitationCode;
       }
       return token;
@@ -260,6 +266,7 @@ export const authOptions: NextAuthOptions = {
         session.user.name = token.name;
         session.user.image = token.image;
         session.user.role = token.role;
+        session.user.status = token.status;
         session.user.myInvitationCode = token.myInvitationCode;
       }
       return session;
