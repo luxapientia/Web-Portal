@@ -17,10 +17,11 @@ export default function AssetAccountValue() {
         const data = await response.json();
         if (!response.ok) {
           throw new Error(data.error || 'Failed to fetch account value');
-        } 
+        }
 
         setAccountValue(data.accountValue);
         setProfit(data.profit);
+        console.log(profit);
         setEarningToday(data.earningToday);
       } catch {
         toast.error('Failed to fetch account value');
@@ -57,17 +58,14 @@ export default function AssetAccountValue() {
           ${accountValue.toFixed(2)}
         </Typography>
         <Typography variant="body2" color="text.secondary" mt={1}>
-          Total Profit as of now
+          Total Earning as of now
         </Typography>
         <Typography variant="h6" color="#ff9800" fontWeight={700}>
-          ${profit.toFixed(2)}
-        </Typography>
-        <Typography variant="caption" color="text.secondary">
-          Earning Today <span style={{ color: '#388e3c', fontWeight: 700 }}>${earningToday.toFixed(2)}</span>
+          ${earningToday.toFixed(2)}
         </Typography>
       </CardContent>
 
-      <Box sx={{ 
+      <Box sx={{
         position: 'absolute',
         bottom: 0,
         left: 0,
