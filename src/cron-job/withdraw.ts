@@ -2,7 +2,7 @@ import cron from 'node-cron';
 import { Transaction, TransactionModel } from '../models/Transaction';
 import { walletService } from '../services/Wallet';
 import { CryptoPriceModel } from '../models/CryptoPrice';
-import { withdraw } from '@/controllers';
+import { withdraw } from '../controllers';
 
 // Function to check transaction status
 async function checkPendingTransactions() {
