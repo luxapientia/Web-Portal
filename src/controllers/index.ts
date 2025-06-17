@@ -38,7 +38,7 @@ export const getVipLevel = async (userId: string): Promise<InterestMatrix> => {
         startActiveMembers: { $lte: totalActiveMembers },
     }).sort({ level: -1 }).limit(1) as InterestMatrix[];
 
-    if (!vipLevel) {
+    if (vipLevel.length === 0) {
         const vipLevel1 = await InterestMatrixModel.findOne({level: 1}) as InterestMatrix;
         return vipLevel1;
     }
@@ -164,6 +164,7 @@ export const getDailyTaskReward = async (userId: string, rewardPercentage: numbe
     const level1InvitingUser = await UserModel.findOne({ myInvitationCode: user.invitationCode }) as User;
 
     if (level1InvitingUser) {
+        console.log('==============================');
         const teamCommisionLevel1 = await TeamCommisionLevelModel.findOne({ level: 1 }) as TeamCommisionLevel;
         selfRewardPercentage -= teamCommisionLevel1.percentage;
         await getTeamCommisionReward(level1InvitingUser.id, user.accountValue.totalAssetValue * teamCommisionLevel1.percentage / 100);
