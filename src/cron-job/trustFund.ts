@@ -1,6 +1,6 @@
 import cron from 'node-cron';
 import { TrustFund, TrustFundModel } from "@/models/TrustFund";
-import { User, UserModel } from "@/models/User";
+import { trustFund as trustFundController } from '@/controllers';
 
 async function checkTrustFund() {
     const trustFunds = await TrustFundModel.find({
@@ -9,16 +9,7 @@ async function checkTrustFund() {
     }) as TrustFund[];
     console.log(`[${new Date().toISOString()}] Checking ${trustFunds.length} trust funds...`);
     for (const trustFund of trustFunds) {
-        const user = await UserModel.findById(trustFund.userId) as User;
-        if (!user) {
-            continue;
-        }
-
-        user.accountValue.totalWithdrawable += trustFund.amount;
-        user.accountValue.totalAssetValue += trustFund.amount;
-        user.accountValue.totalInTrustFund -= trustFund.amount;
-        user.accountValue.totalTrustReleased += trustFund.amount;
-        await user.save();
+        await trustFundController(trustFund.userId as string, trustFund.amount);
         trustFund.released = true;
         await trustFund.save();
     }
