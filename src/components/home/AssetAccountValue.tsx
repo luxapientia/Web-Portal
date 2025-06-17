@@ -54,7 +54,7 @@ export default function AssetAccountValue() {
           </Tooltip>
         </Stack>
         <Typography variant="h3" color="success.main" fontWeight={900} mt={1} sx={{ fontSize: { xs: '2rem', md: '2.5rem' } }}>
-          ${accountValue}
+          ${accountValue.toFixed(2)}
         </Typography>
         <Typography variant="body2" color="text.secondary" mt={1}>
           Total Profit as of now
