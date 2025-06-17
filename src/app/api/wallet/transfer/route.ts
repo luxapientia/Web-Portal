@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
             await TransactionModel.create({
                 fromUserId: user._id,
                 toUserId: recipientUser._id,
-                amount,
+                amountInUSD: amount,
                 type: 'transfer',
                 remark: note,
                 startDate: new Date(),
