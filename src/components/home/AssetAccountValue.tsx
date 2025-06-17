@@ -2,8 +2,10 @@ import { Card, CardContent, Stack, Typography, Tooltip, Button, Box } from '@mui
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 
 export default function AssetAccountValue() {
+  const router = useRouter();
   const [accountValue, setAccountValue] = useState<number>(0);
   const [profit, setProfit] = useState<number>(0);
   const [earningToday, setEarningToday] = useState<number>(0);
@@ -85,6 +87,7 @@ export default function AssetAccountValue() {
             ':hover': { boxShadow: 3, transform: 'translateY(-2px)' },
             py: { xs: 1, md: 1.5 },
           }}
+          onClick={() => router.push('/wallet/deposit')}
         >
           Invest More...
         </Button>
