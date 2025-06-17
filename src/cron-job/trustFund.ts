@@ -13,7 +13,11 @@ async function checkTrustFund() {
         if (!user) {
             continue;
         }
+
         user.accountValue.totalWithdrawable += trustFund.amount;
+        user.accountValue.totalAssetValue += trustFund.amount;
+        user.accountValue.totalInTrustFund -= trustFund.amount;
+        user.accountValue.totalTrustReleased += trustFund.amount;
         await user.save();
         trustFund.released = true;
         await trustFund.save();
