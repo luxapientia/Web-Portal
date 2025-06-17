@@ -55,7 +55,7 @@ export default function TeamContribution({ invitationLink, copied, handleCopy }:
       QRCode.toDataURL(invitationLink)
         .then(url => setShareLink(`${domain}/${url}`))
         .catch(err => console.error('Error generating QR code:', err));
-    } catch (error) {
+    } catch {
       toast.error('Failed to fetch domain');
     }
 
