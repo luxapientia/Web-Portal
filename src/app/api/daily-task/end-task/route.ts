@@ -3,7 +3,7 @@ import { UserModel } from '@/models/User';
 import { DailyTaskModel } from '@/models/DailyTask';
 import { authOptions } from '@/config';
 import { getServerSession } from 'next-auth';
-import { getVipLevel } from '@/controllers';
+import { getDailyTaskReward, getVipLevel } from '@/controllers';
 
 export async function POST(request: NextRequest) {
     try {
@@ -25,6 +25,8 @@ export async function POST(request: NextRequest) {
         }
 
         const tasks = await DailyTaskModel.find({ userId: user?.id});
+
+        await getDailyTaskReward(user?.id, vipLevel.dailyTasksRewardPercentage);
 
         return NextResponse.json({
             success: true,
