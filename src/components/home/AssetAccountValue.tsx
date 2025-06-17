@@ -60,10 +60,10 @@ export default function AssetAccountValue() {
           Total Profit as of now
         </Typography>
         <Typography variant="h6" color="#ff9800" fontWeight={700}>
-          ${profit}
+          ${profit.toFixed(2)}
         </Typography>
         <Typography variant="caption" color="text.secondary">
-          Earning Today <span style={{ color: '#388e3c', fontWeight: 700 }}>${earningToday}</span>
+          Earning Today <span style={{ color: '#388e3c', fontWeight: 700 }}>${earningToday.toFixed(2)}</span>
         </Typography>
       </CardContent>
 
