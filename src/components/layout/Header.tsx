@@ -31,6 +31,7 @@ const publicNavItems: { label: string, path: string }[] = [
 const privateNavItems = [
   { label: "Home", path: "/home" },
   { label: "Wallet", path: "/wallet" },
+  { label: "Support", path: "/support" },
 ];
 
 interface HeaderProps {
