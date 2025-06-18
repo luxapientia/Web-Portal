@@ -37,36 +37,30 @@ export default function VIPPlanTab() {
   const [nextPlan, setNextPlan] = useState<InterestMatrix | null>(null);
   const [activeMembers, setActiveMembers] = useState(0);
   const theme = useTheme();
-
-  useEffect(() => {
-    if (session) {
-      fetchBalance();
-    }
-  }, [session]);
-
+  
   useEffect(() => {
     fetchVIPPlans();
   }, []);
+  
+  useEffect(() => {
+    fetchAccountValue();
+  }, [plans]);
 
-  const fetchBalance = async () => {
+  const fetchAccountValue = async () => {
     try {
-      // setLoading(true);
-      // const balanceResponse = await fetch("/api/wallet/balance", {
-      //   method: "GET",
-      // });
+      const response = await fetch('/api/account-asset');
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch account value');
+      }
 
-      // if (balanceResponse) {
-      //   const balanceData = await balanceResponse.json();
-      //   if (balanceData.success) {
-      //     setBalance(balanceData.balance || 0);
-      //   }
-      // }
-      setBalance(0);
-    } catch (error) {
-      console.error("Error fetching VIP plan data:", error);
-      toast.error("Failed to load VIP plan information");
-    } finally {
-      setLoading(false);
+      setBalance(data.accountValue);
+      setCurrentPlan(data.vipLevel);
+      const nextLevel = data.vipLevel.level + 1;
+      const nextPlan = plans.find(plan => plan.level === nextLevel) || null;
+      setNextPlan(nextPlan);
+    } catch {
+      toast.error('Failed to fetch account value');
     }
   };
 
@@ -79,28 +73,28 @@ export default function VIPPlanTab() {
       const interestMatrix = await response.json();
       if (interestMatrix.success && interestMatrix.data) {
         setPlans(interestMatrix.data);
-        const userBalance = balance || 0;
-        const sortedInterestMatrix = [...interestMatrix.data].sort(
-          (a, b) => a.startAccountValue - b.startAccountValue
-        );
-        let current = null;
-        let next = null;
-        for (let i = 0; i < sortedInterestMatrix.length; i++) {
-          const plan = sortedInterestMatrix[i];
-          if (
-            userBalance >= plan.startAccountValue &&
-            userBalance <= plan.endAccountValue
-          ) {
-            current = plan;
-            next = sortedInterestMatrix[i + 1] || null;
-            break;
-          }
-        }
-        if (!current && sortedInterestMatrix.length > 0) {
-          next = sortedInterestMatrix[0];
-        }
-        setCurrentPlan(current);
-        setNextPlan(next);
+        // const userBalance = balance || 0;
+        // const sortedInterestMatrix = [...interestMatrix.data].sort(
+        //   (a, b) => a.startAccountValue - b.startAccountValue
+        // );
+        // let current = null;
+        // let next = null;
+        // for (let i = 0; i < sortedInterestMatrix.length; i++) {
+        //   const plan = sortedInterestMatrix[i];
+        //   if (
+        //     userBalance >= plan.startAccountValue &&
+        //     userBalance <= plan.endAccountValue
+        //   ) {
+        //     current = plan;
+        //     next = sortedInterestMatrix[i + 1] || null;
+        //     break;
+        //   }
+        // }
+        // if (!current && sortedInterestMatrix.length > 0) {
+        //   next = sortedInterestMatrix[0];
+        // }
+        // setCurrentPlan(current);
+        // setNextPlan(next);
       }
     }
     setActiveMembers(8); // Example value
@@ -296,11 +290,10 @@ export default function VIPPlanTab() {
                 </ListItemIcon>
                 <ListItemText
                   primary="Daily Tasks"
-                  secondary={`${
-                    currentPlan.dailyTasksCountAllowed
-                  } tasks allowed daily, earning $${currentPlan.dailyTasksRewardPercentage.toFixed(
-                    2
-                  )} USD per task`}
+                  secondary={`${currentPlan.dailyTasksCountAllowed
+                    } tasks allowed daily, earning $${currentPlan.dailyTasksRewardPercentage.toFixed(
+                      2
+                    )} USD per task`}
                 />
               </ListItem>
             </List>
