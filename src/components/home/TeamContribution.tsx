@@ -25,7 +25,7 @@ export default function TeamContribution({ invitationLink, copied, handleCopy }:
 
   useEffect(() => {
     fetchTeamEarnings();
-    fetchDomain();
+    fetchQrCodeUrl();
   }, []);
 
   const fetchTeamEarnings = async () => {
@@ -44,16 +44,16 @@ export default function TeamContribution({ invitationLink, copied, handleCopy }:
     }
   };
 
-  const fetchDomain = async () => {
+  const fetchQrCodeUrl = async () => {
     try {
-      const response = await fetch('/api/app-config');
-      const data = await response.json();
-      if (!response.ok) {
-        toast.error('Failed to fetch domain');
-      }
-      const domain = data.domain;
+      // const response = await fetch('/api/app-config');
+      // const data = await response.json();
+      // if (!response.ok) {
+      //   toast.error('Failed to fetch domain');
+      // }
+      // const domain = data.domain;
       QRCode.toDataURL(invitationLink)
-        .then(url => setShareLink(`${domain}/${url}`))
+        .then(url => setShareLink(url))
         .catch(err => console.error('Error generating QR code:', err));
     } catch {
       toast.error('Failed to fetch domain');
