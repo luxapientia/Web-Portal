@@ -16,6 +16,9 @@ const publicRoutes = [
     '/api/auth/gen-invitation-code',
     '/api/app-config',
     '/help',
+    '/api/help/daily-task',
+    '/api/help/team_commission',
+    '/api/help/viplevel',
 ];
 
 export async function middleware(req: NextRequest) {
