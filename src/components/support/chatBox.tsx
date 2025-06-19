@@ -10,10 +10,7 @@ import {
   Paper,
   IconButton,
   Dialog,
-  DialogContent,
   Stack,
-  useTheme,
-  Divider,
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
@@ -35,7 +32,6 @@ interface ChatBoxProps {
 }
 
 const ChatBox = ({ ticketId, ticketSubject, open, onClose }: ChatBoxProps) => {
-  const theme = useTheme();
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([
     {

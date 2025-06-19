@@ -25,11 +25,9 @@ import {
   Assignment,
 } from "@mui/icons-material";
 import toast from "react-hot-toast";
-import { useSession } from "next-auth/react";
 import { InterestMatrix } from "@/models/InterestMatrix";
 
 export default function VIPPlanTab() {
-  const { data: session } = useSession();
   const [loading, setLoading] = useState(true);
   const [balance, setBalance] = useState(0);
   const [plans, setPlans] = useState<InterestMatrix[]>([]);

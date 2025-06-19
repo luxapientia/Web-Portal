@@ -4,7 +4,6 @@ import { Card, Typography, Box, Link, Divider, useTheme, useMediaQuery, Stepper,
 import LockIcon from '@mui/icons-material/Lock';
 import EmailIcon from '@mui/icons-material/Email';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import BadgeIcon from '@mui/icons-material/Badge';
 import KeyIcon from '@mui/icons-material/Key';
 
 export default function AuthenticationSection() {

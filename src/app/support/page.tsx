@@ -293,7 +293,7 @@ const SupportPage = () => {
                               height: 8,
                               borderRadius: '50%',
                               backgroundColor: getPriorityColor(ticket.priority),
-                              boxShadow: theme => `0 0 0 2px ${alpha(getPriorityColor(ticket.priority), 0.2)}`,
+                              boxShadow: `0 0 0 2px ${alpha(getPriorityColor(ticket.priority), 0.2)}`,
                             }}
                           />
                           <Typography 
