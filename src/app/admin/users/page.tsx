@@ -446,69 +446,69 @@ export default function UserManagementPage() {
                                 </TableRow>
                             ) : (
                                 users.map((user: User, index: number) => (
-                                    <TableRow 
-                                        key={index}
-                                        hover
-                                        sx={{
-                                            '&:last-child td, &:last-child th': { border: 0 },
-                                            transition: 'background-color 0.2s',
-                                        }}
-                                    >
-                                        <TableCell>
-                                            <Stack direction="row" spacing={2} alignItems="center">
-                                                <Avatar 
-                                                    sx={{ width: 40, height: 40 }}
-                                                >
-                                                    {user.name.charAt(0)}
-                                                </Avatar>
-                                                <Box>
-                                                    <Typography variant="subtitle2">
-                                                        {user.name}
-                                                    </Typography>
-                                                </Box>
-                                            </Stack>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Stack spacing={0.5}>
-                                                <Typography variant="body2">{user.email}</Typography>
-                                                <Typography variant="caption" color="text.secondary">
-                                                    {user.phone}
+                                <TableRow 
+                                    key={index}
+                                    hover
+                                    sx={{
+                                        '&:last-child td, &:last-child th': { border: 0 },
+                                        transition: 'background-color 0.2s',
+                                    }}
+                                >
+                                    <TableCell>
+                                        <Stack direction="row" spacing={2} alignItems="center">
+                                            <Avatar 
+                                                sx={{ width: 40, height: 40 }}
+                                            >
+                                                {user.name.charAt(0)}
+                                            </Avatar>
+                                            <Box>
+                                                <Typography variant="subtitle2">
+                                                    {user.name}
                                                 </Typography>
-                                            </Stack>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Chip
-                                                label={user.role}
-                                                size="small"
-                                                color={user.role === 'admin' ? 'primary' : 'default'}
-                                                sx={{ 
-                                                    fontWeight: 500,
-                                                    textTransform: 'capitalize',
-                                                    cursor: 'pointer',
-                                                }}
-                                                onClick={() => handleRoleToggle(user._id)}
-                                            />
-                                        </TableCell>
-                                        <TableCell>
-                                            <Chip
-                                                label={user.status}
-                                                size="small"
-                                                sx={{
-                                                    bgcolor: getStatusColor(user.status).bg,
-                                                    color: `${getStatusColor(user.status).color}.main`,
-                                                    fontWeight: 500,
-                                                    textTransform: 'capitalize',
-                                                    cursor: 'pointer',
-                                                }}
-                                                onClick={() => handleStatusToggle(user._id)}
-                                            />
-                                        </TableCell>
-                                        <TableCell>
-                                            <Typography variant="body2">
-                                                {new Date(user.createdAt).toLocaleDateString()}
+                                            </Box>
+                                        </Stack>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Stack spacing={0.5}>
+                                            <Typography variant="body2">{user.email}</Typography>
+                                            <Typography variant="caption" color="text.secondary">
+                                                {user.phone}
                                             </Typography>
-                                        </TableCell>
-                                    </TableRow>
+                                        </Stack>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Chip
+                                            label={user.role}
+                                            size="small"
+                                            color={user.role === 'admin' ? 'primary' : 'default'}
+                                            sx={{ 
+                                                fontWeight: 500,
+                                                textTransform: 'capitalize',
+                                                cursor: 'pointer',
+                                            }}
+                                            onClick={() => handleRoleToggle(user._id)}
+                                        />
+                                    </TableCell>
+                                    <TableCell>
+                                        <Chip
+                                            label={user.status}
+                                            size="small"
+                                            sx={{
+                                                bgcolor: getStatusColor(user.status).bg,
+                                                color: `${getStatusColor(user.status).color}.main`,
+                                                fontWeight: 500,
+                                                textTransform: 'capitalize',
+                                                cursor: 'pointer',
+                                            }}
+                                            onClick={() => handleStatusToggle(user._id)}
+                                        />
+                                    </TableCell>
+                                    <TableCell>
+                                        <Typography variant="body2">
+                                            {new Date(user.createdAt).toLocaleDateString()}
+                                        </Typography>
+                                    </TableCell>
+                                </TableRow>
                                 ))
                             )}
                         </TableBody>

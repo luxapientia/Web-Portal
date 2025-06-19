@@ -15,6 +15,7 @@ const publicRoutes = [
     '/api/auth/reset-password',
     '/api/auth/gen-invitation-code',
     '/api/app-config',
+    '/help',
 ];
 
 export async function middleware(req: NextRequest) {

@@ -25,12 +25,14 @@ import { useSession } from "next-auth/react";
 // Define navigation items
 const publicNavItems: { label: string, path: string }[] = [
   // { label: "Home", path: "/home" },
+  { label: "Help", path: "/help" },
 ];
 
 // Define authenticated user navigation items
 const privateNavItems = [
   { label: "Home", path: "/home" },
   { label: "Wallet", path: "/wallet" },
+  { label: "Help", path: "/help" },
   { label: "Support", path: "/support" },
 ];
 
