@@ -1,11 +1,71 @@
 'use client';
 
-import { Card, Typography, Box } from '@mui/material';
+import { Card, Typography, Box, CircularProgress } from '@mui/material';
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import InfoIcon from '@mui/icons-material/Info';
+import { useEffect, useState } from 'react';
+
+interface VIPLevel {
+  level: number;
+  tasks: number;
+  total: number;
+  perTask: number;
+}
 
 export default function DailyTaskSection() {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [vipLevels, setVipLevels] = useState<VIPLevel[]>([]);
+
+  useEffect(() => {
+    const fetchVIPLevels = async () => {
+      try {
+        const response = await fetch('/api/help/daily-task');
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to fetch VIP level data');
+        }
+        
+        setVipLevels(result.data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load VIP level data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchVIPLevels();
+  }, []);
+
+  if (loading) {
+    return (
+      <Card sx={{ p: 4, mb: 4, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
+        <CircularProgress />
+      </Card>
+    );
+  }
+
+  if (error || !vipLevels.length) {
+    return (
+      <Card sx={{ p: 4, mb: 4 }}>
+        <Typography color="error">
+          {error || 'No VIP level data available. Please try again later.'}
+        </Typography>
+      </Card>
+    );
+  }
+
+  // Calculate example reward distribution for a $100 task reward
+  const exampleReward = 100;
+  const rewardDistribution = [
+    { recipient: 'You', percentage: 72, amount: exampleReward * 0.72 },
+    { recipient: 'Level 1 Upline', percentage: 18, amount: exampleReward * 0.18 },
+    { recipient: 'Level 2 Upline', percentage: 7, amount: exampleReward * 0.07 },
+    { recipient: 'Level 3 Upline', percentage: 3, amount: exampleReward * 0.03 },
+  ];
+
   return (
     <Card sx={{ p: 4, mb: 4 }}>
       <Box display="flex" alignItems="center" gap={2} mb={2}>
@@ -39,14 +99,7 @@ export default function DailyTaskSection() {
                 </Box>
               </Box>
               <Box component="tbody">
-                {[
-                  { level: 1, tasks: 4, total: 2, perTask: 0.5 },
-                  { level: 2, tasks: 5, total: 2.5, perTask: 0.5 },
-                  { level: 3, tasks: 6, total: 3, perTask: 0.5 },
-                  { level: 4, tasks: 7, total: 3.5, perTask: 0.5 },
-                  { level: 5, tasks: 8, total: 4, perTask: 0.5 },
-                  { level: 6, tasks: 9, total: 4.5, perTask: 0.5 },
-                ].map((vip) => (
+                {vipLevels.map((vip) => (
                   <Box component="tr" key={vip.level}>
                     <Box component="td" sx={{ p: 2, border: '1px solid', borderColor: 'divider' }}>VIP {vip.level}</Box>
                     <Box component="td" sx={{ p: 2, border: '1px solid', borderColor: 'divider' }}>{vip.tasks} tasks</Box>
@@ -72,7 +125,7 @@ export default function DailyTaskSection() {
               <li>Navigate to the Tasks section in your dashboard</li>
               <li>Start a new task from your available daily tasks</li>
               <li>Complete the required trading activity</li>
-              <li>Receive reward for each completed task (0.5% of your account value per task)</li>
+              <li>Receive reward for each completed task ({vipLevels[0]?.perTask}% of your account value per task)</li>
               <li>Repeat with remaining available tasks</li>
             </Box>
 
@@ -96,7 +149,7 @@ export default function DailyTaskSection() {
             </Typography>
             <Box sx={{ bgcolor: 'background.paper', p: 2, border: 1, borderColor: 'primary.main', borderRadius: 1 }}>
               <Typography variant="body2" paragraph>
-                For a single task reward of $5:
+                For a single task reward of ${exampleReward}:
               </Typography>
               <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', mb: 2 }}>
                 <Box component="thead" sx={{ bgcolor: 'primary.main', color: 'white' }}>
@@ -107,12 +160,7 @@ export default function DailyTaskSection() {
                   </Box>
                 </Box>
                 <Box component="tbody">
-                  {[
-                    { recipient: 'You', percentage: 72, amount: 3.60 },
-                    { recipient: 'Level 1 Upline', percentage: 18, amount: 0.90 },
-                    { recipient: 'Level 2 Upline', percentage: 7, amount: 0.35 },
-                    { recipient: 'Level 3 Upline', percentage: 3, amount: 0.15 },
-                  ].map((row) => (
+                  {rewardDistribution.map((row) => (
                     <Box component="tr" key={row.recipient}>
                       <Box component="td" sx={{ p: 1, border: '1px solid', borderColor: 'divider' }}>{row.recipient}</Box>
                       <Box component="td" sx={{ p: 1, border: '1px solid', borderColor: 'divider' }}>{row.percentage}%</Box>
@@ -133,11 +181,10 @@ export default function DailyTaskSection() {
             💡 Tips for Maximum Rewards
           </Typography>
           <Box component="ul" sx={{ pl: 2 }}>
-            <li>Each task completion gives you 0.5% of your account value, shared with upline</li>
+            <li>Each task completion gives you {vipLevels[0]?.perTask}% of your account value, shared with upline</li>
             <li>Complete all available daily tasks to earn your full daily percentage</li>
             <li>Higher VIP levels give you more tasks, increasing your total daily earning potential</li>
             <li>Build your downline team to earn additional rewards from their task completions</li>
-            <li>Tasks reset daily at 00:00 UTC</li>
             <li>Uncompleted tasks do not carry over to the next day</li>
           </Box>
         </Box>
