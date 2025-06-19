@@ -37,7 +37,7 @@ export async function middleware(req: NextRequest) {
     }
 
     if(token.status !== 'active') {
-        return NextResponse.json({ error: 'Your account is not active' }, { status: 401 });
+        return NextResponse.redirect(new URL('/auth/dashboard', req.url));
     }
     
     if (req.nextUrl.pathname.startsWith('/admin')) {
