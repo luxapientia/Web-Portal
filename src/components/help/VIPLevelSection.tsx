@@ -1,11 +1,56 @@
 'use client';
 
-import { Card, Typography, Box } from '@mui/material';
+import { Card, Typography, Box, CircularProgress } from '@mui/material';
 import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 import InfoIcon from '@mui/icons-material/Info';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
+import { useEffect, useState } from 'react';
+import { InterestMatrix } from '@/models/InterestMatrix';
 
 export default function VIPLevelSection() {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [vipLevels, setVipLevels] = useState<InterestMatrix[]>([]);
+
+  useEffect(() => {
+    const fetchVIPData = async () => {
+      try {
+        const response = await fetch('/api/help/viplevel');
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to fetch VIP data');
+        }
+        
+        setVipLevels(result.data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load VIP data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchVIPData();
+  }, []);
+
+  if (loading) {
+    return (
+      <Card sx={{ p: 4, mb: 4, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
+        <CircularProgress />
+      </Card>
+    );
+  }
+
+  if (error || !vipLevels.length) {
+    return (
+      <Card sx={{ p: 4, mb: 4 }}>
+        <Typography color="error">
+          {error || 'No VIP levels available. Please try again later.'}
+        </Typography>
+      </Card>
+    );
+  }
+
   return (
     <Card sx={{ p: 4, mb: 4 }}>
       <Box display="flex" alignItems="center" gap={2} mb={2}>
@@ -32,18 +77,15 @@ export default function VIPLevelSection() {
             </Box>
           </Box>
           <Box component="tbody">
-            {[
-              { level: 1, value: '50 - 99', members: '0 - 5' },
-              { level: 2, value: '100 - 500', members: '6 - 10' },
-              { level: 3, value: '501 - 2,000', members: '11 - 20' },
-              { level: 4, value: '2,001 - 5,000', members: '21 - 30' },
-              { level: 5, value: '5,001 - 10,000', members: '31 - 40' },
-              { level: 6, value: '10,001 - 30,000', members: '41 - 50' },
-            ].map((vip) => (
+            {vipLevels.map((vip) => (
               <Box component="tr" key={vip.level}>
                 <Box component="td" sx={{ p: 2, border: '1px solid', borderColor: 'divider' }}>VIP {vip.level}</Box>
-                <Box component="td" sx={{ p: 2, border: '1px solid', borderColor: 'divider' }}>${vip.value}</Box>
-                <Box component="td" sx={{ p: 2, border: '1px solid', borderColor: 'divider' }}>{vip.members}</Box>
+                <Box component="td" sx={{ p: 2, border: '1px solid', borderColor: 'divider' }}>
+                  ${vip.startAccountValue.toLocaleString()} - {vip.endAccountValue === 0 ? '∞' : `$${vip.endAccountValue.toLocaleString()}`}
+                </Box>
+                <Box component="td" sx={{ p: 2, border: '1px solid', borderColor: 'divider' }}>
+                  {vip.startActiveMembers} - {vip.endActiveMembers === 0 ? '∞' : vip.endActiveMembers}
+                </Box>
               </Box>
             ))}
           </Box>
@@ -63,15 +105,10 @@ export default function VIPLevelSection() {
             Higher VIP levels unlock more daily tasks and higher reward percentages:
           </Typography>
           <Box component="ul" sx={{ pl: 2, mb: 3 }}>
-            {[
-              { level: 1, tasks: 4, reward: 2 },
-              { level: 2, tasks: 5, reward: 2.5 },
-              { level: 3, tasks: 6, reward: 3 },
-              { level: 4, tasks: 7, reward: 3.5 },
-              { level: 5, tasks: 8, reward: 4 },
-              { level: 6, tasks: 9, reward: 4.5 },
-            ].map((vip) => (
-              <li key={vip.level}>VIP {vip.level}: {vip.tasks} tasks/day with {vip.reward}% rewards</li>
+            {vipLevels.map((vip) => (
+              <li key={vip.level}>
+                VIP {vip.level}: {vip.dailyTasksCountAllowed} tasks/day with {vip.dailyTasksRewardPercentage}% rewards
+              </li>
             ))}
           </Box>
 
@@ -82,15 +119,8 @@ export default function VIPLevelSection() {
             Earn promotion rewards based on your VIP level:
           </Typography>
           <Box component="ul" sx={{ pl: 2, mb: 3 }}>
-            {[
-              { level: 1, reward: 3 },
-              { level: 2, reward: 20 },
-              { level: 3, reward: 30 },
-              { level: 4, reward: 50 },
-              { level: 5, reward: 100 },
-              { level: 6, reward: 200 },
-            ].map((vip) => (
-              <li key={vip.level}>VIP {vip.level}: ${vip.reward} promotion reward</li>
+            {vipLevels.map((vip) => (
+              <li key={vip.level}>VIP {vip.level}: ${vip.promotionReward} promotion reward</li>
             ))}
           </Box>
 
@@ -101,15 +131,8 @@ export default function VIPLevelSection() {
             Earn rewards from upline deposits ($100 minimum):
           </Typography>
           <Box component="ul" sx={{ pl: 2 }}>
-            {[
-              { level: 1, reward: 1 },
-              { level: 2, reward: 1.5 },
-              { level: 3, reward: 2 },
-              { level: 4, reward: 2.5 },
-              { level: 5, reward: 3 },
-              { level: 6, reward: 3.5 },
-            ].map((vip) => (
-              <li key={vip.level}>VIP {vip.level}: {vip.reward}% reward</li>
+            {vipLevels.map((vip) => (
+              <li key={vip.level}>VIP {vip.level}: ${vip.uplineDepositReward} reward</li>
             ))}
           </Box>
         </Box>
