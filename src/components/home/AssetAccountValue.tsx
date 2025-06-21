@@ -1,5 +1,4 @@
-import { Card, CardContent, Stack, Typography, Tooltip, Button, Box } from '@mui/material';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import { Card, CardContent, Stack, Typography, Button, Box } from '@mui/material';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';

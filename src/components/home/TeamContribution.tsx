@@ -1,5 +1,4 @@
 import { Card, CardContent, Stack, Typography, Tooltip, Button, TextField, InputAdornment, IconButton, Box } from '@mui/material';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';

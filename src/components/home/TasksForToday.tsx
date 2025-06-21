@@ -1,6 +1,5 @@
-import { Card, CardContent, Typography, Divider, Stack, Box, Button, Tooltip, Modal, List, ListItem, ListItemIcon, Paper, Chip } from '@mui/material';
+import { Card, CardContent, Typography, Divider, Stack, Box, Button, Modal, List, ListItem, ListItemIcon, Paper, Chip } from '@mui/material';
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
