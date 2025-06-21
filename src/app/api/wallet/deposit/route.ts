@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { WalletModel } from '@/models/Wallet';
+import { WithdrawWalletModel } from '@/models/Wallet';
 import { Transaction, TransactionModel } from '@/models/Transaction';
 import { authOptions } from '@/config';
 import { getServerSession } from 'next-auth';
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
 
         const { chain, token, transactionId, fromAddress, toAddress } = await request.json();
 
-        const wallet = await WalletModel.findOne({ address: toAddress });
+        const wallet = await WithdrawWalletModel.findOne({ address: toAddress });
 
         if (!wallet) {
             return NextResponse.json({ error: 'Wallet not found' }, { status: 404 });

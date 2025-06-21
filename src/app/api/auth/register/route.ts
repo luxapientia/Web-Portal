@@ -9,7 +9,7 @@ import sharp from 'sharp';
 import { AppConfigModel } from '@/models/AppConfig';
 import { generateRandomInvitationCode } from '@/utils/generate-code';
 import { config } from '@/config';
-import { WalletModel } from '@/models/Wallet';
+import { WithdrawWalletModel } from '@/models/Wallet';
 import { encryptPrivateKey } from '@/utils/encrypt';
 import { walletService } from '@/services/Wallet';
 
@@ -216,7 +216,7 @@ export async function POST(request: Request) {
       const wallet = await walletService.generateWalletCredentials(chain);
       const supportedTokens = config.wallet.supportedChains[chain as keyof typeof config.wallet.supportedChains].supportedTokens.map(val => val.token);
       for (const token of supportedTokens) {
-        await WalletModel.create({
+        await WithdrawWalletModel.create({
           userId: result._id,
           address: wallet.address,
           privateKeyEncrypted: encryptPrivateKey(wallet.privateKey),

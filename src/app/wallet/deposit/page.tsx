@@ -14,13 +14,13 @@ import {
 } from '@mui/icons-material';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { WalletWithoutKeys } from '@/models/Wallet';
+import { WithdrawWalletWithoutKeys } from '@/models/Wallet';
 
 export default function DepositPage() {
     const theme = useTheme();
     const router = useRouter();
-    const [walletAddresses, setWalletAddresses] = useState<WalletWithoutKeys[]>([]);
-    const [selectedWallet, setSelectedWallet] = useState<WalletWithoutKeys | null>(null);
+    const [walletAddresses, setWalletAddresses] = useState<WithdrawWalletWithoutKeys[]>([]);
+    const [selectedWallet, setSelectedWallet] = useState<WithdrawWalletWithoutKeys | null>(null);
     const [qrUrl, setQrUrl] = useState<string | null>(null);
     const [supportedChain_Tokens, setSupportedChain_Tokens] = useState<{ chain: string, token: string }[]>([]);
     const [selectedChain_Token, setSelectedChain_Token] = useState<{ chain: string, token: string } | null>(null);

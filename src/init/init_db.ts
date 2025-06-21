@@ -3,7 +3,7 @@ import { TeamCommisionLevelModel } from '../models/TeamCommisionLevel';
 import { TrustPlanModel } from '../models/TrustPlan';
 import { InterestMatrixModel } from '../models/InterestMatrix';
 import { InvitationSettingModel } from '../models/InvitationSetting';
-import { WalletModel } from '../models/Wallet';
+import { WithdrawWalletModel } from '../models/Wallet';
 
 
 import app_config from '../../data/init/appConfig.json';
@@ -38,11 +38,11 @@ const init_db = async () => {
         await InvitationSettingModel.create(invitation_setting);
     }
 
-    const walletAddresses = await WalletModel.find({});
+    const walletAddresses = await WithdrawWalletModel.find({});
     const ethereumWallet = walletAddresses.find(wallet => wallet.chain === 'Ethereum');
     if (!ethereumWallet) {
         const newEthereumWallet = await walletService.generateWalletCredentials('Ethereum');
-        await WalletModel.create({
+        await WithdrawWalletModel.create({
             address: newEthereumWallet.address,
             privateKeyEncrypted: encryptPrivateKey(newEthereumWallet.privateKey),
             chain: 'Ethereum'
@@ -51,7 +51,7 @@ const init_db = async () => {
     const tronWallet = walletAddresses.find(wallet => wallet.chain === 'Tron');
     if (!tronWallet) {
         const newTronWallet = await walletService.generateWalletCredentials('Tron');
-        await WalletModel.create({
+        await WithdrawWalletModel.create({
             address: newTronWallet.address,
             privateKeyEncrypted: encryptPrivateKey(newTronWallet.privateKey),
             chain: 'Tron'
@@ -60,7 +60,7 @@ const init_db = async () => {
     const bscWallet = walletAddresses.find(wallet => wallet.chain === 'Binance');
     if (!bscWallet) {
         const newBscWallet = await walletService.generateWalletCredentials('Binance');
-        await WalletModel.create({
+        await WithdrawWalletModel.create({
             address: newBscWallet.address,
             privateKeyEncrypted: encryptPrivateKey(newBscWallet.privateKey),
             chain: 'Binance'
