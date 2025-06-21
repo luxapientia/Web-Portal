@@ -26,6 +26,11 @@ export interface User extends Document {
     chain: string;
     address: string;
   }[];
+  depositWallets: {
+    chain: string;
+    address: string;
+    encryptedPrivateKey: string;
+  }[];
   accountValue: {
     totalAssetValue: number,
     totalWithdrawable: number,
@@ -62,6 +67,15 @@ const UserSchema: Schema = new Schema({
     type: [{
       chain: { type: String, required: true },
       address: { type: String, required: true }
+    }],
+    required: false,
+    default: []
+  },
+  depositWallets: {
+    type: [{
+      chain: { type: String, required: true },
+      address: { type: String, required: true },
+      encryptedPrivateKey: { type: String, required: true }
     }],
     required: false,
     default: []
