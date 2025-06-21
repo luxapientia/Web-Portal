@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/config';
-import { WithdrawWalletModel } from '@/models/WithdrawWallet';
+import { CentralWalletModel } from '@/models/CentralWallet';
 // import { encryptPrivateKey } from '@/utils/encrypt';
 // import { walletService } from '@/services/Wallet';
 
@@ -41,7 +41,7 @@ export async function PUT(request: NextRequest) {
         // const newWallet = await walletService.generateWalletCredentials(chain);
 
         // Update the wallet address
-        const wallet = await WithdrawWalletModel.findOneAndUpdate(
+        const wallet = await CentralWalletModel.findOneAndUpdate(
             { chain },
             {
                 address,

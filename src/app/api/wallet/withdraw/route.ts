@@ -4,7 +4,7 @@ import { UserModel } from '@/models/User';
 import { authOptions } from '@/config';
 import { getServerSession } from 'next-auth';
 import { User } from '@/models/User';
-import { WithdrawWalletModel } from '@/models/WithdrawWallet';
+import { CentralWalletModel } from '@/models/CentralWallet';
 
 export async function POST(request: NextRequest) {
     try {
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const fromWallet = await WithdrawWalletModel.findOne({chain: chain });
+        const fromWallet = await CentralWalletModel.findOne({chain: chain });
         if (!fromWallet) {
             return NextResponse.json(
                 { success: false, error: 'Central wallet not found' },

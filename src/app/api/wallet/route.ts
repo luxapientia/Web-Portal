@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { WithdrawWallet, WithdrawWalletModel, WithdrawWalletWithoutKeys } from '@/models/WithdrawWallet';
+import { CentralWallet, CentralWalletModel, CentralWalletWithoutKeys } from '@/models/CentralWallet';
 import { authOptions, config } from '@/config';
 import { getServerSession } from 'next-auth';
 
@@ -10,12 +10,12 @@ export async function GET() {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const wallet = await WithdrawWalletModel.find({}) as WithdrawWallet[];
+        const wallet = await CentralWalletModel.find({}) as CentralWallet[];
 
         const walletWithoutKeys = wallet.map(w => ({
             address: w.address,
             chain: w.chain,
-        })) as WithdrawWalletWithoutKeys[];
+        })) as CentralWalletWithoutKeys[];
 
         const supportedChains = Object.keys(config.wallet.supportedChains).map(chain => {
             const tokens = config.wallet.supportedChains[chain as keyof typeof config.wallet.supportedChains].supportedTokens.map(val => val.token);
