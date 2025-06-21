@@ -80,9 +80,6 @@ export default function TeamContribution({ invitationLink, copied, handleCopy }:
           <Typography variant="subtitle1" fontWeight={700} sx={{ fontSize: { xs: '1rem', md: '1.15rem' } }}>
             Team Contribution
           </Typography>
-          <Tooltip title="Total value contributed by your team">
-            <InfoOutlinedIcon fontSize="small" color="action" />
-          </Tooltip>
         </Stack>
         <Typography variant="h6" color="primary" fontWeight={800} mt={1} sx={{ fontSize: { xs: '1.3rem', md: '1.7rem' } }}>
           ${teamEarnings}

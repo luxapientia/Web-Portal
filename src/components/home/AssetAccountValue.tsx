@@ -50,9 +50,6 @@ export default function AssetAccountValue() {
           <Typography variant="subtitle1" fontWeight={700} sx={{ fontSize: { xs: '1rem', md: '1.15rem' } }}>
             Asset Account Value
           </Typography>
-          <Tooltip title="Total value of your assets">
-            <InfoOutlinedIcon fontSize="small" color="action" />
-          </Tooltip>
         </Stack>
         <Typography variant="h3" color="success.main" fontWeight={900} mt={1} sx={{ fontSize: { xs: '2rem', md: '2.5rem' } }}>
           ${accountValue.toFixed(2)}

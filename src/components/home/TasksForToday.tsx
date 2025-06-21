@@ -186,9 +186,6 @@ export default function TasksForToday({ onAccountValueChange }: TasksForTodayPro
             <Typography variant="subtitle1" fontWeight={700}>
               Your tasks for today
             </Typography>
-            <Tooltip title="Complete these tasks to earn more">
-              <InfoOutlinedIcon fontSize="small" color="action" />
-            </Tooltip>
           </Box>
           <Divider sx={{ mb: 1 }} />
           <Stack direction="row" alignItems="center" spacing={1}>

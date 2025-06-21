@@ -22,18 +22,6 @@ export default function TrustFundSection() {
         textAlign: 'center',
       }}
     >
-      {/* Top-right help icon */}
-      <IconButton
-        size="large"
-        sx={{
-          position: 'absolute',
-          top: 8,
-          right: 8,
-          color: '#000000',
-        }}
-      >
-        <HelpOutlineIcon />
-      </IconButton>
 
       {/* Lock icon image above button */}
       <Box sx={{ mb: 2, display: 'flex', justifyContent: 'center' }}>
