@@ -4,7 +4,7 @@ import { UserModel } from '@/models/User';
 import { authOptions } from '@/config';
 import { getServerSession } from 'next-auth';
 import { User } from '@/models/User';
-import { WithdrawWalletModel } from '@/models/Wallet';
+import { WithdrawWalletModel } from '@/models/WithdrawWallet';
 
 export async function POST(request: NextRequest) {
     try {

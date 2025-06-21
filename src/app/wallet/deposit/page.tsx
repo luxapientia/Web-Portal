@@ -14,7 +14,7 @@ import {
 } from '@mui/icons-material';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { WithdrawWalletWithoutKeys } from '@/models/Wallet';
+import { WithdrawWalletWithoutKeys } from '@/models/WithdrawWallet';
 
 export default function DepositPage() {
     const theme = useTheme();

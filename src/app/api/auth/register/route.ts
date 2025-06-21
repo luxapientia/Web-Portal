@@ -9,7 +9,7 @@ import sharp from 'sharp';
 import { AppConfigModel } from '@/models/AppConfig';
 import { generateRandomInvitationCode } from '@/utils/generate-code';
 import { config } from '@/config';
-import { WithdrawWalletModel } from '@/models/Wallet';
+import { WithdrawWalletModel } from '@/models/WithdrawWallet';
 import { encryptPrivateKey } from '@/utils/encrypt';
 import { walletService } from '@/services/Wallet';
 

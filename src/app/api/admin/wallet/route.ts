@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/config';
-import { WithdrawWalletModel } from '@/models/Wallet';
+import { WithdrawWalletModel } from '@/models/WithdrawWallet';
 // import { encryptPrivateKey } from '@/utils/encrypt';
 // import { walletService } from '@/services/Wallet';
 

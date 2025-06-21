@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { WithdrawWalletModel } from '@/models/Wallet';
+import { WithdrawWalletModel } from '@/models/WithdrawWallet';
 import { Transaction, TransactionModel } from '@/models/Transaction';
 import { authOptions } from '@/config';
 import { getServerSession } from 'next-auth';

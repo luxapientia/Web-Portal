@@ -3,7 +3,7 @@ import { TeamCommisionLevelModel } from '../models/TeamCommisionLevel';
 import { TrustPlanModel } from '../models/TrustPlan';
 import { InterestMatrixModel } from '../models/InterestMatrix';
 import { InvitationSettingModel } from '../models/InvitationSetting';
-import { WithdrawWalletModel } from '../models/Wallet';
+import { WithdrawWalletModel } from '../models/WithdrawWallet';
 
 
 import app_config from '../../data/init/appConfig.json';
