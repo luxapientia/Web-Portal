@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, Typography, Box, CircularProgress } from '@mui/material';
+import { Card, Typography, Box, CircularProgress, TableContainer, Table, TableBody, TableRow, TableCell, TableHead, Paper } from '@mui/material';
 import GroupsIcon from '@mui/icons-material/Groups';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import InfoIcon from '@mui/icons-material/Info';
@@ -17,11 +17,11 @@ export default function TeamCommissionSection() {
       try {
         const response = await fetch('/api/help/team_commission');
         const result = await response.json();
-        
+
         if (!result.success) {
           throw new Error(result.error || 'Failed to fetch commission data');
         }
-        
+
         setCommissionLevels(result.data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load commission data');
@@ -76,28 +76,30 @@ export default function TeamCommissionSection() {
         <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', display: 'flex', alignItems: 'center', gap: 1 }}>
           <AccountTreeIcon /> Commission Levels
         </Typography>
-        
+
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mb: 4 }}>
           <Box sx={{ bgcolor: 'background.paper', p: 2, border: 1, borderColor: 'primary.main', borderRadius: 1 }}>
             <Typography variant="subtitle1" color="primary" gutterBottom>
               Commission Rates from Daily Task Rewards:
             </Typography>
-            <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse' }}>
-              <Box component="thead" sx={{ bgcolor: 'primary.main', color: 'white' }}>
-                <Box component="tr">
-                  <Box component="th" sx={{ p: 2, border: '1px solid', borderColor: 'divider' }}>Level</Box>
-                  <Box component="th" sx={{ p: 2, border: '1px solid', borderColor: 'divider' }}>Commission Rate</Box>
-                </Box>
-              </Box>
-              <Box component="tbody">
-                {commissionLevels.map((level) => (
-                  <Box component="tr" key={level.level}>
-                    <Box component="td" sx={{ p: 2, border: '1px solid', borderColor: 'divider' }}>Level {level.level}</Box>
-                    <Box component="td" sx={{ p: 2, border: '1px solid', borderColor: 'divider' }}>{level.percentage}%</Box>
-                  </Box>
-                ))}
-              </Box>
-            </Box>
+            <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
+              <Table sx={{ minWidth: 400 }}>
+                <TableHead sx={{ bgcolor: 'primary.main' }}>
+                  <TableRow>
+                    <TableCell sx={{ color: 'white' }} align="center">Level</TableCell>
+                    <TableCell sx={{ color: 'white' }} align="center">Commission Rate</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {commissionLevels.map((level) => (
+                    <TableRow key={level.level}>
+                      <TableCell align="center">Level {level.level}</TableCell>
+                      <TableCell align="center">{level.percentage}%</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
           </Box>
         </Box>
       </Box>
@@ -106,7 +108,7 @@ export default function TeamCommissionSection() {
         <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', display: 'flex', alignItems: 'center', gap: 1 }}>
           <InfoIcon /> How Team Commissions Work
         </Typography>
-        
+
         <Box sx={{ pl: 2 }}>
           <Typography variant="subtitle1" gutterBottom>
             Example Scenario:
@@ -122,28 +124,30 @@ export default function TeamCommissionSection() {
                 <li>Mike invites Alex (Level 3 for John)</li>
               </Typography>
             </Box>
-            
+
             <Typography variant="subtitle2" gutterBottom>
               When Mike earns ${exampleDailyReward} from daily tasks:
             </Typography>
-            <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', mb: 2 }}>
-              <Box component="thead" sx={{ bgcolor: 'primary.main', color: 'white' }}>
-                <Box component="tr">
-                  <Box component="th" sx={{ p: 1, border: '1px solid', borderColor: 'divider' }}>Member</Box>
-                  <Box component="th" sx={{ p: 1, border: '1px solid', borderColor: 'divider' }}>Relationship</Box>
-                  <Box component="th" sx={{ p: 1, border: '1px solid', borderColor: 'divider' }}>Commission</Box>
-                </Box>
-              </Box>
-              <Box component="tbody">
-                {exampleCommissions.map((row) => (
-                  <Box component="tr" key={row.member}>
-                    <Box component="td" sx={{ p: 1, border: '1px solid', borderColor: 'divider' }}>{row.member}</Box>
-                    <Box component="td" sx={{ p: 1, border: '1px solid', borderColor: 'divider' }}>{row.relationship}</Box>
-                    <Box component="td" sx={{ p: 1, border: '1px solid', borderColor: 'divider' }}>{row.commission}</Box>
-                  </Box>
-                ))}
-              </Box>
-            </Box>
+            <TableContainer component={Paper} sx={{ overflowX: 'auto', mb: 2 }}>
+              <Table sx={{ minWidth: 400 }}>
+                <TableHead sx={{ bgcolor: 'primary.main' }}>
+                  <TableRow>
+                    <TableCell sx={{ color: 'white' }} align="center">Member</TableCell>
+                    <TableCell sx={{ color: 'white' }} align="center">Relationship</TableCell>
+                    <TableCell sx={{ color: 'white' }} align="center">Commission</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {exampleCommissions.map((row) => (
+                    <TableRow key={row.member}>
+                      <TableCell align="center">{row.member}</TableCell>
+                      <TableCell align="center">{row.relationship}</TableCell>
+                      <TableCell align="center">{row.commission}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
             <Typography variant="body2" color="text.secondary">
               * Commissions are calculated based on team members' daily task rewards
             </Typography>

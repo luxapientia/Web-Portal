@@ -1,6 +1,18 @@
 'use client';
 
-import { Card, Typography, Box, CircularProgress } from '@mui/material';
+import {
+  Card,
+  Typography,
+  Box,
+  CircularProgress,
+  TableContainer,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  Paper,
+} from '@mui/material';
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import InfoIcon from '@mui/icons-material/Info';
@@ -23,11 +35,11 @@ export default function DailyTaskSection() {
       try {
         const response = await fetch('/api/help/daily-task');
         const result = await response.json();
-        
+
         if (!result.success) {
           throw new Error(result.error || 'Failed to fetch VIP level data');
         }
-        
+
         setVipLevels(result.data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load VIP level data');
@@ -83,32 +95,34 @@ export default function DailyTaskSection() {
         <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', display: 'flex', alignItems: 'center', gap: 1 }}>
           <TrendingUpIcon /> Daily Task Benefits
         </Typography>
-        
+
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 3 }}>
           <Box sx={{ bgcolor: 'background.paper', p: 2, border: 1, borderColor: 'primary.main', borderRadius: 1 }}>
             <Typography variant="subtitle1" color="primary" gutterBottom>
               VIP Level Benefits:
             </Typography>
-            <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse' }}>
-              <Box component="thead" sx={{ bgcolor: 'primary.main', color: 'white' }}>
-                <Box component="tr">
-                  <Box component="th" sx={{ p: 2, border: '1px solid', borderColor: 'divider' }}>VIP Level</Box>
-                  <Box component="th" sx={{ p: 2, border: '1px solid', borderColor: 'divider' }}>Tasks Per Day</Box>
-                  <Box component="th" sx={{ p: 2, border: '1px solid', borderColor: 'divider' }}>Daily Total %</Box>
-                  <Box component="th" sx={{ p: 2, border: '1px solid', borderColor: 'divider' }}>Reward Per Task</Box>
-                </Box>
-              </Box>
-              <Box component="tbody">
-                {vipLevels.map((vip) => (
-                  <Box component="tr" key={vip.level}>
-                    <Box component="td" sx={{ p: 2, border: '1px solid', borderColor: 'divider' }}>VIP {vip.level}</Box>
-                    <Box component="td" sx={{ p: 2, border: '1px solid', borderColor: 'divider' }}>{vip.tasks} tasks</Box>
-                    <Box component="td" sx={{ p: 2, border: '1px solid', borderColor: 'divider' }}>{vip.total}%</Box>
-                    <Box component="td" sx={{ p: 2, border: '1px solid', borderColor: 'divider' }}>{vip.perTask}%</Box>
-                  </Box>
-                ))}
-              </Box>
-            </Box>
+            <TableContainer component={Paper} sx={{ overflowX: 'auto', mb: 2 }}>
+              <Table sx={{ minWidth: 600 }} aria-label="VIP Level Table">
+                <TableHead sx={{ bgcolor: 'primary.main' }}>
+                  <TableRow>
+                    <TableCell sx={{ color: 'white' }} align="center">VIP Level</TableCell>
+                    <TableCell sx={{ color: 'white' }} align="center">Tasks Per Day</TableCell>
+                    <TableCell sx={{ color: 'white' }} align="center">Daily Total %</TableCell>
+                    <TableCell sx={{ color: 'white' }} align="center">Reward Per Task</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {vipLevels.map((vip) => (
+                    <TableRow key={vip.level}>
+                      <TableCell align="center">VIP {vip.level}</TableCell>
+                      <TableCell align="center">{vip.tasks} tasks</TableCell>
+                      <TableCell align="center">{vip.total}%</TableCell>
+                      <TableCell align="center">{vip.perTask}%</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
           </Box>
         </Box>
 
@@ -116,7 +130,7 @@ export default function DailyTaskSection() {
           <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', display: 'flex', alignItems: 'center', gap: 1 }}>
             <InfoIcon /> How Daily Tasks Work
           </Typography>
-          
+
           <Box sx={{ pl: 2 }}>
             <Typography variant="subtitle1" gutterBottom>
               Task Completion Process:
@@ -151,24 +165,26 @@ export default function DailyTaskSection() {
               <Typography variant="body2" paragraph>
                 For a single task reward of ${exampleReward}:
               </Typography>
-              <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', mb: 2 }}>
-                <Box component="thead" sx={{ bgcolor: 'primary.main', color: 'white' }}>
-                  <Box component="tr">
-                    <Box component="th" sx={{ p: 1, border: '1px solid', borderColor: 'divider' }}>Recipient</Box>
-                    <Box component="th" sx={{ p: 1, border: '1px solid', borderColor: 'divider' }}>Percentage</Box>
-                    <Box component="th" sx={{ p: 1, border: '1px solid', borderColor: 'divider' }}>Amount</Box>
-                  </Box>
-                </Box>
-                <Box component="tbody">
-                  {rewardDistribution.map((row) => (
-                    <Box component="tr" key={row.recipient}>
-                      <Box component="td" sx={{ p: 1, border: '1px solid', borderColor: 'divider' }}>{row.recipient}</Box>
-                      <Box component="td" sx={{ p: 1, border: '1px solid', borderColor: 'divider' }}>{row.percentage}%</Box>
-                      <Box component="td" sx={{ p: 1, border: '1px solid', borderColor: 'divider' }}>${row.amount.toFixed(2)}</Box>
-                    </Box>
-                  ))}
-                </Box>
-              </Box>
+              <TableContainer component={Paper} sx={{ overflowX: 'auto', mb: 2 }}>
+                <Table sx={{ minWidth: 500 }} aria-label="Reward Distribution Table">
+                  <TableHead sx={{ bgcolor: 'primary.main' }}>
+                    <TableRow>
+                      <TableCell sx={{ color: 'white' }} align="center">Recipient</TableCell>
+                      <TableCell sx={{ color: 'white' }} align="center">Percentage</TableCell>
+                      <TableCell sx={{ color: 'white' }} align="center">Amount</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {rewardDistribution.map((row) => (
+                      <TableRow key={row.recipient}>
+                        <TableCell align="center">{row.recipient}</TableCell>
+                        <TableCell align="center">{row.percentage}%</TableCell>
+                        <TableCell align="center">${row.amount.toFixed(2)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
               <Typography variant="body2" color="primary">
                 Note: If any upline level doesn't exist, you receive their share of the reward.
               </Typography>

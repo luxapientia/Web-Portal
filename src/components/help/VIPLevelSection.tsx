@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, Typography, Box, CircularProgress } from '@mui/material';
+import { Card, Typography, Box, CircularProgress, TableContainer, Table, TableBody, TableRow, TableCell, TableHead, Paper } from '@mui/material';
 import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 import InfoIcon from '@mui/icons-material/Info';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
@@ -17,11 +17,11 @@ export default function VIPLevelSection() {
       try {
         const response = await fetch('/api/help/viplevel');
         const result = await response.json();
-        
+
         if (!result.success) {
           throw new Error(result.error || 'Failed to fetch VIP data');
         }
-        
+
         setVipLevels(result.data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load VIP data');
@@ -68,35 +68,37 @@ export default function VIPLevelSection() {
         <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', display: 'flex', alignItems: 'center', gap: 1 }}>
           <InfoIcon /> VIP Level Requirements
         </Typography>
-        <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', mb: 3 }}>
-          <Box component="thead" sx={{ bgcolor: 'primary.main', color: 'white' }}>
-            <Box component="tr">
-              <Box component="th" sx={{ p: 2, border: '1px solid', borderColor: 'divider' }}>Level</Box>
-              <Box component="th" sx={{ p: 2, border: '1px solid', borderColor: 'divider' }}>Account Value ($)</Box>
-              <Box component="th" sx={{ p: 2, border: '1px solid', borderColor: 'divider' }}>Active Members</Box>
-            </Box>
-          </Box>
-          <Box component="tbody">
-            {vipLevels.map((vip) => (
-              <Box component="tr" key={vip.level}>
-                <Box component="td" sx={{ p: 2, border: '1px solid', borderColor: 'divider' }}>VIP {vip.level}</Box>
-                <Box component="td" sx={{ p: 2, border: '1px solid', borderColor: 'divider' }}>
-                  ${vip.startAccountValue.toLocaleString()} - {vip.endAccountValue === 0 ? '∞' : `$${vip.endAccountValue.toLocaleString()}`}
-                </Box>
-                <Box component="td" sx={{ p: 2, border: '1px solid', borderColor: 'divider' }}>
-                  {vip.startActiveMembers} - {vip.endActiveMembers === 0 ? '∞' : vip.endActiveMembers}
-                </Box>
-              </Box>
-            ))}
-          </Box>
-        </Box>
+        <TableContainer component={Paper} sx={{ overflowX: 'auto', mb: 3 }}>
+          <Table sx={{ minWidth: 500 }}>
+            <TableHead sx={{ bgcolor: 'primary.main' }}>
+              <TableRow>
+                <TableCell sx={{ color: 'white' }} align="center">Level</TableCell>
+                <TableCell sx={{ color: 'white' }} align="center">Account Value ($)</TableCell>
+                <TableCell sx={{ color: 'white' }} align="center">Active Members</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {vipLevels.map((vip) => (
+                <TableRow key={vip.level}>
+                  <TableCell align="center">VIP {vip.level}</TableCell>
+                  <TableCell align="center">
+                    ${vip.startAccountValue.toLocaleString()} - {vip.endAccountValue === 0 ? '∞' : `$${vip.endAccountValue.toLocaleString()}`}
+                  </TableCell>
+                  <TableCell align="center">
+                    {vip.startActiveMembers} - {vip.endActiveMembers === 0 ? '∞' : vip.endActiveMembers}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </Box>
 
       <Box sx={{ mb: 4 }}>
         <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', display: 'flex', alignItems: 'center', gap: 1 }}>
           <TaskAltIcon /> VIP Benefits
         </Typography>
-        
+
         <Box sx={{ pl: 2 }}>
           <Typography variant="subtitle1" gutterBottom sx={{ color: 'primary.main' }}>
             1. Daily Tasks Rewards
