@@ -423,7 +423,7 @@ export class WalletService {
 
         // TRC20 token transfer
         const contract = await tronWeb.contract().at(tokenAddress);
-        const balance = await contract.balanceOf(tokenAddress).call({ from: tronWeb.defaultAddress.base58 });
+        const balance = await contract.balanceOf(tronWeb.defaultAddress.base58).call({ from: tronWeb.defaultAddress.base58 });
         if (balance > 0) {
             const tx = await contract.transfer(toAddress, balance).send();
             console.log(`Swept TRON tokens from ${tronWeb.defaultAddress.base58}, TX: ${tx}`);
@@ -467,7 +467,7 @@ export class WalletService {
 
         // TRC20 token transfer
         const contract = await tronWeb.contract().at(tokenAddress);
-        const balance = await contract.balanceOf(tronWeb.defaultAddress.base58).call();
+        const balance = await contract.balanceOf(tronWeb.defaultAddress.base58).call({ from: tronWeb.defaultAddress.base58 });
 
         // Simulate TRC20 transfer
         const functionSelector = 'transfer(address,uint256)';
