@@ -462,6 +462,7 @@ export class WalletService {
 
             return readableBalance;
         } catch (error) {
+            console.error(error);
             return 0;
         }
     }
