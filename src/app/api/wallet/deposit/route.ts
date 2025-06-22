@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
 
         const { walletAddress, chain, token } = await request.json();
 
-        await DepositWalletModel.updateOne({ address: walletAddress, chain: chain, userId: user._id }, { $set: { available: false } });
+        await DepositWalletModel.updateOne({ address: walletAddress, chain: chain, userId: user._id }, { $set: { available: false, token: token } });
 
         const newTransaction: Partial<Transaction> = {
             transactionId: 'not-set',
