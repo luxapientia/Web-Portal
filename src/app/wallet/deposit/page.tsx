@@ -26,9 +26,7 @@ export default function DepositPage() {
     const [selectedChain_Token, setSelectedChain_Token] = useState<{ chain: string, token: string } | null>(null);
     const [copied, setCopied] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [transactionId, setTransactionId] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [userWalletAddress, setUserWalletAddress] = useState('');
 
     useEffect(() => {
         fetchWalletAddresses();
@@ -82,7 +80,7 @@ export default function DepositPage() {
     }
 
     const handleSubmitDeposit = async () => {
-        if (!selectedWallet || !transactionId.trim() || !selectedChain_Token || !userWalletAddress.trim()) {
+        if (!selectedWallet || !selectedChain_Token) {
             return;
         }
 
@@ -96,24 +94,20 @@ export default function DepositPage() {
                 body: JSON.stringify({
                     chain: selectedChain_Token.chain,
                     token: selectedChain_Token.token,
-                    transactionId: transactionId.trim(),
-                    fromAddress: userWalletAddress.trim(),
-                    toAddress: selectedWallet.address,
+                    walletAddress: selectedWallet.address,
                 }),
             });
 
-            const data = await response.json();
-
             if (!response.ok) {
-                toast.error(data.data.error || 'Failed to submit deposit');
+                toast.error('Failed to submit deposit');
                 return;
             }
+
+            const data = await response.json();
 
             if (data.success) {
                 toast.success('Deposit submitted successfully!');
                 setIsModalOpen(false);
-                setTransactionId('');
-                setUserWalletAddress('');
                 // router.push('/wallet/transactions');
             } else {
                 toast.error(data.data.error || 'Failed to submit deposit');
@@ -480,56 +474,18 @@ export default function DepositPage() {
                                 </DialogTitle>
 
                                 <DialogContent sx={{ pt: 1, px: 4 }}>
-                                    <Box sx={{ mt: 2 }}>
-                                        <Box sx={{ mb: 3 }}>
-                                            <TextField
-                                                fullWidth
-                                                label="Your Wallet Address"
-                                                variant="outlined"
-                                                value={userWalletAddress}
-                                                onChange={(e) => setUserWalletAddress(e.target.value)}
-                                                disabled={isSubmitting}
-                                                placeholder={`Enter your ${selectedChain_Token?.chain} wallet address`}
-                                                sx={{
-                                                    '& .MuiOutlinedInput-root': {
-                                                        backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                                                        borderRadius: 2,
-                                                        fontFamily: 'monospace',
-                                                    },
-                                                }}
-                                            />
-                                            <Typography 
-                                                variant="caption" 
-                                                color="text.secondary"
-                                                sx={{ display: 'block', mt: 1, px: 0.5 }}
-                                            >
-                                                Enter the wallet address from which you'll send the {selectedChain_Token?.token}
-                                            </Typography>
-                                        </Box>
-
-                                        <TextField
-                                            fullWidth
-                                            label="Transaction ID"
-                                            variant="outlined"
-                                            value={transactionId}
-                                            onChange={(e) => setTransactionId(e.target.value)}
-                                            disabled={isSubmitting}
-                                            placeholder="e.g. 0x123abc..."
-                                            sx={{
-                                                '& .MuiOutlinedInput-root': {
-                                                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                                                    borderRadius: 2,
-                                                },
-                                            }}
-                                        />
-                                        <Typography
-                                            variant="caption"
-                                            color="text.secondary"
-                                            sx={{ display: 'block', mt: 1.5, px: 0.5 }}
-                                        >
-                                            Please enter the transaction ID of your deposit so we can verify it on the blockchain.
-                                        </Typography>
-                                    </Box>
+                                    <Typography
+                                        variant="body1"
+                                        sx={{ mt: 2, mb: 3 }}
+                                    >
+                                        Please confirm the deposit to the following wallet address:
+                                    </Typography>
+                                    <Typography
+                                        variant="body2"
+                                        sx={{ fontFamily: 'monospace', wordBreak: 'break-all' }}
+                                    >
+                                        {selectedWallet?.address}
+                                    </Typography>
                                 </DialogContent>
 
                                 <DialogActions
@@ -567,7 +523,7 @@ export default function DepositPage() {
                                     <Button
                                         variant="contained"
                                         onClick={handleSubmitDeposit}
-                                        disabled={!transactionId.trim() || !userWalletAddress.trim() || isSubmitting}
+                                        disabled={isSubmitting}
                                         sx={{
                                             minWidth: 120,
                                             px: 3,
@@ -587,7 +543,7 @@ export default function DepositPage() {
                                         {isSubmitting ? (
                                             <CircularProgress size={22} color="inherit" />
                                         ) : (
-                                            'Submit'
+                                            'Confirm'
                                         )}
                                     </Button>
                                 </DialogActions>
