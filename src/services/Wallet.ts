@@ -349,13 +349,16 @@ export class WalletService {
         }
     }
 
-    public async getEvmBalance(address: string, chain: 'Binance' | 'Ethereum', token: string): Promise<number> {
+    public async getEvmBalance(address: string, chain: 'Binance' | 'Ethereum', token?: string): Promise<number> {
         const walletConfig = config.wallet.supportedChains[chain];
         if (!walletConfig) throw new Error(`Unsupported chain: ${chain}`);
+        const provider = new ethers.providers.JsonRpcProvider(walletConfig.rpcUrl);
+        if (!token) {
+            const balance = await provider.getBalance(address);
+            return parseFloat(ethers.utils.formatEther(balance));
+        }
         const tokenAddress = walletConfig.supportedTokens.find((t) => t.token === token)?.contractAddress;
         if (!tokenAddress) throw new Error(`Token ${token} not found for chain ${chain}`);
-
-        const provider = new ethers.providers.JsonRpcProvider(walletConfig.rpcUrl);
 
         // ERC20 Token balance
         const tokenAbi = [
@@ -371,7 +374,7 @@ export class WalletService {
         return parseFloat(ethers.utils.formatUnits(rawBalance, decimals));
     }
 
-    public async estimateEvmSweepGasCost(privateKey: string, toAddress: string, chain: 'Binance' | 'Ethereum', token: string) {
+    public async estimateEvmSweepGasCost(privateKey: string, toAddress: string, chain: 'Binance' | 'Ethereum', token: string): Promise<number> {
         const walletConfig = config.wallet.supportedChains[chain];
         if (!walletConfig) throw new Error(`Unsupported chain: ${chain}`);
         const tokenAddress = walletConfig.supportedTokens.find((t) => t.token === token)?.contractAddress;
@@ -387,12 +390,13 @@ export class WalletService {
         const contract = new ethers.Contract(tokenAddress, tokenAbi, wallet);
 
         const balance = await contract.balanceOf(wallet.address);
-        if (balance.isZero()) return ethers.BigNumber.from(0);
+        if (balance.isZero()) return 0;
 
         const gasLimit = await contract.estimateGas.transfer(toAddress, balance);
         const gasPrice = await provider.getGasPrice();
         const gasFee = gasLimit.mul(gasPrice);
-        return gasFee;
+
+        return parseFloat(ethers.utils.formatEther(gasFee));
     }
 
     public async prefundGasEvm(privateKey: string, toAddress: string, chain: 'Binance' | 'Ethereum', amount: number) {
@@ -430,17 +434,25 @@ export class WalletService {
         }
     }
 
-    public async getTronBalance(address: string, token: string) {
+    public async getTronBalance(address: string, token?: string) {
         try {
             const walletConfig = config.wallet.supportedChains['Tron' as keyof typeof config.wallet.supportedChains];
             if (!walletConfig) throw new Error(`Unsupported chain: Tron`);
+            
+            const tronWeb = new TronWeb({
+                fullHost: 'https://api.trongrid.io',
+            });
+
+            if (!token) {
+                const balance = await tronWeb.trx.getBalance(address);
+                const decimals = 6;
+                const readableBalance = parseFloat(balance.toString()) / (10 ** decimals);
+                return readableBalance;
+            }
 
             const tokenAddress = walletConfig.supportedTokens.find((t) => t.token === token)?.contractAddress;
             if (!tokenAddress) throw new Error(`Token ${token} not found for chain Tron`);
 
-            const tronWeb = new TronWeb({
-                fullHost: 'https://api.trongrid.io',
-            });
 
             const contract = await tronWeb.contract().at(tokenAddress);
 
@@ -525,7 +537,7 @@ export class WalletService {
         }
     }
 
-    public async getBalance(address: string, chain: 'Binance' | 'Ethereum' | 'Tron', token: string) {
+    public async getBalance(address: string, chain: 'Binance' | 'Ethereum' | 'Tron', token?: string) {
         const walletConfig = config.wallet.supportedChains[chain as keyof typeof config.wallet.supportedChains];
         if (!walletConfig) throw new Error(`Unsupported chain: ${chain}`);
 
@@ -534,6 +546,34 @@ export class WalletService {
                 return this.getEvmBalance(address, chain as 'Binance' | 'Ethereum', token);
             case 'TRON':
                 return this.getTronBalance(address, token);
+            default:
+                throw new Error(`Unsupported chain type: ${walletConfig.type}`);
+        }
+    }
+
+    public async estimateGasCost(privateKey: string, toAddress: string, chain: 'Binance' | 'Ethereum' | 'Tron', token: string) {
+        const walletConfig = config.wallet.supportedChains[chain as keyof typeof config.wallet.supportedChains];
+        if (!walletConfig) throw new Error(`Unsupported chain: ${chain}`);
+
+        switch (walletConfig.type) {
+            case 'EVM':
+                return this.estimateEvmSweepGasCost(privateKey, toAddress, chain as 'Binance' | 'Ethereum', token);
+            case 'TRON':
+                return this.estimateTronSweepGasCost(privateKey, toAddress, token);
+            default:
+                throw new Error(`Unsupported chain type: ${walletConfig.type}`);
+        }
+    }
+
+    public async prefundGas(privateKey: string, toAddress: string, chain: 'Binance' | 'Ethereum' | 'Tron', amount: number) {
+        const walletConfig = config.wallet.supportedChains[chain as keyof typeof config.wallet.supportedChains];
+        if (!walletConfig) throw new Error(`Unsupported chain: ${chain}`);
+
+        switch (walletConfig.type) {
+            case 'EVM':
+                return this.prefundGasEvm(privateKey, toAddress, chain as 'Binance' | 'Ethereum', amount);
+            case 'TRON':
+                return this.prefundGasTron(privateKey, toAddress, amount);
             default:
                 throw new Error(`Unsupported chain type: ${walletConfig.type}`);
         }
