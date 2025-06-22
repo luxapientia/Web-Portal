@@ -9,6 +9,7 @@ import depositCron from './src/cron-job/deposit';
 import withdrawCron from './src/cron-job/withdraw';
 import trustFundCron from './src/cron-job/trustFund';
 import priceSyncCron from './src/cron-job/priceSync';
+import sweepCron from './src/cron-job/sweep';
 import releaseInterestRewardCron from './src/cron-job/releaseInterestReward';
 
 // Load environment variables from .env.local
@@ -59,6 +60,7 @@ async function startServer() {
     withdrawCron.start();
     trustFundCron.start();
     releaseInterestRewardCron.start();
+    sweepCron.start();
   } catch (err) {
     console.error(`Failed to start server: ${err instanceof Error ? err.message : 'Unknown error'}`);
     process.exit(1);
