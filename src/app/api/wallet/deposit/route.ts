@@ -79,40 +79,18 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
-        const { chain, token, transactionId, fromAddress, toAddress } = await request.json();
+        const { walletAddress, chain, token } = await request.json();
 
-        const wallet = await CentralWalletModel.findOne({ address: toAddress });
-
-        if (!wallet) {
-            return NextResponse.json({ error: 'Wallet not found' }, { status: 404 });
-        }
-
-        if (await TransactionModel.findOne({ transactionId })) {
-            return NextResponse.json({ error: 'Transaction already exists' }, { status: 400 });
-        }
-
-        const txDetails = await walletService.getTxDetails(transactionId, chain);
-
-        if (txDetails.status === 'notStarted') {
-            return NextResponse.json({ error: 'Transaction not started' }, { status: 400 });
-        }
-
-        const cryptoPrice = await CryptoPriceModel.find({ symbol: token }).sort({ timestamp: -1 }).limit(1);
+        await DepositWalletModel.updateOne({ address: walletAddress, chain: chain, userId: user._id }, { $set: { available: false } });
 
         const newTransaction: Partial<Transaction> = {
-            transactionId,
-            fromAddress: fromAddress,
-            toAddress: toAddress,
+            transactionId: 'not-set',
+            toAddress: walletAddress,
             type: 'deposit',
             startDate: new Date(),
-            remarks: `${user.name} deposited ${txDetails.amount} ${token} from ${txDetails.fromAddress} to ${txDetails.toAddress}`,
+            status: 'pending',
             token: token,
             chain: chain,
-            fromUserId: user._id,
-        }
-
-        if (txDetails.amount) {
-            newTransaction.amountInUSD = txDetails.amount * (cryptoPrice[0]?.price || 1);
         }
 
         const transaction = await TransactionModel.create(newTransaction);
