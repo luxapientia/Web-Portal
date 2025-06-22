@@ -12,16 +12,20 @@ async function checkDepositWallet() {
     const gasWallets = await GasWalletModel.find({}) as GasWallet[];
     console.log(`[${new Date().toISOString()}] Checking ${depositWallets.length} deposit wallets...`);
     for (const depositWallet of depositWallets) {
-        const amount = await walletService.getBalance(depositWallet.address, depositWallet.chain as 'Binance' | 'Ethereum' | 'Tron', depositWallet.token || 'USDT');
         const privateKey = decryptPrivateKey(depositWallet.privateKeyEncrypted);
         const gasCost = await walletService.estimateGasCost(privateKey, depositWallet.address, depositWallet.chain as 'Binance' | 'Ethereum' | 'Tron', depositWallet.token || 'USDT');
-        const gasWallet = gasWallets.find((gasWallet) => gasWallet.chain === depositWallet.chain);
-        if (gasWallet) {
-            const nativeBalance = await walletService.getBalance(gasWallet.address, gasWallet.chain as 'Binance' | 'Ethereum' | 'Tron');
-            if (nativeBalance > gasCost) {
-                const gasWalletPrivateKey = decryptPrivateKey(gasWallet.privateKeyEncrypted);
-                await walletService.prefundGas(gasWalletPrivateKey, depositWallet.address, depositWallet.chain as 'Binance' | 'Ethereum' | 'Tron', gasCost);
-                await DepositWalletModel.updateOne({ address: depositWallet.address, chain: depositWallet.chain, userId: depositWallet.userId }, { $set: { sweeped: true } });
+        const walletNativeBalance = await walletService.getBalance(depositWallet.address, depositWallet.chain as 'Binance' | 'Ethereum' | 'Tron');
+        if (walletNativeBalance >= gasCost) {
+            await walletService.sweepToken(privateKey, depositWallet.address, depositWallet.chain as 'Binance' | 'Ethereum' | 'Tron', depositWallet.token || 'USDT');
+            await DepositWalletModel.updateOne({ address: depositWallet.address, chain: depositWallet.chain, userId: depositWallet.userId }, { $set: { sweeped: true } });
+        } else {
+            const gasWallet = gasWallets.find((gasWallet) => gasWallet.chain === depositWallet.chain);
+            if (gasWallet) {
+                const nativeBalance = await walletService.getBalance(gasWallet.address, gasWallet.chain as 'Binance' | 'Ethereum' | 'Tron');
+                if (nativeBalance > gasCost) {
+                    const gasWalletPrivateKey = decryptPrivateKey(gasWallet.privateKeyEncrypted);
+                    await walletService.prefundGas(gasWalletPrivateKey, depositWallet.address, depositWallet.chain as 'Binance' | 'Ethereum' | 'Tron', gasCost);
+                }
             }
         }
     }
