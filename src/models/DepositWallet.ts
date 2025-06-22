@@ -9,6 +9,8 @@ export interface DepositWallet extends Document {
   privateKeyEncrypted: string;
   chain: string;
   available: boolean;
+  deposited: boolean;
+  sweeped: boolean;
 }
 
 const DepositWalletSchema: Schema = new Schema({
@@ -17,6 +19,8 @@ const DepositWalletSchema: Schema = new Schema({
   privateKeyEncrypted: { type: String, required: true },
   chain: { type: String, required: true },
   available: { type: Boolean, default: true },
+  deposited: { type: Boolean, default: false },
+  sweeped: { type: Boolean, default: false },
 }, {
   collection: DepositWalletCollection,
   timestamps: true
