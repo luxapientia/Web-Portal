@@ -5,7 +5,6 @@ import QRCode from 'qrcode';
 import { SystemTokenModel } from '../models/System_Token';
 import { WalletCredentials } from '../schemas/wallet.schema';
 import { config } from '../config';
-import fs from 'fs';
 
 export interface TransactionDetails {
     status: 'notStarted' | 'pending' | 'success' | 'failed';
