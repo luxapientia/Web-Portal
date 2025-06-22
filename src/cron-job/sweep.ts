@@ -3,6 +3,7 @@ import { DepositWallet, DepositWalletModel } from '../models/DepositWallet';
 import { GasWallet, GasWalletModel } from '../models/GasWallet';
 import { walletService } from '../services/Wallet';
 import { decryptPrivateKey } from '../utils/encrypt';
+import { CentralWallet, CentralWalletModel } from '@/models/CentralWallet';
 
 async function checkDepositWallet() {
     const depositWallets = await DepositWalletModel.find({
@@ -10,13 +11,18 @@ async function checkDepositWallet() {
         sweeped: false
     }) as DepositWallet[];
     const gasWallets = await GasWalletModel.find({}) as GasWallet[];
+    const centralWallets = await CentralWalletModel.find({}) as CentralWallet[];
     console.log(`[${new Date().toISOString()}] Checking ${depositWallets.length} deposit wallets...`);
     for (const depositWallet of depositWallets) {
         const privateKey = decryptPrivateKey(depositWallet.privateKeyEncrypted);
         const gasCost = await walletService.estimateGasCost(privateKey, depositWallet.address, depositWallet.chain as 'Binance' | 'Ethereum' | 'Tron', depositWallet.token || 'USDT');
         const walletNativeBalance = await walletService.getBalance(depositWallet.address, depositWallet.chain as 'Binance' | 'Ethereum' | 'Tron');
         if (walletNativeBalance >= gasCost) {
-            await walletService.sweepToken(privateKey, depositWallet.address, depositWallet.chain as 'Binance' | 'Ethereum' | 'Tron', depositWallet.token || 'USDT');
+            const centralWallet = centralWallets.find((centralWallet) => centralWallet.chain === depositWallet.chain);
+            if (!centralWallet) {
+                continue;
+            }
+            await walletService.sweepToken(privateKey, centralWallet.address, depositWallet.chain as 'Binance' | 'Ethereum' | 'Tron', depositWallet.token || 'USDT');
             await DepositWalletModel.updateOne({ address: depositWallet.address, chain: depositWallet.chain, userId: depositWallet.userId }, { $set: { sweeped: true } });
         } else {
             const gasWallet = gasWallets.find((gasWallet) => gasWallet.chain === depositWallet.chain);
