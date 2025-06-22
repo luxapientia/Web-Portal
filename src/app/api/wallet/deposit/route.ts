@@ -76,6 +76,7 @@ export async function POST(request: NextRequest) {
 
         const newTransaction: Partial<Transaction> = {
             transactionId: 'not-set',
+            fromUserId: user._id,
             toAddress: walletAddress,
             type: 'deposit',
             startDate: new Date(),
