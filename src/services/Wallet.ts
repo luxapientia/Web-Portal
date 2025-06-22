@@ -5,6 +5,7 @@ import QRCode from 'qrcode';
 import { SystemTokenModel } from '../models/System_Token';
 import { WalletCredentials } from '../schemas/wallet.schema';
 import { config } from '../config';
+import fs from 'fs';
 
 export interface TransactionDetails {
     status: 'notStarted' | 'pending' | 'success' | 'failed';
@@ -325,9 +326,12 @@ export class WalletService {
         }
     }
 
-    public async sweepEvmToken(privateKey: string, toAddress: string, chain: 'Binance' | 'Ethereum', tokenAddress: string) {
+    public async sweepEvmToken(privateKey: string, toAddress: string, chain: 'Binance' | 'Ethereum', token: string) {
         const walletConfig = config.wallet.supportedChains[chain];
         if (!walletConfig) throw new Error(`Unsupported chain: ${chain}`);
+
+        const tokenAddress = walletConfig.supportedTokens.find((t) => t.token === token)?.contractAddress;
+        if (!tokenAddress) throw new Error(`Token ${token} not found for chain ${chain}`);
 
         const provider = new ethers.providers.JsonRpcProvider(walletConfig.rpcUrl);
         const wallet = new ethers.Wallet(privateKey, provider);
@@ -336,19 +340,43 @@ export class WalletService {
             "function balanceOf(address) view returns (uint256)",
             "function transfer(address to, uint amount) returns (bool)",
         ];
-        const token = new ethers.Contract(tokenAddress, tokenAbi, wallet);
+        const contract = new ethers.Contract(tokenAddress, tokenAbi, wallet);
 
-        const balance = await token.balanceOf(wallet.address);
+        const balance = await contract.balanceOf(wallet.address);
         if (balance.gt(0)) {
-            const tx = await token.transfer(toAddress, balance);
+            const tx = await contract.transfer(toAddress, balance);
             console.log(`Swept tokens from ${wallet.address}, TX: ${tx.hash}`);
             await tx.wait();
         }
     }
 
-    public async estimateEvmSweepGasCost(privateKey: string, toAddress: string, chain: 'Binance' | 'Ethereum', tokenAddress: string) {
+    public async getEvmBalance(address: string, chain: 'Binance' | 'Ethereum', token: string): Promise<number> {
         const walletConfig = config.wallet.supportedChains[chain];
         if (!walletConfig) throw new Error(`Unsupported chain: ${chain}`);
+        const tokenAddress = walletConfig.supportedTokens.find((t) => t.token === token)?.contractAddress;
+        if (!tokenAddress) throw new Error(`Token ${token} not found for chain ${chain}`);
+
+        const provider = new ethers.providers.JsonRpcProvider(walletConfig.rpcUrl);
+
+        // ERC20 Token balance
+        const tokenAbi = [
+            "function balanceOf(address) view returns (uint256)",
+            "function decimals() view returns (uint8)",
+        ];
+        const contract = new ethers.Contract(tokenAddress, tokenAbi, provider);
+        const [rawBalance, decimals] = await Promise.all([
+            contract.balanceOf(address),
+            contract.decimals()
+        ]);
+
+        return parseFloat(ethers.utils.formatUnits(rawBalance, decimals));
+    }
+
+    public async estimateEvmSweepGasCost(privateKey: string, toAddress: string, chain: 'Binance' | 'Ethereum', token: string) {
+        const walletConfig = config.wallet.supportedChains[chain];
+        if (!walletConfig) throw new Error(`Unsupported chain: ${chain}`);
+        const tokenAddress = walletConfig.supportedTokens.find((t) => t.token === token)?.contractAddress;
+        if (!tokenAddress) throw new Error(`Token ${token} not found for chain ${chain}`);
 
         const provider = new ethers.providers.JsonRpcProvider(walletConfig.rpcUrl);
         const wallet = new ethers.Wallet(privateKey, provider);
@@ -357,12 +385,12 @@ export class WalletService {
             "function balanceOf(address) view returns (uint256)",
             "function transfer(address to, uint amount) returns (bool)",
         ];
-        const token = new ethers.Contract(tokenAddress, tokenAbi, wallet);
+        const contract = new ethers.Contract(tokenAddress, tokenAbi, wallet);
 
-        const balance = await token.balanceOf(wallet.address);
+        const balance = await contract.balanceOf(wallet.address);
         if (balance.isZero()) return ethers.BigNumber.from(0);
 
-        const gasLimit = await token.estimateGas.transfer(toAddress, balance);
+        const gasLimit = await contract.estimateGas.transfer(toAddress, balance);
         const gasPrice = await provider.getGasPrice();
         const gasFee = gasLimit.mul(gasPrice);
         return gasFee;
@@ -381,7 +409,13 @@ export class WalletService {
         return tx;
     }
 
-    public async sweepTronToken(privateKey: string, toAddress: string, tokenAddress: string) {
+    public async sweepTronToken(privateKey: string, toAddress: string, token: string) {
+        const walletConfig = config.wallet.supportedChains['Tron' as keyof typeof config.wallet.supportedChains];
+        if (!walletConfig) throw new Error(`Unsupported chain: Tron`);
+
+        const tokenAddress = walletConfig.supportedTokens.find((t) => t.token === token)?.contractAddress;
+        if (!tokenAddress) throw new Error(`Token ${token} not found for chain Tron`);
+
         const tronWeb = new TronWeb({
             fullHost: 'https://api.trongrid.io',
             eventServer: 'https://api.someotherevent.io',
@@ -390,10 +424,34 @@ export class WalletService {
 
         // TRC20 token transfer
         const contract = await tronWeb.contract().at(tokenAddress);
-        const balance = await contract.balanceOf(tronWeb.defaultAddress.base58).call();
+        const balance = await contract.balanceOf(tokenAddress).call({ from: tronWeb.defaultAddress.base58 });
         if (balance > 0) {
             const tx = await contract.transfer(toAddress, balance).send();
             console.log(`Swept TRON tokens from ${tronWeb.defaultAddress.base58}, TX: ${tx}`);
+        }
+    }
+
+    public async getTronBalance(address: string, token: string) {
+        try {
+            const walletConfig = config.wallet.supportedChains['Tron' as keyof typeof config.wallet.supportedChains];
+            if (!walletConfig) throw new Error(`Unsupported chain: Tron`);
+
+            const tokenAddress = walletConfig.supportedTokens.find((t) => t.token === token)?.contractAddress;
+            if (!tokenAddress) throw new Error(`Token ${token} not found for chain Tron`);
+
+            const tronWeb = new TronWeb({
+                fullHost: 'https://api.trongrid.io',
+            });
+
+            const contract = await tronWeb.contract().at(tokenAddress);
+
+            const balance = await contract.methods.balanceOf(address).call({ from: address });
+            const decimals = await contract.methods.decimals().call({ from: address });
+            const readableBalance = parseFloat(balance.toString()) / (10 ** parseInt(decimals.toString()));
+
+            return readableBalance;
+        } catch (error) {
+            return 0;
         }
     }
 
@@ -407,11 +465,11 @@ export class WalletService {
             eventServer: 'https://api.someotherevent.io',
             privateKey
         });
-    
-       // TRC20 token transfer
-       const contract = await tronWeb.contract().at(tokenAddress);
-       const balance = await contract.balanceOf(tronWeb.defaultAddress.base58).call();
-    
+
+        // TRC20 token transfer
+        const contract = await tronWeb.contract().at(tokenAddress);
+        const balance = await contract.balanceOf(tronWeb.defaultAddress.base58).call();
+
         // Simulate TRC20 transfer
         const functionSelector = 'transfer(address,uint256)';
         const parameters = [
@@ -423,7 +481,7 @@ export class WalletService {
             callValue: 0,
             shouldPollResponse: false
         };
-    
+
         const result = await tronWeb.transactionBuilder.triggerSmartContract(
             tokenAddress,
             functionSelector,
@@ -431,14 +489,14 @@ export class WalletService {
             parameters,
             tronWeb.defaultAddress.base58
         );
-    
+
         if (!result.result || result.result.result !== true) {
             throw new Error('Simulation failed: Invalid TRC20 transfer or parameters.');
         }
-    
+
         const energyUsed = result.energy_used;
         const gasFee = (energyUsed * 420) / 1_000_000; // TRX = sun / 1e6
-    
+
         return gasFee;
     }
 
@@ -454,15 +512,29 @@ export class WalletService {
         return tx;
     }
 
-    public async sweepToken(privateKey: string, toAddress: string, chain: 'Binance' | 'Ethereum' | 'Tron', tokenAddress: string) {
+    public async sweepToken(privateKey: string, toAddress: string, chain: 'Binance' | 'Ethereum' | 'Tron', token: string) {
         const walletConfig = config.wallet.supportedChains[chain as keyof typeof config.wallet.supportedChains];
         if (!walletConfig) throw new Error(`Unsupported chain: ${chain}`);
 
         switch (walletConfig.type) {
             case 'EVM':
-                return this.sweepEvmToken(privateKey, toAddress, chain as 'Binance' | 'Ethereum', tokenAddress);
+                return this.sweepEvmToken(privateKey, toAddress, chain as 'Binance' | 'Ethereum', token);
             case 'TRON':
-                return this.sweepTronToken(privateKey, toAddress, tokenAddress);
+                return this.sweepTronToken(privateKey, toAddress, token);
+            default:
+                throw new Error(`Unsupported chain type: ${walletConfig.type}`);
+        }
+    }
+
+    public async getBalance(address: string, chain: 'Binance' | 'Ethereum' | 'Tron', token: string) {
+        const walletConfig = config.wallet.supportedChains[chain as keyof typeof config.wallet.supportedChains];
+        if (!walletConfig) throw new Error(`Unsupported chain: ${chain}`);
+
+        switch (walletConfig.type) {
+            case 'EVM':
+                return this.getEvmBalance(address, chain as 'Binance' | 'Ethereum', token);
+            case 'TRON':
+                return this.getTronBalance(address, token);
             default:
                 throw new Error(`Unsupported chain type: ${walletConfig.type}`);
         }
