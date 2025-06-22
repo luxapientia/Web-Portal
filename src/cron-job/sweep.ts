@@ -3,7 +3,7 @@ import { DepositWallet, DepositWalletModel } from '../models/DepositWallet';
 import { GasWallet, GasWalletModel } from '../models/GasWallet';
 import { walletService } from '../services/Wallet';
 import { decryptPrivateKey } from '../utils/encrypt';
-import { CentralWallet, CentralWalletModel } from '@/models/CentralWallet';
+import { CentralWallet, CentralWalletModel } from '../models/CentralWallet';
 
 async function checkDepositWallet() {
     const depositWallets = await DepositWalletModel.find({
