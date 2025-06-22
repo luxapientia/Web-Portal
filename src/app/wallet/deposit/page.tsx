@@ -59,7 +59,7 @@ export default function DepositPage() {
 
     const fetchWalletAddresses = async () => {
         try {
-            const response = await fetch('/api/wallet');
+            const response = await fetch('/api/wallet/deposit');
             if (!response.ok) {
                 toast.error('Failed to fetch wallet addresses');
                 return;
