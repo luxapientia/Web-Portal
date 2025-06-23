@@ -33,7 +33,7 @@ async function checkPendingTransactions() {
                 transaction.releaseDate = new Date();
                 await transaction.save();
 
-                await DepositWalletModel.updateOne({ address: transaction.toAddress, chain: transaction.chain, userId: transaction.fromUserId as string }, { $set: { deposited: true, token: transaction.token } });
+                await DepositWalletModel.updateOne({ address: transaction.toAddress, chain: transaction.chain, userId: transaction.fromUserId as string, token: transaction.token }, { $set: { deposited: true, sweeped: false } });
             }
             // try {
             //     // Check transaction status on blockchain
