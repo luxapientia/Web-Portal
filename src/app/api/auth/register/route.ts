@@ -12,6 +12,7 @@ import { config } from '@/config';
 import { CentralWalletModel } from '@/models/CentralWallet';
 import { encryptPrivateKey } from '@/utils/encrypt';
 import { walletService } from '@/services/Wallet';
+import { DepositWalletModel } from '@/models/DepositWallet';
 
 // Configure upload directory
 const uploadDir = join(process.cwd(), 'public');
@@ -55,7 +56,7 @@ export async function POST(request: Request) {
     // Check if user already exists
     const userCount = await UserModel.countDocuments();
 
-    
+
     // Check if user already exists
     const existingUser = await UserModel.findOne({
       $or: [
@@ -214,17 +215,14 @@ export async function POST(request: Request) {
     const supportedChains = Object.keys(config.wallet.supportedChains);
     for (const chain of supportedChains) {
       const wallet = await walletService.generateWalletCredentials(chain);
-      const supportedTokens = config.wallet.supportedChains[chain as keyof typeof config.wallet.supportedChains].supportedTokens.map(val => val.token);
-      for (const token of supportedTokens) {
-        await CentralWalletModel.create({
-          userId: result._id,
-          address: wallet.address,
-          privateKeyEncrypted: encryptPrivateKey(wallet.privateKey),
-          chain: chain,
-          token: token
-        });
-      }
+      await DepositWalletModel.create({
+        userId: result._id,
+        address: wallet.address,
+        privateKeyEncrypted: encryptPrivateKey(wallet.privateKey),
+        chain: chain,
+      });
     }
+
     // Clear email verification status
     await redis.del(`email_verified:${email}`);
 
