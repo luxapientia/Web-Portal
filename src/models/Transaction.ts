@@ -10,6 +10,7 @@ export type TransactionType =
   | 'interest_deposit'
   | 'trust_deposit'
   | 'deposit'
+  | 'sweep'
 
 export interface Transaction extends Document {
   _id: string,
