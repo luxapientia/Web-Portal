@@ -9,7 +9,6 @@ import sharp from 'sharp';
 import { AppConfigModel } from '@/models/AppConfig';
 import { generateRandomInvitationCode } from '@/utils/generate-code';
 import { config } from '@/config';
-import { CentralWalletModel } from '@/models/CentralWallet';
 import { encryptPrivateKey } from '@/utils/encrypt';
 import { walletService } from '@/services/Wallet';
 import { DepositWalletModel } from '@/models/DepositWallet';
@@ -215,12 +214,16 @@ export async function POST(request: Request) {
     const supportedChains = Object.keys(config.wallet.supportedChains);
     for (const chain of supportedChains) {
       const wallet = await walletService.generateWalletCredentials(chain);
-      await DepositWalletModel.create({
-        userId: result._id,
-        address: wallet.address,
-        privateKeyEncrypted: encryptPrivateKey(wallet.privateKey),
-        chain: chain,
-      });
+      const supportedTokens = config.wallet.supportedChains[chain as keyof typeof config.wallet.supportedChains].supportedTokens.map(val => val.token);
+      for (const token of supportedTokens) {
+        await DepositWalletModel.create({
+          userId: result._id,
+          address: wallet.address,
+          privateKeyEncrypted: encryptPrivateKey(wallet.privateKey),
+          chain: chain,
+          token: token
+        });
+      }
     }
 
     // Clear email verification status
