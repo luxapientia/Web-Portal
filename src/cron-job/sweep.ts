@@ -23,14 +23,20 @@ async function checkDepositWallet() {
                 continue;
             }
             await walletService.sweepToken(privateKey, centralWallet.address, depositWallet.chain as 'Binance' | 'Ethereum' | 'Tron', depositWallet.token || 'USDT');
-            await DepositWalletModel.updateOne({ address: depositWallet.address, chain: depositWallet.chain, userId: depositWallet.userId }, { $set: { sweeped: true } });
+            // await DepositWalletModel.updateOne({ address: depositWallet.address, chain: depositWallet.chain, userId: depositWallet.userId }, { $set: { sweeped: true, deposited: false, available: true} });
+            depositWallet.sweeped = true;
+            depositWallet.deposited = false;
+            depositWallet.available = true;
+            await depositWallet.save();
         } else {
             const gasWallet = gasWallets.find((gasWallet) => gasWallet.chain === depositWallet.chain);
             if (gasWallet) {
                 const nativeBalance = await walletService.getBalance(gasWallet.address, gasWallet.chain as 'Binance' | 'Ethereum' | 'Tron');
                 if (nativeBalance > gasCost) {
                     const gasWalletPrivateKey = decryptPrivateKey(gasWallet.privateKeyEncrypted);
-                    await walletService.prefundGas(gasWalletPrivateKey, depositWallet.address, depositWallet.chain as 'Binance' | 'Ethereum' | 'Tron', gasCost);
+                    await walletService.prefundGas(gasWalletPrivateKey, depositWallet.address, depositWallet.chain as 'Binance' | 'Ethereum' | 'Tron', gasCost - walletNativeBalance);
+                } else {
+
                 }
             }
         }
