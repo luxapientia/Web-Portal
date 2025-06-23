@@ -536,7 +536,7 @@ export class WalletService {
             privateKey
         });
 
-        const tx = await tronWeb.trx.sendTransaction(toAddress, amount);
+        const tx = await tronWeb.trx.sendTransaction(toAddress, amount * 1e6);
         console.log(`Prefunded gas for ${tronWeb.defaultAddress.base58}, TX: ${tx}`);
         return tx;
     }
