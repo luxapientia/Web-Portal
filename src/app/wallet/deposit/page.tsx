@@ -14,13 +14,12 @@ import {
 } from '@mui/icons-material';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { CentralWalletWithoutKeys } from '@/models/CentralWallet';
-
+import { DepositWalletWithoutKeys } from '@/models/DepositWallet';
 export default function DepositPage() {
     const theme = useTheme();
     const router = useRouter();
-    const [walletAddresses, setWalletAddresses] = useState<CentralWalletWithoutKeys[]>([]);
-    const [selectedWallet, setSelectedWallet] = useState<CentralWalletWithoutKeys | null>(null);
+    const [walletAddresses, setWalletAddresses] = useState<DepositWalletWithoutKeys[]>([]);
+    const [selectedWallet, setSelectedWallet] = useState<DepositWalletWithoutKeys | null>(null);
     const [qrUrl, setQrUrl] = useState<string | null>(null);
     const [supportedChain_Tokens, setSupportedChain_Tokens] = useState<{ chain: string, token: string }[]>([]);
     const [selectedChain_Token, setSelectedChain_Token] = useState<{ chain: string, token: string } | null>(null);
@@ -108,6 +107,7 @@ export default function DepositPage() {
             if (data.success) {
                 toast.success('Deposit submitted successfully!');
                 setIsModalOpen(false);
+                fetchWalletAddresses();
                 // router.push('/wallet/transactions');
             } else {
                 toast.error(data.data.error || 'Failed to submit deposit');
@@ -178,9 +178,9 @@ export default function DepositPage() {
                         </IconButton>
 
                         {/* Title Section */}
-                        <Box sx={{ 
-                            textAlign: 'center', 
-                            mb: 4, 
+                        <Box sx={{
+                            textAlign: 'center',
+                            mb: 4,
                             mt: { xs: 3, md: 4 },
                             position: 'relative',
                             '&::after': {
@@ -276,7 +276,7 @@ export default function DepositPage() {
                                     onChange={(e) => {
                                         const parsed = JSON.parse(e.target.value);
                                         setSelectedChain_Token(parsed);
-                                        setSelectedWallet(walletAddresses.find(walletAddresses => walletAddresses.chain === parsed.chain) || null);
+                                        setSelectedWallet(walletAddresses.find(walletAddresses => walletAddresses.chain === parsed.chain && walletAddresses.token === parsed.token) || null);
                                     }}
                                     displayEmpty
                                     renderValue={(selected) => {
@@ -378,6 +378,7 @@ export default function DepositPage() {
                                     fullWidth
                                     variant="contained"
                                     size="large"
+                                    disabled={!selectedWallet.available}
                                     onClick={() => setIsModalOpen(true)}
                                     startIcon={<SendIcon />}
                                     sx={{
@@ -396,7 +397,7 @@ export default function DepositPage() {
                                         }
                                     }}
                                 >
-                                    Deposit
+                                    {selectedWallet.available ? "Deposit" : "Pending"}
                                 </Button>
                             )}
 
@@ -440,7 +441,7 @@ export default function DepositPage() {
                                 </Box>
                             )}
 
-                            
+
 
                             {/* Transaction ID Modal */}
                             <Dialog
