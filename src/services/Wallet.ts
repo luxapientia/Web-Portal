@@ -438,7 +438,7 @@ export class WalletService {
         try {
             const walletConfig = config.wallet.supportedChains['Tron' as keyof typeof config.wallet.supportedChains];
             if (!walletConfig) throw new Error(`Unsupported chain: Tron`);
-            
+
             const tronWeb = new TronWeb({
                 fullHost: 'https://api.trongrid.io',
             });
@@ -470,46 +470,63 @@ export class WalletService {
     public async estimateTronSweepGasCost(
         privateKey: string,
         toAddress: string,
-        tokenAddress: string
+        token: string
     ): Promise<number> {
-        const tronWeb = new TronWeb({
-            fullHost: 'https://api.trongrid.io',
-            eventServer: 'https://api.someotherevent.io',
-            privateKey
-        });
+        console.log(privateKey, toAddress, token);
+        // try {
+        // const walletConfig = config.wallet.supportedChains['Tron' as keyof typeof config.wallet.supportedChains];
+        // if (!walletConfig) throw new Error(`Unsupported chain: Tron`);
 
-        // TRC20 token transfer
-        const contract = await tronWeb.contract().at(tokenAddress);
-        const balance = await contract.balanceOf(tronWeb.defaultAddress.base58).call({ from: tronWeb.defaultAddress.base58 });
+        // const tokenAddress = walletConfig.supportedTokens.find((t) => t.token === token)?.contractAddress;
+        // if (!tokenAddress) throw new Error(`Token ${token} not found for chain Tron`);
 
-        // Simulate TRC20 transfer
-        const functionSelector = 'transfer(address,uint256)';
-        const parameters = [
-            { type: 'address', value: toAddress },
-            { type: 'uint256', value: balance }
-        ];
-        const options = {
-            feeLimit: 100_000_000, // Max fee limit: 100 TRX
-            callValue: 0,
-            shouldPollResponse: false
-        };
+        // const tronWeb = new TronWeb({
+        //     fullHost: 'https://api.trongrid.io',
+        //     eventServer: 'https://api.someotherevent.io',
+        //     privateKey
+        // });
 
-        const result = await tronWeb.transactionBuilder.triggerSmartContract(
-            tokenAddress,
-            functionSelector,
-            options,
-            parameters,
-            tronWeb.defaultAddress.base58
-        );
+        // // TRC20 token transfer
+        // const contract = await tronWeb.contract().at(tokenAddress);
+        // const balance = await contract.balanceOf(tronWeb.defaultAddress.base58).call({ from: tronWeb.defaultAddress.base58 });
 
-        if (!result.result || result.result.result !== true) {
-            throw new Error('Simulation failed: Invalid TRC20 transfer or parameters.');
-        }
+        // // Simulate TRC20 transfer
+        // const functionSelector = 'transfer(address,uint256)';
+        // const parameters = [
+        //     { type: 'address', value: toAddress },
+        //     { type: 'uint256', value: balance }
+        // ];
+        // const options = {
+        //     feeLimit: 100_000_000, // Max fee limit: 100 TRX
+        //     callValue: 0,
+        //     shouldPollResponse: true,
+        //     visible: true
+        // };
 
-        const energyUsed = result.energy_used;
-        const gasFee = (energyUsed * 420) / 1_000_000; // TRX = sun / 1e6
+        // const result = await tronWeb.transactionBuilder.triggerSmartContract(
+        //     tokenAddress,
+        //     functionSelector,
+        //     options,
+        //     parameters,
+        //     tronWeb.defaultAddress.base58
+        // );
 
-        return gasFee;
+        // console.log(tronWeb.transactionBuilder.estimateEnergy)
+
+        // if (!result.result || result.result.result !== true) {
+        //     throw new Error('Simulation failed: Invalid TRC20 transfer or parameters.');
+        // }
+
+        // const energyUsed = result.energy_used;
+        // const gasFee = (energyUsed * 420) / 1_000_000; // TRX = sun / 1e6
+
+        // // return gasFee;
+        // } catch (error) {
+        //     console.error(error);
+        //     // return 0;
+        // }
+
+        return 15;
     }
 
     public async prefundGasTron(privateKey: string, toAddress: string, amount: number) {
