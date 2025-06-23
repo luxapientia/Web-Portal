@@ -2,11 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Transaction, TransactionModel } from '@/models/Transaction';
 import { authOptions, config } from '@/config';
 import { getServerSession } from 'next-auth';
-import { walletService } from '@/services/Wallet';
 import { UserModel } from '@/models/User';
 import { User } from '@/models/User';
-import { DepositWallet, DepositWalletModel } from '@/models/DepositWallet';
-import { encryptPrivateKey } from '@/utils/encrypt';
+import { DepositWalletModel, DepositWalletWithoutKeys } from '@/models/DepositWallet';
 
 export async function GET() {
     try {
@@ -23,33 +21,7 @@ export async function GET() {
             };
         });
 
-        const depositWallets = [];
-        for( const supportedChain of supportedChains) {
-            const wallet = await DepositWalletModel.findOne({userId: session.user.id, chain: supportedChain.chain, available: true}) as DepositWallet;
-            if(!wallet) {
-                const newWallet = await walletService.generateWalletCredentials(supportedChain.chain as keyof typeof config.wallet.supportedChains);
-                await DepositWalletModel.create({
-                    userId: session.user.id,
-                    address: newWallet.address,
-                    privateKeyEncrypted: encryptPrivateKey(newWallet.privateKey),
-                    chain: supportedChain.chain,
-                });
-
-                depositWallets.push({
-                    chain: supportedChain.chain,
-                    address: newWallet.address,
-                    available: true,
-                    userId: session.user.id
-                })
-            } else {
-                depositWallets.push({
-                    chain: wallet.chain,
-                    address: wallet.address,
-                    available: wallet.available,
-                    userId: wallet.userId
-                })
-            }
-        }
+        const depositWallets = await DepositWalletModel.find({userId: session.user.id}) as DepositWalletWithoutKeys[];
 
         return NextResponse.json({ success: true, data: { walletAddresses: depositWallets, supportedChains } });
     } catch (error) {
@@ -72,7 +44,7 @@ export async function POST(request: NextRequest) {
 
         const { walletAddress, chain, token } = await request.json();
 
-        await DepositWalletModel.updateOne({ address: walletAddress, chain: chain, userId: user._id }, { $set: { available: false, token: token } });
+        await DepositWalletModel.updateOne({ address: walletAddress, chain: chain, userId: user._id }, { $set: { available: false } });
 
         const newTransaction: Partial<Transaction> = {
             transactionId: 'not-set',
