@@ -4,7 +4,6 @@ import { UserModel } from '@/models/User';
 import { authOptions } from '@/config';
 import { getServerSession } from 'next-auth';
 import { User } from '@/models/User';
-import { CentralWalletModel } from '@/models/CentralWallet';
 
 export async function POST(request: NextRequest) {
     try {
@@ -47,14 +46,6 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const fromWallet = await CentralWalletModel.findOne({chain: chain });
-        if (!fromWallet) {
-            return NextResponse.json(
-                { success: false, error: 'Central wallet not found' },
-                { status: 400 }
-            );
-        }
-
         // Create new transaction
         const transaction = await TransactionModel.create({
             transactionId: 'not-set',
@@ -64,7 +55,6 @@ export async function POST(request: NextRequest) {
             amountInUSD: amount,
             token: token,
             chain: chain,
-            fromAddress: fromWallet.address,
             toAddress: toAddress,
             remarks: `${user.name} requested a withdraw of ${amount} ${token} from ${chain} chain`,
             startDate: new Date()

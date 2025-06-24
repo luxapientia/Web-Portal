@@ -1,34 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { CentralWalletModel } from '@/models/CentralWallet';
 import { Transaction, TransactionModel } from '@/models/Transaction';
-import { authOptions, config } from '@/config';
+import { authOptions } from '@/config';
 import { getServerSession } from 'next-auth';
+import { walletService } from '@/services/Wallet';
 import { UserModel } from '@/models/User';
 import { User } from '@/models/User';
-import { DepositWalletModel, DepositWalletWithoutKeys } from '@/models/DepositWallet';
-
-export async function GET() {
-    try {
-        const session = await getServerSession(authOptions);
-        if (!session?.user?.email) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
-        const supportedChains = Object.keys(config.wallet.supportedChains).map(chain => {
-            const tokens = config.wallet.supportedChains[chain as keyof typeof config.wallet.supportedChains].supportedTokens.map(val => val.token);
-            return {
-                chain: chain,
-                tokens: tokens
-            };
-        });
-
-        const depositWallets = await DepositWalletModel.find({userId: session.user.id}) as DepositWalletWithoutKeys[];
-
-        return NextResponse.json({ success: true, data: { walletAddresses: depositWallets, supportedChains } });
-    } catch (error) {
-        console.error('Error fetching wallet:', error);
-        return NextResponse.json({ error: 'Failed to fetch wallet' }, { status: 500 });
-    }
-}
+import { CryptoPriceModel } from '@/models/CryptoPrice';
 
 export async function POST(request: NextRequest) {
     try {
@@ -42,19 +20,39 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
-        const { walletAddress, chain, token } = await request.json();
+        const { chain, token, transactionId, toAddress } = await request.json();
 
-        await DepositWalletModel.updateOne({ address: walletAddress, chain: chain, userId: user._id }, { $set: { available: false, sweeped: false, deposited: false } });
+        const wallet = await CentralWalletModel.findOne({ address: toAddress, chain });
+
+        if (!wallet) {
+            return NextResponse.json({ error: 'Wallet not found' }, { status: 404 });
+        }
+
+        if (await TransactionModel.findOne({ transactionId })) {
+            return NextResponse.json({ error: 'Transaction already exists' }, { status: 400 });
+        }
+
+        const txDetails = await walletService.getTxDetails(transactionId, chain);
+
+        if (txDetails.status === 'notStarted') {
+            return NextResponse.json({ error: 'Transaction not started' }, { status: 400 });
+        }
+
+        const cryptoPrice = await CryptoPriceModel.find({ symbol: token }).sort({ timestamp: -1 }).limit(1);
 
         const newTransaction: Partial<Transaction> = {
-            transactionId: 'not-set',
-            fromUserId: user._id,
-            toAddress: walletAddress,
+            transactionId,
+            toAddress: toAddress,
             type: 'deposit',
             startDate: new Date(),
-            status: 'pending',
+            remarks: `${user.name} deposited ${txDetails.amount} ${token} from ${txDetails.fromAddress} to ${txDetails.toAddress}`,
             token: token,
             chain: chain,
+            fromUserId: user._id,
+        }
+
+        if (txDetails.amount) {
+            newTransaction.amountInUSD = txDetails.amount * (cryptoPrice[0]?.price || 1);
         }
 
         const transaction = await TransactionModel.create(newTransaction);

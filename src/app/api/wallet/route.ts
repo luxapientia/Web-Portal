@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { CentralWallet, CentralWalletModel, CentralWalletWithoutKeys } from '@/models/CentralWallet';
+import { CentralWallet, CentralWalletModel, CentralWalletWithoutId } from '@/models/CentralWallet';
 import { authOptions, config } from '@/config';
 import { getServerSession } from 'next-auth';
 
@@ -10,22 +10,31 @@ export async function GET() {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const wallet = await CentralWalletModel.find({}) as CentralWallet[];
+        const wallets = await CentralWalletModel.find({}) as CentralWallet[];
 
-        const walletWithoutKeys = wallet.map(w => ({
-            address: w.address,
-            chain: w.chain,
-        })) as CentralWalletWithoutKeys[];
+        const centralWallets: any[] = [];
 
         const supportedChains = Object.keys(config.wallet.supportedChains).map(chain => {
+            const ws = wallets.filter(wallet => wallet.chain === chain);
+            if (ws.length > 0) {
+                const idx = Math.floor(Math.random() * ws.length);
+                const centralWallet = ws[idx];
+                centralWallets.push({
+                    address: centralWallet.address,
+                    chain: centralWallet.chain,
+                });
+            }
             const tokens = config.wallet.supportedChains[chain as keyof typeof config.wallet.supportedChains].supportedTokens.map(val => val.token);
             return {
                 chain: chain,
                 tokens: tokens
             };
+
+            
+
         });
 
-        return NextResponse.json({ success: true, data: { walletAddresses: walletWithoutKeys, supportedChains } });
+        return NextResponse.json({ success: true, data: { walletAddresses: centralWallets, supportedChains } });
     } catch (error) {
         console.error('Error fetching wallet:', error);
         return NextResponse.json({ error: 'Failed to fetch wallet' }, { status: 500 });

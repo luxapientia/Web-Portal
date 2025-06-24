@@ -8,10 +8,6 @@ import { join } from 'path';
 import sharp from 'sharp';
 import { AppConfigModel } from '@/models/AppConfig';
 import { generateRandomInvitationCode } from '@/utils/generate-code';
-import { config } from '@/config';
-import { encryptPrivateKey } from '@/utils/encrypt';
-import { walletService } from '@/services/Wallet';
-import { DepositWalletModel } from '@/models/DepositWallet';
 
 // Configure upload directory
 const uploadDir = join(process.cwd(), 'public');
@@ -55,7 +51,7 @@ export async function POST(request: Request) {
     // Check if user already exists
     const userCount = await UserModel.countDocuments();
 
-
+    
     // Check if user already exists
     const existingUser = await UserModel.findOne({
       $or: [
@@ -208,22 +204,6 @@ export async function POST(request: Request) {
         { error: 'Failed to register user' },
         { status: 500 }
       );
-    }
-
-    // Create wallet
-    const supportedChains = Object.keys(config.wallet.supportedChains);
-    for (const chain of supportedChains) {
-      const wallet = await walletService.generateWalletCredentials(chain);
-      const supportedTokens = config.wallet.supportedChains[chain as keyof typeof config.wallet.supportedChains].supportedTokens.map(val => val.token);
-      for (const token of supportedTokens) {
-        await DepositWalletModel.create({
-          userId: result._id,
-          address: wallet.address,
-          privateKeyEncrypted: encryptPrivateKey(wallet.privateKey),
-          chain: chain,
-          token: token
-        });
-      }
     }
 
     // Clear email verification status

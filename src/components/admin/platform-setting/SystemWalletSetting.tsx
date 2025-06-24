@@ -20,36 +20,46 @@ import {
   DialogActions,
   Button,
   TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
-import { ContentCopy, Edit as EditIcon } from '@mui/icons-material';
+import { ContentCopy, Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
 import toast from 'react-hot-toast';
-
-interface WalletAddress {
-  address: string;
-  chain: string;
-}
+import { CentralWalletWithoutId } from '@/models/CentralWallet';
 
 interface EditDialogProps {
   open: boolean;
   onClose: () => void;
-  wallet: WalletAddress | null;
+  wallet: CentralWalletWithoutId | null;
   onSave: (chain: string, address: string) => Promise<void>;
+  isNew?: boolean;
 }
 
-function EditDialog({ open, onClose, wallet, onSave }: EditDialogProps) {
+function EditDialog({ open, onClose, wallet, onSave, isNew = false }: EditDialogProps) {
   const [address, setAddress] = useState('');
+  const [chain, setChain] = useState('');
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (wallet) {
       setAddress(wallet.address);
+      setChain(wallet.chain);
+      setError('');
+    } else if (isNew) {
+      setAddress('');
+      setChain('');
       setError('');
     }
-  }, [wallet]);
+  }, [wallet, isNew]);
 
   const handleSave = async () => {
-    if (!wallet) return;
+    if (isNew && !chain) {
+      setError('Chain is required');
+      return;
+    }
     if (!address.trim()) {
       setError('Address is required');
       return;
@@ -57,7 +67,7 @@ function EditDialog({ open, onClose, wallet, onSave }: EditDialogProps) {
 
     try {
       setSaving(true);
-      await onSave(wallet.chain, address.trim());
+      await onSave(chain || wallet!.chain, address.trim());
       onClose();
     } catch (error) {
       console.error('Error saving wallet address:', error);
@@ -69,10 +79,28 @@ function EditDialog({ open, onClose, wallet, onSave }: EditDialogProps) {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>
-        Edit {wallet?.chain} Wallet Address
+        {isNew ? 'Add New Wallet' : `Edit ${wallet?.chain} Wallet Address`}
       </DialogTitle>
       <DialogContent>
         <Box sx={{ mt: 2 }}>
+          {isNew && (
+            <FormControl fullWidth sx={{ mb: 2 }}>
+              <InputLabel>Chain</InputLabel>
+              <Select
+                value={chain}
+                label="Chain"
+                onChange={(e) => {
+                  setChain(e.target.value);
+                  setError('');
+                }}
+                disabled={saving}
+              >
+                <MenuItem value="Ethereum">Ethereum</MenuItem>
+                <MenuItem value="Binance">Binance</MenuItem>
+                <MenuItem value="Tron">Tron</MenuItem>
+              </Select>
+            </FormControl>
+          )}
           <TextField
             label="Wallet Address"
             fullWidth
@@ -82,7 +110,7 @@ function EditDialog({ open, onClose, wallet, onSave }: EditDialogProps) {
               setError('');
             }}
             error={!!error}
-            helperText={error || 'Enter the new wallet address for this chain'}
+            helperText={error || 'Enter the wallet address for this chain'}
             disabled={saving}
           />
         </Box>
@@ -94,7 +122,7 @@ function EditDialog({ open, onClose, wallet, onSave }: EditDialogProps) {
         <Button 
           onClick={handleSave}
           variant="contained"
-          disabled={saving || !address.trim() || !!error}
+          disabled={saving || !address.trim() || (isNew && !chain) || !!error}
         >
           {saving ? 'Saving...' : 'Save Changes'}
         </Button>
@@ -104,9 +132,10 @@ function EditDialog({ open, onClose, wallet, onSave }: EditDialogProps) {
 }
 
 export default function SystemWalletSetting() {
-  const [walletAddresses, setWalletAddresses] = useState<WalletAddress[]>([]);
+  const [walletAddresses, setWalletAddresses] = useState<CentralWalletWithoutId[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editWallet, setEditWallet] = useState<WalletAddress | null>(null);
+  const [editWallet, setEditWallet] = useState<CentralWalletWithoutId | null>(null);
+  const [isNewWallet, setIsNewWallet] = useState(false);
 
   useEffect(() => {
     fetchWalletAddresses();
@@ -133,7 +162,7 @@ export default function SystemWalletSetting() {
   const handleSaveAddress = async (chain: string, address: string) => {
     try {
       const response = await fetch('/api/admin/wallet', {
-        method: 'PUT',
+        method: isNewWallet ? 'POST' : 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -143,7 +172,7 @@ export default function SystemWalletSetting() {
       const data = await response.json();
 
       if (data.success) {
-        toast.success('Wallet address updated successfully');
+        toast.success(isNewWallet ? 'Wallet created successfully' : 'Wallet address updated successfully');
         fetchWalletAddresses(); // Refresh the list
       } else {
         throw new Error(data.error || 'Failed to update wallet address');
@@ -152,6 +181,30 @@ export default function SystemWalletSetting() {
       console.error('Error updating wallet address:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to update wallet address');
       throw error;
+    }
+  };
+
+  const handleDeleteWallet = async (chain: string) => {
+    try {
+      const response = await fetch('/api/admin/wallet', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ chain }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success('Wallet deleted successfully');
+        fetchWalletAddresses(); // Refresh the list
+      } else {
+        throw new Error(data.error || 'Failed to delete wallet');
+      }
+    } catch (error) {
+      console.error('Error deleting wallet:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to delete wallet');
     }
   };
 
@@ -177,6 +230,32 @@ export default function SystemWalletSetting() {
         <Typography variant="h6" fontWeight="bold">
           System Wallet Addresses
         </Typography>
+        <Button
+          variant="outlined"
+          startIcon={<AddIcon />}
+          onClick={() => {
+            setIsNewWallet(true);
+            setEditWallet(null);
+          }}
+          sx={{
+            borderRadius: '8px',
+            textTransform: 'none',
+            px: 2,
+            py: 1,
+            borderColor: 'primary.main',
+            color: 'primary.main',
+            bgcolor: 'background.paper',
+            '&:hover': {
+                bgcolor: 'primary.main',
+                color: 'white',
+                borderColor: 'primary.main',
+            },
+            transition: 'all 0.2s ease-in-out',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+        }}
+        >
+          Add Wallet
+        </Button>
       </Stack>
 
       <Alert severity="info" sx={{ mb: 3 }}>
@@ -221,8 +300,8 @@ export default function SystemWalletSetting() {
                   <TableCell colSpan={3} align="center">No wallet addresses found</TableCell>
                 </TableRow>
               ) : (
-                walletAddresses.map((wallet) => (
-                  <TableRow key={wallet.chain}>
+                walletAddresses.map((wallet, index) => (
+                  <TableRow key={index}>
                     <TableCell>{wallet.chain}</TableCell>
                     <TableCell>
                       <Box sx={{ 
@@ -247,9 +326,20 @@ export default function SystemWalletSetting() {
                         <Tooltip title="Edit Address">
                           <IconButton
                             size="small"
-                            onClick={() => setEditWallet(wallet)}
+                            onClick={() => {
+                              setIsNewWallet(false);
+                              setEditWallet(wallet);
+                            }}
                           >
                             <EditIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Delete Wallet">
+                          <IconButton
+                            size="small"
+                            onClick={() => handleDeleteWallet(wallet.chain)}
+                          >
+                            <DeleteIcon />
                           </IconButton>
                         </Tooltip>
                       </Stack>
@@ -263,10 +353,14 @@ export default function SystemWalletSetting() {
       </Paper>
 
       <EditDialog
-        open={!!editWallet}
-        onClose={() => setEditWallet(null)}
+        open={!!editWallet || isNewWallet}
+        onClose={() => {
+          setEditWallet(null);
+          setIsNewWallet(false);
+        }}
         wallet={editWallet}
         onSave={handleSaveAddress}
+        isNew={isNewWallet}
       />
     </Box>
   );

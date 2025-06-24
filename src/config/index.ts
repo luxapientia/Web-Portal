@@ -147,7 +147,7 @@ export const config = {
         },
         supportedTokens: [{
           token: 'USDT',
-          contractAddress: 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t'
+          contractAddress: 'TXLAQ63Xg1NAzckPwKHvzw7CSEmLMEqcdj'
         }, {
           token: 'USDC',
           contractAddress: 'TEkxiTehnzSmSe2XqrBj4w32RUN966rdz8'

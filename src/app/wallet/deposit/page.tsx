@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Container, Typography, Paper, Button, useTheme, IconButton, Select, MenuItem, InputLabel, FormControl, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress } from '@mui/material';
+import { Box, Container, Typography, Paper, TextField, Button, useTheme, IconButton, Select, MenuItem, InputLabel, FormControl, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress } from '@mui/material';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import QRCode from 'qrcode'
 import toast from 'react-hot-toast';
@@ -14,17 +14,19 @@ import {
 } from '@mui/icons-material';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { DepositWalletWithoutKeys } from '@/models/DepositWallet';
+import { CentralWalletWithoutId } from '@/models/CentralWallet';
+
 export default function DepositPage() {
     const theme = useTheme();
     const router = useRouter();
-    const [walletAddresses, setWalletAddresses] = useState<DepositWalletWithoutKeys[]>([]);
-    const [selectedWallet, setSelectedWallet] = useState<DepositWalletWithoutKeys | null>(null);
+    const [walletAddresses, setWalletAddresses] = useState<CentralWalletWithoutId[]>([]);
+    const [selectedWallet, setSelectedWallet] = useState<CentralWalletWithoutId | null>(null);
     const [qrUrl, setQrUrl] = useState<string | null>(null);
     const [supportedChain_Tokens, setSupportedChain_Tokens] = useState<{ chain: string, token: string }[]>([]);
     const [selectedChain_Token, setSelectedChain_Token] = useState<{ chain: string, token: string } | null>(null);
     const [copied, setCopied] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [transactionId, setTransactionId] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
@@ -56,7 +58,7 @@ export default function DepositPage() {
 
     const fetchWalletAddresses = async () => {
         try {
-            const response = await fetch('/api/wallet/deposit');
+            const response = await fetch('/api/wallet');
             if (!response.ok) {
                 toast.error('Failed to fetch wallet addresses');
                 return;
@@ -79,7 +81,7 @@ export default function DepositPage() {
     }
 
     const handleSubmitDeposit = async () => {
-        if (!selectedWallet || !selectedChain_Token) {
+        if (!selectedWallet || !transactionId.trim() || !selectedChain_Token) {
             return;
         }
 
@@ -93,21 +95,22 @@ export default function DepositPage() {
                 body: JSON.stringify({
                     chain: selectedChain_Token.chain,
                     token: selectedChain_Token.token,
-                    walletAddress: selectedWallet.address,
+                    transactionId: transactionId.trim(),
+                    toAddress: selectedWallet.address,
                 }),
             });
 
+            const data = await response.json();
+
             if (!response.ok) {
-                toast.error('Failed to submit deposit');
+                toast.error(data.data.error || 'Failed to submit deposit');
                 return;
             }
-
-            const data = await response.json();
 
             if (data.success) {
                 toast.success('Deposit submitted successfully!');
                 setIsModalOpen(false);
-                fetchWalletAddresses();
+                setTransactionId('');
                 // router.push('/wallet/transactions');
             } else {
                 toast.error(data.data.error || 'Failed to submit deposit');
@@ -276,7 +279,7 @@ export default function DepositPage() {
                                     onChange={(e) => {
                                         const parsed = JSON.parse(e.target.value);
                                         setSelectedChain_Token(parsed);
-                                        setSelectedWallet(walletAddresses.find(walletAddresses => walletAddresses.chain === parsed.chain && walletAddresses.token === parsed.token) || null);
+                                        setSelectedWallet(walletAddresses.find(walletAddresses => walletAddresses.chain === parsed.chain) || null);
                                     }}
                                     displayEmpty
                                     renderValue={(selected) => {
@@ -378,7 +381,6 @@ export default function DepositPage() {
                                     fullWidth
                                     variant="contained"
                                     size="large"
-                                    disabled={!selectedWallet.available}
                                     onClick={() => setIsModalOpen(true)}
                                     startIcon={<SendIcon />}
                                     sx={{
@@ -397,7 +399,7 @@ export default function DepositPage() {
                                         }
                                     }}
                                 >
-                                    {selectedWallet.available ? "Deposit" : "Pending"}
+                                    Deposit
                                 </Button>
                             )}
 
@@ -475,18 +477,31 @@ export default function DepositPage() {
                                 </DialogTitle>
 
                                 <DialogContent sx={{ pt: 1, px: 4 }}>
-                                    <Typography
-                                        variant="body1"
-                                        sx={{ mt: 2, mb: 3 }}
-                                    >
-                                        Please confirm the deposit to the following wallet address:
-                                    </Typography>
-                                    <Typography
-                                        variant="body2"
-                                        sx={{ fontFamily: 'monospace', wordBreak: 'break-all' }}
-                                    >
-                                        {selectedWallet?.address}
-                                    </Typography>
+                                    <Box sx={{ mt: 2 }}>
+
+                                        <TextField
+                                            fullWidth
+                                            label="Transaction ID"
+                                            variant="outlined"
+                                            value={transactionId}
+                                            onChange={(e) => setTransactionId(e.target.value)}
+                                            disabled={isSubmitting}
+                                            placeholder="e.g. 0x123abc..."
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                                                    borderRadius: 2,
+                                                },
+                                            }}
+                                        />
+                                        <Typography
+                                            variant="caption"
+                                            color="text.secondary"
+                                            sx={{ display: 'block', mt: 1.5, px: 0.5 }}
+                                        >
+                                            Please enter the transaction ID of your deposit so we can verify it on the blockchain.
+                                        </Typography>
+                                    </Box>
                                 </DialogContent>
 
                                 <DialogActions
@@ -524,7 +539,7 @@ export default function DepositPage() {
                                     <Button
                                         variant="contained"
                                         onClick={handleSubmitDeposit}
-                                        disabled={isSubmitting}
+                                        disabled={!transactionId.trim() || isSubmitting}
                                         sx={{
                                             minWidth: 120,
                                             px: 3,
@@ -544,7 +559,7 @@ export default function DepositPage() {
                                         {isSubmitting ? (
                                             <CircularProgress size={22} color="inherit" />
                                         ) : (
-                                            'Confirm'
+                                            'Submit'
                                         )}
                                     </Button>
                                 </DialogActions>

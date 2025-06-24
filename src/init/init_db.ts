@@ -3,7 +3,7 @@ import { TeamCommisionLevelModel } from '../models/TeamCommisionLevel';
 import { TrustPlanModel } from '../models/TrustPlan';
 import { InterestMatrixModel } from '../models/InterestMatrix';
 import { InvitationSettingModel } from '../models/InvitationSetting';
-import { CentralWalletModel } from '../models/CentralWallet';
+// import { CentralWalletModel } from '../models/CentralWallet';
 
 
 import app_config from '../../data/init/appConfig.json';
@@ -11,9 +11,8 @@ import team_commision_levels from '../../data/init/teamCommisionLevels.json';
 import trust_plan from '../../data/init/trustPlan.json';
 import interest_matrix from '../../data/init/interestMatrix.json';
 import invitation_setting from '../../data/init/invitationSetting.json';
-import { walletService } from '../services/Wallet';
-import { encryptPrivateKey } from '../utils/encrypt';
-import { GasWalletModel } from '../models/GasWallet';
+// import { walletService } from '../services/Wallet';
+// import { encryptPrivateKey } from '../utils/encrypt';
 
 const init_db = async () => {
     const appConfig = await AppConfigModel.findOne({});
@@ -39,63 +38,34 @@ const init_db = async () => {
         await InvitationSettingModel.create(invitation_setting);
     }
 
-    const walletAddresses = await CentralWalletModel.find({});
-    const ethereumWallet = walletAddresses.find(wallet => wallet.chain === 'Ethereum');
-    if (!ethereumWallet) {
-        const newEthereumWallet = await walletService.generateWalletCredentials('Ethereum');
-        await CentralWalletModel.create({
-            address: newEthereumWallet.address,
-            privateKeyEncrypted: encryptPrivateKey(newEthereumWallet.privateKey),
-            chain: 'Ethereum'
-        });
-    }
-    const tronWallet = walletAddresses.find(wallet => wallet.chain === 'Tron');
-    if (!tronWallet) {
-        const newTronWallet = await walletService.generateWalletCredentials('Tron');
-        await CentralWalletModel.create({
-            address: newTronWallet.address,
-            privateKeyEncrypted: encryptPrivateKey(newTronWallet.privateKey),
-            chain: 'Tron'
-        });
-    }
-    const bscWallet = walletAddresses.find(wallet => wallet.chain === 'Binance');
-    if (!bscWallet) {
-        const newBscWallet = await walletService.generateWalletCredentials('Binance');
-        await CentralWalletModel.create({
-            address: newBscWallet.address,
-            privateKeyEncrypted: encryptPrivateKey(newBscWallet.privateKey),
-            chain: 'Binance'
-        });
-    }
-
-    const gasWallets = await GasWalletModel.find({});
-    const ethereumGasWallet = gasWallets.find(wallet => wallet.chain === 'Ethereum');
-    if (!ethereumGasWallet) {
-        const newEthereumGasWallet = await walletService.generateWalletCredentials('Ethereum');
-        await GasWalletModel.create({
-            address: newEthereumGasWallet.address,
-            privateKeyEncrypted: encryptPrivateKey(newEthereumGasWallet.privateKey),
-            chain: 'Ethereum'
-        });
-    }
-    const tronGasWallet = gasWallets.find(wallet => wallet.chain === 'Tron');
-    if (!tronGasWallet) {
-        const newTronGasWallet = await walletService.generateWalletCredentials('Tron');
-        await GasWalletModel.create({
-            address: newTronGasWallet.address,
-            privateKeyEncrypted: encryptPrivateKey(newTronGasWallet.privateKey),
-            chain: 'Tron'
-        });
-    }
-    const bscGasWallet = gasWallets.find(wallet => wallet.chain === 'Binance');
-    if (!bscGasWallet) {
-        const newBscGasWallet = await walletService.generateWalletCredentials('Binance');
-        await GasWalletModel.create({
-            address: newBscGasWallet.address,
-            privateKeyEncrypted: encryptPrivateKey(newBscGasWallet.privateKey),
-            chain: 'Binance'
-        });
-    }
+    // const walletAddresses = await CentralWalletModel.find({});
+    // const ethereumWallet = walletAddresses.find(wallet => wallet.chain === 'Ethereum');
+    // if (!ethereumWallet) {
+    //     const newEthereumWallet = await walletService.generateWalletCredentials('Ethereum');
+    //     await CentralWalletModel.create({
+    //         address: newEthereumWallet.address,
+    //         privateKeyEncrypted: encryptPrivateKey(newEthereumWallet.privateKey),
+    //         chain: 'Ethereum'
+    //     });
+    // }
+    // const tronWallet = walletAddresses.find(wallet => wallet.chain === 'Tron');
+    // if (!tronWallet) {
+    //     const newTronWallet = await walletService.generateWalletCredentials('Tron');
+    //     await CentralWalletModel.create({
+    //         address: newTronWallet.address,
+    //         privateKeyEncrypted: encryptPrivateKey(newTronWallet.privateKey),
+    //         chain: 'Tron'
+    //     });
+    // }
+    // const bscWallet = walletAddresses.find(wallet => wallet.chain === 'Binance');
+    // if (!bscWallet) {
+    //     const newBscWallet = await walletService.generateWalletCredentials('Binance');
+    //     await CentralWalletModel.create({
+    //         address: newBscWallet.address,
+    //         privateKeyEncrypted: encryptPrivateKey(newBscWallet.privateKey),
+    //         chain: 'Binance'
+    //     });
+    // }
 }
 
 export default init_db;
