@@ -141,13 +141,14 @@ export const trustFund = async (userId: string, amount: number) => {
 export const transfer = async (fromUserId: string, toUserId: string, amount: number, transferFee: number) => {
     const user = await UserModel.findById(fromUserId) as User;
     const startVipLevel = await getVipLevel(user.id);
-    const recipientUser = await UserModel.findById(toUserId) as User;
+    // const recipientUser = await UserModel.findById(toUserId) as User;
     user.accountValue.totalAssetValue -= (amount + transferFee);
     user.accountValue.totalWithdrawable -= (amount + transferFee);
-    recipientUser.accountValue.totalAssetValue += amount;
-    recipientUser.accountValue.totalWithdrawable += amount;
+    await deposit(toUserId, amount);
+    // recipientUser.accountValue.totalAssetValue += amount;
+    // recipientUser.accountValue.totalWithdrawable += amount;
     await user.save();
-    await recipientUser.save();
+    // await recipientUser.save();
 
     const currentVipLevel = await getVipLevel(user.id);
     if(currentVipLevel.level > startVipLevel.level) {
