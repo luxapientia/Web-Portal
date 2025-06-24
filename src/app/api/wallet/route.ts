@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { CentralWallet, CentralWalletModel, CentralWalletWithoutId } from '@/models/CentralWallet';
+import { CentralWallet, CentralWalletModel } from '@/models/CentralWallet';
 import { authOptions, config } from '@/config';
 import { getServerSession } from 'next-auth';
 
@@ -12,7 +12,7 @@ export async function GET() {
 
         const wallets = await CentralWalletModel.find({}) as CentralWallet[];
 
-        const centralWallets: any[] = [];
+        const centralWallets: { address: string, chain: string }[] = [];
 
         const supportedChains = Object.keys(config.wallet.supportedChains).map(chain => {
             const ws = wallets.filter(wallet => wallet.chain === chain);
