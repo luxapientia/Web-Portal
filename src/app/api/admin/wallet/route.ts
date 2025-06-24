@@ -1,7 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/config';
-import { CentralWalletModel } from '@/models/CentralWallet';
+import { CentralWallet, CentralWalletModel } from '@/models/CentralWallet';
+import { config } from '@/config';
+
+
+export async function GET() {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user?.email) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const wallets = await CentralWalletModel.find({}) as CentralWallet[];
+
+        const supportedChains = Object.keys(config.wallet.supportedChains).map(chain => {
+            const tokens = config.wallet.supportedChains[chain as keyof typeof config.wallet.supportedChains].supportedTokens.map(val => val.token);
+            return {
+                chain: chain,
+                tokens: tokens
+            };
+
+            
+
+        });
+
+        return NextResponse.json({ success: true, data: { walletAddresses: wallets, supportedChains } });
+    } catch (error) {
+        console.error('Error fetching wallet:', error);
+        return NextResponse.json({ error: 'Failed to fetch wallet' }, { status: 500 });
+    }
+}
 
 export async function PUT(request: NextRequest) {
     try {

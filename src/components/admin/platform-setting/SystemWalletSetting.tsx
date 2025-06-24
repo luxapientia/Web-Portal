@@ -143,7 +143,7 @@ export default function SystemWalletSetting() {
 
   const fetchWalletAddresses = async () => {
     try {
-      const response = await fetch('/api/wallet');
+      const response = await fetch('/api/admin/wallet');
       const data = await response.json();
       
       if (data.success) {
