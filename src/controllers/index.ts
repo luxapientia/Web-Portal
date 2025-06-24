@@ -65,6 +65,7 @@ export const deposit = async (userId: string, amount: number) => {
                 released: false
             }) as InterestReward;
             user.accountValue.totalDeposited += amount;
+            user.accountValue.totalWithdrawable += amount;
             user.accountValue.totalAssetValue += amount + interestReward.amount;
             user.accountValue.totalUnreleasedInterest += interestReward.amount;
 
@@ -78,6 +79,7 @@ export const deposit = async (userId: string, amount: number) => {
             }
         } else {
             user.accountValue.totalDeposited += amount;
+            user.accountValue.totalWithdrawable += amount;
             user.accountValue.totalAssetValue += amount;
         }
         await user.save();
