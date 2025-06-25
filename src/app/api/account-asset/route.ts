@@ -21,6 +21,12 @@ export async function GET() {
 
         const accountValue = user.accountValue.totalAssetValue;
         const vipLevel = await getVipLevel(user?.id);
+        const firstDepositRewards = await InterestRewardModel.find({
+            userId: user?.id,
+            type: 'firstDeposit',
+            released: false
+        }) as InterestReward[];
+        const doubleBubbleAmount = firstDepositRewards.reduce((acc, log) => acc + log.amount, 0);
         const earningTodayLogs = await InterestRewardModel.find({
             userId: user?.id,
             startDate: {
@@ -47,6 +53,7 @@ export async function GET() {
             earningToday: earningTodayLogs.reduce((acc, log) => acc + log.amount, 0),
             totalDeposit: totalDepositLogs.reduce((acc, log) => acc + log.amount, 0),
             vipLevel: vipLevel,
+            doubleBubbleAmount: doubleBubbleAmount
         });
     } catch (error) {
         console.error('Failed to get account asset', error);

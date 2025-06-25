@@ -19,9 +19,11 @@ export default function WalletPage() {
     const theme = useTheme();
     const router = useRouter();
     const [user, setUser] = useState<User | null>(null);
+    const [doubleBubbleAmount, setDoubleBubbleAmount] = useState(0);
 
     useEffect(() => {
         fetchUser();
+        fetchDoubleBubble();
     }, []);
     
     const fetchUser = async () => {
@@ -38,6 +40,22 @@ export default function WalletPage() {
             toast.error('Failed to fetch user');
         }
     };
+
+    const fetchDoubleBubble = async () => {
+        try {
+            const response = await fetch('/api/account-asset');
+            if (!response.ok) {
+                toast.error('Failed to fetch double bubble');
+                return;
+            }
+            const data = await response.json();
+            setDoubleBubbleAmount(data.doubleBubbleAmount);
+        } catch (error) {
+            console.error('Error fetching user:', error);
+            toast.error('Failed to fetch double bubble');
+        }
+    }
+
     const actions = [
         {
             title: 'Deposit',
@@ -158,6 +176,44 @@ export default function WalletPage() {
                             Manage your funds, transfers, and track your financial growth
                         </Typography>
                     </Box>
+
+                    {/* Double Bubble Section */}
+                    {doubleBubbleAmount > 0 && (
+                        <Box 
+                            sx={{
+                                mb: 4,
+                                p: 2,
+                                borderRadius: 3,
+                                background: 'linear-gradient(135deg, rgba(76, 175, 80, 0.15), rgba(76, 175, 80, 0.3))',
+                                border: '1px solid rgba(76, 175, 80, 0.2)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                flexDirection: 'column',
+                                textAlign: 'center'
+                            }}
+                        >
+                            <Typography 
+                                variant="h6" 
+                                sx={{ 
+                                    color: 'success.main',
+                                    fontWeight: 600,
+                                    mb: 1
+                                }}
+                            >
+                                Double Bubble Bonus Available!
+                            </Typography>
+                            <Typography 
+                                variant="h4" 
+                                sx={{ 
+                                    color: 'success.main',
+                                    fontWeight: 700
+                                }}
+                            >
+                                ${doubleBubbleAmount.toFixed(2)}
+                            </Typography>
+                        </Box>
+                    )}
 
                     {/* Balance Cards Section */}
                     <Box sx={{
