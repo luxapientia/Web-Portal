@@ -102,7 +102,7 @@ export default function MarketSentiment() {
                                     variant="body2"
                                     sx={{ color: trendColor }}
                                 >
-                                    {priceChange24h > 0 ? '+' : ''}{priceChange24h.toFixed(2)}%
+                                    {priceChange24h > 0 ? '+' : ''}{priceChange24h.toFixed(8)}%
                                 </Typography>
                             </>
                         )}

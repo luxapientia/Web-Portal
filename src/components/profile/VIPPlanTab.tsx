@@ -170,7 +170,7 @@ export default function VIPPlanTab() {
                   Current Balance
                 </Typography>
                 <Typography variant="h5" sx={{ fontWeight: 500 }}>
-                  ${balance.toFixed(2)} USD
+                  ${balance.toFixed(8)} USD
                 </Typography>
               </Paper>
             </Box>
@@ -228,7 +228,7 @@ export default function VIPPlanTab() {
                 {Math.max(
                   nextPlan.startAccountValue - balance,
                   0
-                ).toFixed(2)}{" "}
+                ).toFixed(8)}{" "}
                 USD more to reach {nextPlan.name}
               </Typography>
             </Box>
@@ -377,7 +377,7 @@ export default function VIPPlanTab() {
                         sx={{ mr: 1 }}
                       />
                       <Typography variant="body2">
-                        ${plan.uplineDepositReward.toFixed(2)} Per
+                        ${plan.uplineDepositReward.toFixed(8)} Per
                         Referral
                       </Typography>
                     </Box>

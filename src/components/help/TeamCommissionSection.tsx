@@ -56,7 +56,7 @@ export default function TeamCommissionSection() {
   const exampleCommissions = commissionLevels.slice(0, 2).map(level => ({
     member: level.level === 1 ? 'Sarah' : 'John',
     relationship: level.level === 1 ? 'Direct Upline' : 'Level 2 Upline',
-    commission: `$${(level.percentage * exampleDailyReward / 100).toFixed(2)}`
+    commission: `$${(level.percentage * exampleDailyReward / 100).toFixed(8)}`
   }));
 
   return (

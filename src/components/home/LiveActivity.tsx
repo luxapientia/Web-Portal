@@ -41,17 +41,17 @@ export default function LiveActivity() {
     const getActionText = (activity: ActivityLog) => {
         switch (activity.type) {
             case 'deposit':
-                return `Deposited USD ${activity.amount.toFixed(2)}`;
+                return `Deposited USD ${activity.amount.toFixed(8)}`;
             case 'withdraw':
-                return `Withdrew USD ${activity.amount.toFixed(2)}`;
+                return `Withdrew USD ${activity.amount.toFixed(8)}`;
             case 'transfer':
-                return `Transferred USD ${activity.amount.toFixed(2)}`;
+                return `Transferred USD ${activity.amount.toFixed(8)}`;
             case 'earn':
-                return `Earned USD ${activity.amount.toFixed(2)}`;
+                return `Earned USD ${activity.amount.toFixed(8)}`;
             case 'team_earn':
-                return `Team Earned USD ${activity.amount.toFixed(2)}`;
+                return `Team Earned USD ${activity.amount.toFixed(8)}`;
             default:
-                return `USD ${activity.amount.toFixed(2)}`;
+                return `USD ${activity.amount.toFixed(8)}`;
         }
     };
 
