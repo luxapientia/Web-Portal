@@ -429,7 +429,7 @@ export default function WithdrawPage() {
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                                         <BalanceIcon sx={{ color: 'primary.main', fontSize: 20 }} />
                                         <Typography variant="body2" color="text.secondary">
-                                            <strong>Withdrawable balance:</strong> ${withdrawableBalance.toFixed(2)}
+                                            <strong>Withdrawable balance:</strong> ${withdrawableBalance.toFixed(8)}
                                         </Typography>
                                     </Box>
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

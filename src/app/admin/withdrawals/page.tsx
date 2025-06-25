@@ -554,7 +554,7 @@ export default function WithdrawalsPage() {
                                                     fontWeight: 500,
                                                     fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.875rem' },
                                                 }}>
-                                                    ${tx.amountInUSD?.toFixed(2) || '0.00'}
+                                                    ${tx.amountInUSD?.toFixed(8) || '0.00'}
                                                 </Box>
                                             </TableCell>
                                             <TableCell>
@@ -698,7 +698,7 @@ export default function WithdrawalsPage() {
                                                     fontWeight: 500,
                                                 }}
                                             >
-                                                ${selectedWithdrawal.amountInUSD?.toFixed(2) || '0.00'}
+                                                ${selectedWithdrawal.amountInUSD?.toFixed(8) || '0.00'}
                                             </Typography>
                                         </Box>
                                     </Box>

@@ -575,7 +575,7 @@ export default function TrustPackPage() {
                                                         </Typography>
                                                         {parseFloat(fundValue) > 0 && (
                                                             <Typography variant="body2" color="rgba(255, 255, 255, 0.9)">
-                                                                ${totalReward.toFixed(2)}
+                                                                ${totalReward.toFixed(8)}
                                                             </Typography>
                                                         )}
                                                     </Box>
@@ -593,7 +593,7 @@ export default function TrustPackPage() {
                                                                     textShadow: '0 2px 4px rgba(0,0,0,0.1)',
                                                                 }}
                                                             >
-                                                                ${dailyReward.toFixed(2)}
+                                                                ${dailyReward.toFixed(8)}
                                         </Typography>
                                                         </Box>
                                                     )}

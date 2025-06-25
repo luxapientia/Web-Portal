@@ -406,7 +406,7 @@ export default function HistoryPage() {
                                                         }}
                                                     >
                                                         {transaction.type.includes('withdraw') ? '-' : '+'}
-                                                        ${transaction.amountInUSD?.toFixed(2) || '0.00'}
+                                                        ${transaction.amountInUSD?.toFixed(8) || '0.00'}
                                                     </Typography>
                                                 </TableCell>
                                                 <TableCell align="center">
@@ -570,7 +570,7 @@ export default function HistoryPage() {
                                         }}
                                     >
                                         {selectedTransaction.type.includes('withdraw') ? '-' : '+'}
-                                        ${selectedTransaction.amountInUSD?.toFixed(2) || '0.00'}
+                                        ${selectedTransaction.amountInUSD?.toFixed(8) || '0.00'}
                                     </Typography>
                                 </Box>
                             </Stack>

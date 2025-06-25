@@ -431,7 +431,7 @@ export default function DepositPage() {
                                                     fontWeight: 500,
                                                     fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.875rem' },
                                                 }}>
-                                                    ${tx.amountInUSD?.toFixed(2) || '0.00'}
+                                                    ${tx.amountInUSD?.toFixed(8) || '0.00'}
                                                 </Box>
                                             </TableCell>
                                             <TableCell>
@@ -566,7 +566,7 @@ export default function DepositPage() {
                                                     color: 'success.main'
                                                 }}
                                             >
-                                                ${selectedDeposit.amountInUSD?.toFixed(2) || '0.00'}
+                                                ${selectedDeposit.amountInUSD?.toFixed(8) || '0.00'}
                                             </Typography>
                                         </Box>
                                     </Box>

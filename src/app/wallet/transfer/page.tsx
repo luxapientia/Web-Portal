@@ -373,7 +373,7 @@ export default function TransferPage() {
                                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                                 <ReceiptIcon sx={{ mr: 1, color: 'text.secondary' }} />
                                                 <Typography variant="body2" color="text.secondary">
-                                                    <strong>Total amount (including fee):</strong> ${calculateTotalAmount().toFixed(2)}
+                                                    <strong>Total amount (including fee):</strong> ${calculateTotalAmount().toFixed(8)}
                                                 </Typography>
                                             </Box>
                                         )}

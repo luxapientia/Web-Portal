@@ -634,7 +634,7 @@ export default function TeamContributionPage() {
 
                     <TableCell align="right">
                       <Typography fontWeight={600} color="primary">
-                        USD {activity.log.amount.toFixed(2)}
+                        USD {activity.log.amount.toFixed(8)}
                       </Typography>
                     </TableCell>
 

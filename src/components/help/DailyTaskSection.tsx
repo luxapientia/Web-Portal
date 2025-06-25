@@ -179,7 +179,7 @@ export default function DailyTaskSection() {
                       <TableRow key={row.recipient}>
                         <TableCell align="center">{row.recipient}</TableCell>
                         <TableCell align="center">{row.percentage}%</TableCell>
-                        <TableCell align="center">${row.amount.toFixed(2)}</TableCell>
+                        <TableCell align="center">${row.amount.toFixed(8)}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

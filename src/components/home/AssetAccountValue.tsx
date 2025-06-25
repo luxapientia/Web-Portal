@@ -51,13 +51,13 @@ export default function AssetAccountValue() {
           </Typography>
         </Stack>
         <Typography variant="h3" color="success.main" fontWeight={900} mt={1} sx={{ fontSize: { xs: '2rem', md: '2.5rem' } }}>
-          ${accountValue.toFixed(2)}
+          ${accountValue.toFixed(8)}
         </Typography>
         <Typography variant="body2" color="text.secondary" mt={1}>
           Total Earning as of now
         </Typography>
         <Typography variant="h6" color="#ff9800" fontWeight={700}>
-          ${earningToday.toFixed(2)}
+          ${earningToday.toFixed(8)}
         </Typography>
       </CardContent>
 

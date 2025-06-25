@@ -210,7 +210,7 @@ export default function WalletPage() {
                                     fontWeight: 700
                                 }}
                             >
-                                ${doubleBubbleAmount.toFixed(2)}
+                                ${doubleBubbleAmount.toFixed(8)}
                             </Typography>
                         </Box>
                     )}
@@ -282,14 +282,14 @@ export default function WalletPage() {
                                 </Box>
                                 <Box sx={{ display: 'flex', alignItems: 'baseline', mb: 1 }}>
                                     <Typography variant="h4" fontWeight="bold">
-                                        ${user?.accountValue.totalAssetValue?.toFixed(2) || '0.00'}
+                                        ${user?.accountValue.totalAssetValue?.toFixed(8) || '0.00'}
                                     </Typography>
                                     <Typography variant="subtitle2" sx={{ ml: 1, opacity: 0.8 }}>
                                         USD
                                     </Typography>
                                 </Box>
                                 <Typography variant="body2" sx={{ mt: 2, opacity: 0.8 }}>
-                                    Available for withdrawal: ${user?.accountValue.totalWithdrawable?.toFixed(2) || '0.00'}
+                                    Available for withdrawal: ${user?.accountValue.totalWithdrawable?.toFixed(8) || '0.00'}
                                 </Typography>
                             </Box>
                         </Paper>
@@ -341,14 +341,14 @@ export default function WalletPage() {
                                 </Box>
                                 <Box sx={{ display: 'flex', alignItems: 'baseline', mb: 1 }}>
                                     <Typography variant="h4" fontWeight="bold">
-                                        ${user?.accountValue.totalInTrustFund?.toFixed(2) || '0.00'}
+                                        ${user?.accountValue.totalInTrustFund?.toFixed(8) || '0.00'}
                                     </Typography>
                                     <Typography variant="subtitle2" sx={{ ml: 1, opacity: 0.8 }}>
                                         USD
                                     </Typography>
                                 </Box>
                                 <Typography variant="body2" sx={{ mt: 2, opacity: 0.8 }}>
-                                    Released: ${user?.accountValue.totalTrustReleased?.toFixed(2) || '0.00'}
+                                    Released: ${user?.accountValue.totalTrustReleased?.toFixed(8) || '0.00'}
                                 </Typography>
                             </Box>
                         </Paper>
