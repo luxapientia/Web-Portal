@@ -45,7 +45,7 @@ export async function GET() {
 
         const transferable = availableTransferCount >= 0 && currentWithdrawTransactions.length == 0;
 
-        const transferableAmount = user.accountValue.totalAssetValue - user.accountValue.totalInTrustFund - transferFee;
+        const transferableAmount = user.accountValue.totalWithdrawable - transferFee;
 
         return NextResponse.json({
             success: true,
