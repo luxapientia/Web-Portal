@@ -1,21 +1,22 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { UserCollection } from './User';
 
 export const ActivityLogCollection = 'activity_log';
 
 export interface ActivityLog extends Document {
-    userId: mongoose.Types.ObjectId | string;  // User who owns this transaction
-    userEmail: string;
-    type: 'deposit' | 'withdraw' | 'transfer' | 'earn' | 'team_earn';
+    userId: string;  // User who owns this transaction
+    type: 'deposit' | 'withdraw' | 'transfer' | 'daily_task' | 'trust_fund';
     amount: number;
     timestamp: Date;
+    toUserId?: string;
 }
 
 const ActivityLogSchema: Schema = new Schema({
-    userId: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
-    userEmail: { type: String, required: true },
-    type: { type: String, required: true, enum: ['deposit', 'withdraw', 'transfer', 'earn', 'team_earn'] },
+    userId: { type: Schema.Types.ObjectId, required: true, ref: UserCollection },
+    type: { type: String, required: true, enum: ['deposit', 'withdraw', 'transfer', 'daily_task', 'trust_fund'] },
     amount: { type: Number, required: true },
-    timestamp: { type: Date, required: true }
+    timestamp: { type: Date, required: true },
+    toUserId: { type: Schema.Types.ObjectId, required: false, ref: UserCollection }
 }, {
     collection: ActivityLogCollection
 });

@@ -1,3 +1,4 @@
+import { ActivityLog, ActivityLogModel } from '@/models/ActivityLog';
 import { AppConfig, AppConfigModel } from '../models/AppConfig';
 import { InterestMatrix, InterestMatrixModel } from '../models/InterestMatrix';
 import { InterestReward, InterestRewardModel } from '../models/InterestReward';
@@ -85,6 +86,13 @@ export const deposit = async (userId: string, amount: number) => {
         await user.save();
     }
 
+    await ActivityLogModel.create({
+        userId: user.id,
+        type: 'deposit',
+        amount: amount,
+        timestamp: new Date()
+    }) as ActivityLog;
+
     const currentVipLevel = await getVipLevel(user.id);
     if (currentVipLevel.level > startVipLevel.level) {
         await getPromotionReward(user.id);
@@ -120,6 +128,13 @@ export const withdraw = async (userId: string, amount: number) => {
         user.accountValue.totalWithdrawable -= amount;
         user.accountValue.totalAssetValue -= amount;
         await user.save();
+
+        await ActivityLogModel.create({
+            userId: user.id,
+            type: 'withdraw',
+            amount: amount,
+            timestamp: new Date()
+        }) as ActivityLog;
     }
 }
 
@@ -131,6 +146,13 @@ export const trustFund = async (userId: string, amount: number) => {
     user.accountValue.totalInTrustFund -= amount;
     user.accountValue.totalTrustReleased += amount;
     await user.save();
+
+    await ActivityLogModel.create({
+        userId: user.id,
+        type: 'trust_fund',
+        amount: amount,
+        timestamp: new Date()
+    }) as ActivityLog;
 
     const currentVipLevel = await getVipLevel(user.id);
     if (currentVipLevel.level > startVipLevel.level) {
@@ -149,6 +171,14 @@ export const transfer = async (fromUserId: string, toUserId: string, amount: num
     // recipientUser.accountValue.totalWithdrawable += amount;
     await user.save();
     // await recipientUser.save();
+
+    await ActivityLogModel.create({
+        userId: user.id,
+        type: 'transfer',
+        amount: amount,
+        toUserId: toUserId,
+        timestamp: new Date()
+    }) as ActivityLog;
 
     const currentVipLevel = await getVipLevel(user.id);
     if (currentVipLevel.level > startVipLevel.level) {
@@ -186,6 +216,13 @@ export const getDailyTaskReward = async (userId: string, rewardPercentage: numbe
     user.accountValue.totalAssetValue += rewardAmount;
     user.accountValue.totalReleasedInterest += rewardAmount;
     await user.save();
+
+    await ActivityLogModel.create({
+        userId: user.id,
+        type: 'daily_task',
+        amount: rewardAmount,
+        timestamp: new Date()
+    }) as ActivityLog;
 
     await InterestRewardModel.create({
         userId: user.id,
