@@ -14,6 +14,7 @@ import LiveTvIcon from '@mui/icons-material/LiveTv';
 import Layout from "@/components/layout/Layout";
 // import RewardReceiveSection from '@/components/home/RewardReceiveSection';
 import TrustFundSection from '@/components/home/TrustFundSection';
+import LiveActivity from '@/components/home/LiveActivity';
 
 export default function HomePage() {
     const theme = useTheme();
@@ -101,78 +102,7 @@ export default function HomePage() {
                             {tab === 0 ? (
                                 <MarketSentiment />
                             ) : (
-                                <>
-                                    <Typography variant="h6" fontWeight={700} mb={2}>Live Activity</Typography>
-                                    <Box
-                                        sx={{
-                                            mt: 1,
-                                            display: 'flex',
-                                            flexWrap: 'wrap',
-                                            gap: 2,
-                                            justifyContent: { xs: 'flex-start', md: 'space-between' },
-                                        }}
-                                    >
-                                        {[
-                                            {
-                                                color: 'success.main',
-                                                domain: 'hs***.com',
-                                                action: 'Deposited USDT 200.00',
-                                                time: '3 minutes ago',
-                                            },
-                                            {
-                                                color: 'warning.main',
-                                                domain: 'gi***.online',
-                                                action: 'Withdraw USDT 350.00',
-                                                time: '10 minutes ago',
-                                            },
-                                            {
-                                                color: 'info.main',
-                                                domain: 'just****.sg',
-                                                action: 'Deposited USD 400.00',
-                                                time: '15 minutes ago',
-                                            },
-                                        ].map((item, idx) => (
-                                            <Box
-                                                key={idx}
-                                                sx={{
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: 2,
-                                                    p: 2,
-                                                    bgcolor: 'background.paper',
-                                                    borderRadius: 2,
-                                                    width: '100%',
-                                                    boxShadow: 1,
-                                                }}
-                                            >
-                                                <Box
-                                                    sx={{
-                                                        width: 10,
-                                                        height: 10,
-                                                        bgcolor: item.color,
-                                                        borderRadius: '50%',
-                                                        flexShrink: 0,
-                                                    }}
-                                                />
-                                                <Box sx={{ flexGrow: 1 }}>
-                                                    <Typography variant="body1" fontWeight={700}>
-                                                        {item.domain}
-                                                    </Typography>
-                                                    <Typography variant="body2" color="text.secondary">
-                                                        {item.action}
-                                                    </Typography>
-                                                </Box>
-                                                <Typography
-                                                    variant="caption"
-                                                    color="text.secondary"
-                                                    sx={{ whiteSpace: 'nowrap' }}
-                                                >
-                                                    {item.time}
-                                                </Typography>
-                                            </Box>
-                                        ))}
-                                    </Box>
-                                </>
+                                <LiveActivity />
                             )}
                         </CardContent>
                     </Card>
