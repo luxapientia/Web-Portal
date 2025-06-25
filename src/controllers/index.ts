@@ -38,7 +38,7 @@ export const getVipLevel = async (userId: string): Promise<InterestMatrix> => {
     }).sort({ level: -1 }).limit(1) as InterestMatrix[];
 
     if (vipLevel.length === 0) {
-        const vipLevel1 = await InterestMatrixModel.findOne({level: 1}) as InterestMatrix;
+        const vipLevel1 = await InterestMatrixModel.findOne({ level: 1 }) as InterestMatrix;
         return vipLevel1;
     }
 
@@ -86,7 +86,7 @@ export const deposit = async (userId: string, amount: number) => {
     }
 
     const currentVipLevel = await getVipLevel(user.id);
-    if(currentVipLevel.level > startVipLevel.level) {
+    if (currentVipLevel.level > startVipLevel.level) {
         await getPromotionReward(user.id);
     }
 }
@@ -109,7 +109,7 @@ export const getUplineDepositReward = async (userId: string, amount: number) => 
     await user.save();
 
     const currentVipLevel = await getVipLevel(user.id);
-    if(currentVipLevel.level > startVipLevel.level) {
+    if (currentVipLevel.level > startVipLevel.level) {
         await getPromotionReward(user.id);
     }
 }
@@ -133,7 +133,7 @@ export const trustFund = async (userId: string, amount: number) => {
     await user.save();
 
     const currentVipLevel = await getVipLevel(user.id);
-    if(currentVipLevel.level > startVipLevel.level) {
+    if (currentVipLevel.level > startVipLevel.level) {
         await getPromotionReward(user.id);
     }
 }
@@ -151,7 +151,7 @@ export const transfer = async (fromUserId: string, toUserId: string, amount: num
     // await recipientUser.save();
 
     const currentVipLevel = await getVipLevel(user.id);
-    if(currentVipLevel.level > startVipLevel.level) {
+    if (currentVipLevel.level > startVipLevel.level) {
         await getPromotionReward(user.id);
     }
 }
@@ -160,32 +160,29 @@ export const getDailyTaskReward = async (userId: string, rewardPercentage: numbe
     const user = await UserModel.findById(userId) as User;
     const startVipLevel = await getVipLevel(user.id);
 
-    let selfRewardPercentage = 100;
+    if (user.accountValue.totalAssetValue > 100) {
+        const level1InvitingUser = await UserModel.findOne({ myInvitationCode: user.invitationCode }) as User;
 
-    const level1InvitingUser = await UserModel.findOne({ myInvitationCode: user.invitationCode }) as User;
+        if (level1InvitingUser) {
+            const teamCommisionLevel1 = await TeamCommisionLevelModel.findOne({ level: 1 }) as TeamCommisionLevel;
+            await getTeamCommisionReward(level1InvitingUser.id, user.accountValue.totalAssetValue * teamCommisionLevel1.percentage / 100 * rewardPercentage / 100);
 
-    if (level1InvitingUser) {
-        const teamCommisionLevel1 = await TeamCommisionLevelModel.findOne({ level: 1 }) as TeamCommisionLevel;
-        selfRewardPercentage -= teamCommisionLevel1.percentage;
-        await getTeamCommisionReward(level1InvitingUser.id, user.accountValue.totalAssetValue * teamCommisionLevel1.percentage / 100 * rewardPercentage /100);
+            const level2InvitingUser = await UserModel.findOne({ myInvitationCode: level1InvitingUser.invitationCode }) as User;
+            if (level2InvitingUser) {
+                const teamCommisionLevel2 = await TeamCommisionLevelModel.findOne({ level: 2 }) as TeamCommisionLevel;
+                await getTeamCommisionReward(level2InvitingUser.id, user.accountValue.totalAssetValue * teamCommisionLevel2.percentage / 100 * rewardPercentage / 100);
 
-        const level2InvitingUser = await UserModel.findOne({ myInvitationCode: level1InvitingUser.invitationCode }) as User;
-        if (level2InvitingUser) {
-            const teamCommisionLevel2 = await TeamCommisionLevelModel.findOne({ level: 2 }) as TeamCommisionLevel;
-            selfRewardPercentage -= teamCommisionLevel2.percentage;
-            await getTeamCommisionReward(level2InvitingUser.id, user.accountValue.totalAssetValue * teamCommisionLevel2.percentage / 100 * rewardPercentage /100);
-
-            const level3InvitingUser = await UserModel.findOne({ myInvitationCode: level2InvitingUser.invitationCode }) as User;
-            if (level3InvitingUser) {
-                const teamCommisionLevel3 = await TeamCommisionLevelModel.findOne({ level: 3 }) as TeamCommisionLevel;
-                selfRewardPercentage -= teamCommisionLevel3.percentage;
-                await getTeamCommisionReward(level3InvitingUser.id, user.accountValue.totalAssetValue * teamCommisionLevel3.percentage / 100 * rewardPercentage /100);
+                const level3InvitingUser = await UserModel.findOne({ myInvitationCode: level2InvitingUser.invitationCode }) as User;
+                if (level3InvitingUser) {
+                    const teamCommisionLevel3 = await TeamCommisionLevelModel.findOne({ level: 3 }) as TeamCommisionLevel;
+                    await getTeamCommisionReward(level3InvitingUser.id, user.accountValue.totalAssetValue * teamCommisionLevel3.percentage / 100 * rewardPercentage / 100);
+                }
             }
-        }
 
+        }
     }
 
-    const rewardAmount = user.accountValue.totalAssetValue * rewardPercentage / 100 * selfRewardPercentage / 100;
+    const rewardAmount = user.accountValue.totalAssetValue * rewardPercentage / 100;
     user.accountValue.totalAssetValue += rewardAmount;
     user.accountValue.totalReleasedInterest += rewardAmount;
     await user.save();
@@ -200,7 +197,7 @@ export const getDailyTaskReward = async (userId: string, rewardPercentage: numbe
     }) as InterestReward;
 
     const currentVipLevel = await getVipLevel(user.id);
-    if(currentVipLevel.level > startVipLevel.level) {
+    if (currentVipLevel.level > startVipLevel.level) {
         await getPromotionReward(user.id);
     }
 }
@@ -223,7 +220,7 @@ export const getTeamCommisionReward = async (userId: string, amount: number) => 
     }) as InterestReward;
 
     const currentVipLevel = await getVipLevel(user.id);
-    if(currentVipLevel.level > startVipLevel.level) {
+    if (currentVipLevel.level > startVipLevel.level) {
         await getPromotionReward(user.id);
     }
 }
@@ -232,7 +229,7 @@ export const getPromotionReward = async (userId: string) => {
     const user = await UserModel.findById(userId) as User;
     const currentVipLevel = await getVipLevel(user.id);
     const promotionInterestReward = await InterestRewardModel.findOne({ userId: user.id, type: 'promotion', reachedLevel: currentVipLevel.level }) as InterestReward;
-    if(!promotionInterestReward) {
+    if (!promotionInterestReward) {
         user.accountValue.totalAssetValue += currentVipLevel.promotionReward;
         user.accountValue.totalReleasedInterest += currentVipLevel.promotionReward;
         await user.save();
