@@ -1,4 +1,4 @@
-import { ActivityLog, ActivityLogModel } from '@/models/ActivityLog';
+import { ActivityLog, ActivityLogModel } from '../models/ActivityLog';
 import { AppConfig, AppConfigModel } from '../models/AppConfig';
 import { InterestMatrix, InterestMatrixModel } from '../models/InterestMatrix';
 import { InterestReward, InterestRewardModel } from '../models/InterestReward';
