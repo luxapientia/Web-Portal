@@ -552,8 +552,8 @@ export default function TeamContributionPage() {
                       <TableCell sx={{ py: 1.5 }} align="center">
                         <Chip
                           size="small"
-                          label={member.status === 'active' ? 'Active' : 'Inactive'}
-                          color={member.status === 'active' ? 'success' : 'default'}
+                          label={member.status === 'active' && member.accountValue.totalAssetValue > 100 ? 'Active' : 'Inactive'}
+                          color={member.status === 'active' && member.accountValue.totalAssetValue > 100 ? 'success' : 'default'}
                           sx={{
                             fontWeight: 500,
                             height: 24,
