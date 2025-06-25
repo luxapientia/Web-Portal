@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import { 
   Person as PersonIcon,
-  Settings as SettingsIcon,
+  // Settings as SettingsIcon,
   Logout as LogoutIcon,
   Dashboard as DashboardIcon,
   AccountCircle
@@ -61,10 +61,10 @@ export default function UserMenu({
     router.push('/profile');
   };
 
-  const handleSettings = () => {
-    handleMenuClose();
-    router.push('/settings');
-  };
+  // const handleSettings = () => {
+  //   handleMenuClose();
+  //   router.push('/settings');
+  // };
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', order: { xs: -1, md: 0 } }}>
@@ -117,10 +117,10 @@ export default function UserMenu({
             {session?.user?.name || 'My Profile'}
           </Typography>
         </MenuItem>
-        <MenuItem onClick={handleSettings}>
+        {/* <MenuItem onClick={handleSettings}>
           <SettingsIcon fontSize="small" sx={{ mr: 1 }} />
           Settings
-        </MenuItem>
+        </MenuItem> */}
         <Divider />
         <MenuItem onClick={handleLogout}>
           <LogoutIcon fontSize="small" sx={{ mr: 1 }} />
