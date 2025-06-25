@@ -39,7 +39,7 @@ import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import CopyButton from '@/components/common/CopyButton';
 import { format } from 'date-fns';
-import { Transaction } from '@/models/Transaction';
+import { TransactionWithRef } from '@/models/Transaction';
 
 type SortField = 'createdAt' | 'amountInUSD';
 
@@ -53,9 +53,9 @@ export default function HistoryPage() {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [total, setTotal] = useState(0);
-    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [transactions, setTransactions] = useState<TransactionWithRef[]>([]);
     const [loading, setLoading] = useState(true);
-    const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+    const [selectedTransaction, setSelectedTransaction] = useState<TransactionWithRef | null>(null);
     const [detailsOpen, setDetailsOpen] = useState(false);
     const [sortField, setSortField] = useState<SortField>('createdAt');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
@@ -70,6 +70,7 @@ export default function HistoryPage() {
             const data = await response.json();
 
             if (data.success) {
+                console.log(data.data.transactions);
                 setTransactions(data.data.transactions);
                 setTotal(data.data.total);
             } else {
@@ -150,7 +151,7 @@ export default function HistoryPage() {
         setPage(0);
     };
 
-    const handleViewDetails = (transaction: Transaction) => {
+    const handleViewDetails = (transaction: TransactionWithRef) => {
         setSelectedTransaction(transaction);
         setDetailsOpen(true);
     };
@@ -626,6 +627,28 @@ export default function HistoryPage() {
                                             size="small"
                                         />
                                     </Box>
+                                </Box>
+                            )}
+
+                            {selectedTransaction.fromUserId && (
+                                <Box>
+                                    <Typography variant="subtitle2" color="text.secondary">
+                                        From User
+                                    </Typography>
+                                    <Typography variant="body1" sx={{ mt: 0.5 }}>
+                                        {selectedTransaction.fromUserId.name} ({selectedTransaction.fromUserId.email})
+                                    </Typography>
+                                </Box>
+                            )}
+
+                            {selectedTransaction.toUserId && (
+                                <Box>
+                                    <Typography variant="subtitle2" color="text.secondary">
+                                        To User
+                                    </Typography>
+                                    <Typography variant="body1" sx={{ mt: 0.5 }}>
+                                        {selectedTransaction.toUserId.name} ({selectedTransaction.toUserId.email})
+                                    </Typography>
                                 </Box>
                             )}
 

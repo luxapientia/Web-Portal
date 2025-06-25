@@ -59,7 +59,9 @@ export async function GET(request: NextRequest) {
             .find(query)
             .sort(sort)
             .skip(page * limit)
-            .limit(limit);
+            .limit(limit)
+            .populate('fromUserId')
+            .populate('toUserId');
 
         return NextResponse.json({
             success: true,
