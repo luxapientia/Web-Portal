@@ -34,15 +34,32 @@ export async function sendEmail({ to, subject, text, html }: EmailData) {
       throw new Error('Mailgun configuration is missing');
     }
 
-    const messageData = {
-      from: FROM_EMAIL,
-      to,
-      subject,
-      text,
-      html,
-    };
+    // const messageData = {
+    //   from: FROM_EMAIL,
+    //   to,
+    //   subject,
+    //   text,
+    //   html,
+    // };
 
-    const response = await client.messages.create(DOMAIN, messageData);
+    // const response = await client.messages.create(DOMAIN, messageData);
+    const response = await fetch("https://postal.bubble2025.com/api/v1/send/message", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Server-API-Key': process.env.POSTAL_API_KEY as string
+      },
+      body: JSON.stringify({
+        to: to,
+        from: 'OTP <otp@bubble2025.com>',
+        subject: subject,
+        text: text,
+        html_body: html
+      })
+    })
+    if (!response.ok) {
+      return { success: false, error: "Failed to send email" };
+    }
     return { success: true, data: response };
   } catch (error) {
     console.error('Error sending email:', error);
