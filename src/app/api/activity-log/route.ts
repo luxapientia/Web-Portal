@@ -27,7 +27,9 @@ export async function GET() {
             })
             .sort({ timestamp: -1 })
             .limit(10)
-            .lean();
+            .lean()
+            .populate('userId')
+            .populate('toUserId');
 
         return NextResponse.json(activityLogs);
     } catch (error) {

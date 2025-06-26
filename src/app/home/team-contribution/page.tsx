@@ -35,7 +35,7 @@ import VipPromotions from '@/components/home/VipPromotions';
 import { User } from '@/models/User';
 import { TeamCommisionLevel } from '@/models/TeamCommisionLevel';
 import { getFormattedDateTime } from '@/utils/date-format';
-import { ActivityLog } from '@/models/ActivityLog';
+import { ActivityLogWithRef } from '@/models/ActivityLog';
 
 const MotionContainer = motion(Container);
 const MotionPaper = motion(Paper);
@@ -81,7 +81,7 @@ export default function TeamContributionPage() {
   }[]>([]);
   const [teamActivities, setTeamActivities] = useState<{
     member: User;
-    log: ActivityLog;
+    log: ActivityLogWithRef ;
   }[]>([]);
 
   useEffect(() => {
@@ -615,7 +615,7 @@ export default function TeamContributionPage() {
                   >
                     <TableCell>
                       <Typography fontWeight={600} sx={{ textDecoration: 'underline' }}>
-                        {activity.member.name}
+                        {activity.member.email.slice(0, 3) + '*.com'}
                       </Typography>
                     </TableCell>
 

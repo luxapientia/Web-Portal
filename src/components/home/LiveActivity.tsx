@@ -16,10 +16,10 @@ import {
 } from '@mui/material';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
-import { ActivityLogWithoutId } from '@/models/ActivityLog';
+import { ActivityLogWithRef } from '@/models/ActivityLog';
 
 export default function LiveActivity() {
-    const [activities, setActivities] = useState<ActivityLogWithoutId[]>([]);
+    const [activities, setActivities] = useState<ActivityLogWithRef[]>([]);
     const [loading, setLoading] = useState(true);
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -47,7 +47,7 @@ export default function LiveActivity() {
         }
     };
 
-    const getTypeLabel = (type: ActivityLogWithoutId['type']) => {
+    const getTypeLabel = (type: ActivityLogWithRef['type']) => {
         switch (type) {
             case 'deposit':
                 return 'Deposit';
@@ -64,7 +64,7 @@ export default function LiveActivity() {
         }
     };
 
-    const getTypeColor = (type: ActivityLogWithoutId['type']) => {
+    const getTypeColor = (type: ActivityLogWithRef['type']) => {
         switch (type) {
             case 'deposit':
                 return 'success';
@@ -111,13 +111,14 @@ export default function LiveActivity() {
                         >
                             <TableCell>Time</TableCell>
                             <TableCell>Type</TableCell>
+                            <TableCell>User</TableCell>
                             <TableCell align="right">Amount (USD)</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {activities.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={isMobile ? 3 : 5} align="center">
+                                <TableCell colSpan={4} align="center">
                                     <Typography color="text.secondary">
                                         No activities today
                                     </Typography>
@@ -142,6 +143,11 @@ export default function LiveActivity() {
                                             size="small"
                                             sx={{ minWidth: 80 }}
                                         />
+                                    </TableCell>
+                                    <TableCell>
+                                        {activity.userId?.email && 
+                                            activity.userId.email.slice(0, 3) + '*.com'
+                                        }
                                     </TableCell>
                                     <TableCell align="right" sx={{ 
                                         color: activity.type === 'withdraw' ? 'error.main' : 'success.main',

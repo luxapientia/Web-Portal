@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { User, UserModel } from '@/models/User';
-import { ActivityLog, ActivityLogModel } from '@/models/ActivityLog';
+import { ActivityLogModel, ActivityLogWithRef } from '@/models/ActivityLog';
 import { ObjectId } from 'mongodb';
 import { authOptions } from '@/config';
 import { getServerSession } from 'next-auth';
@@ -34,9 +34,9 @@ export async function GET() {
             userId: { $in: totalTeamMembers.map(member => member.id) },
             type: 'deposit',
             timestamp: { $gte: new Date(new Date().setHours(0, 0, 0, 0)), $lt: new Date(new Date().setHours(23, 59, 59, 999)) }
-        }) as ActivityLog[];
+        }).populate('userId', 'email') as ActivityLogWithRef[];
 
-        const result: { member: User, log: ActivityLog }[] = todayTeamMemberLogs.map((log: ActivityLog) => {
+        const result: { member: User, log: ActivityLogWithRef }[] = todayTeamMemberLogs.map((log: ActivityLogWithRef) => {
             const member = totalTeamMembers.find((member: User) => member.id === log.userId);
             if (!member) {
                 return null;
@@ -45,7 +45,7 @@ export async function GET() {
                 member: member,
                 log: log
             }
-        }).filter((result): result is { member: User, log: ActivityLog } => result !== null);
+        }).filter((result): result is { member: User, log: ActivityLogWithRef } => result !== null);
 
         return NextResponse.json({
             success: true,
