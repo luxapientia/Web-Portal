@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Container, Typography, Paper, TextField, Button, useTheme, IconButton, Select, MenuItem, InputLabel, FormControl, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, Stack, Chip } from '@mui/material';
+import { Box, Container, Typography, Paper, TextField, Button, useTheme, IconButton, Select, MenuItem, InputLabel, FormControl, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, Stack, Chip, Alert, AlertTitle } from '@mui/material';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import QRCode from 'qrcode'
 import toast from 'react-hot-toast';
@@ -28,7 +28,6 @@ export default function DepositPage() {
     const [selectedChain_Token, setSelectedChain_Token] = useState<{ chain: string, token: string } | null>(null);
     const [copied, setCopied] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [transactionId, setTransactionId] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
@@ -84,7 +83,7 @@ export default function DepositPage() {
     }
 
     const handleSubmitDeposit = async () => {
-        if (!selectedWallet || !transactionId.trim() || !selectedChain_Token) {
+        if (!selectedWallet || !selectedChain_Token) {
             return;
         }
 
@@ -98,7 +97,6 @@ export default function DepositPage() {
                 body: JSON.stringify({
                     chain: selectedChain_Token.chain,
                     token: selectedChain_Token.token,
-                    transactionId: transactionId.trim(),
                     toAddress: selectedWallet.address,
                 }),
             });
@@ -113,8 +111,7 @@ export default function DepositPage() {
             if (data.success) {
                 toast.success('Deposit submitted successfully!');
                 setIsModalOpen(false);
-                setTransactionId('');
-                // router.push('/wallet/transactions');
+                fetchWalletAddresses();
             } else {
                 toast.error(data.data.error || 'Failed to submit deposit');
             }
@@ -539,8 +536,6 @@ export default function DepositPage() {
                                     </Box>
                                 )}
 
-
-
                                 {/* Transaction ID Modal */}
                                 <Dialog
                                     open={isModalOpen}
@@ -569,34 +564,50 @@ export default function DepositPage() {
                                             letterSpacing: 0.5,
                                         }}
                                     >
-                                        Submit Transaction ID
+                                        Confirm Deposit
                                     </DialogTitle>
 
                                     <DialogContent sx={{ pt: 1, px: 4 }}>
                                         <Box sx={{ mt: 2 }}>
-
-                                            <TextField
-                                                fullWidth
-                                                label="Transaction ID"
-                                                variant="outlined"
-                                                value={transactionId}
-                                                onChange={(e) => setTransactionId(e.target.value)}
-                                                disabled={isSubmitting}
-                                                placeholder="e.g. 0x123abc..."
-                                                sx={{
-                                                    '& .MuiOutlinedInput-root': {
-                                                        backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                                                        borderRadius: 2,
-                                                    },
-                                                }}
-                                            />
-                                            <Typography
-                                                variant="caption"
-                                                color="text.secondary"
-                                                sx={{ display: 'block', mt: 1.5, px: 0.5 }}
-                                            >
-                                                Please enter the transaction ID of your deposit so we can verify it on the blockchain.
+                                            <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                                                Please confirm your deposit details:
                                             </Typography>
+                                            
+                                            <Box sx={{ mt: 2, mb: 3, p: 2, bgcolor: 'rgba(0, 0, 0, 0.02)', borderRadius: 2 }}>
+                                                <Stack spacing={1.5}>
+                                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                        <Typography variant="body2" color="text.secondary">Network:</Typography>
+                                                        <Typography variant="body2" fontWeight={500}>{selectedChain_Token?.chain}</Typography>
+                                                    </Box>
+                                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                        <Typography variant="body2" color="text.secondary">Token:</Typography>
+                                                        <Typography variant="body2" fontWeight={500}>{selectedChain_Token?.token}</Typography>
+                                                    </Box>
+                                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                        <Typography variant="body2" color="text.secondary">Address:</Typography>
+                                                        <Typography 
+                                                            variant="body2" 
+                                                            fontWeight={500} 
+                                                            sx={{ 
+                                                                maxWidth: '60%', 
+                                                                textAlign: 'right',
+                                                                wordBreak: 'break-all'
+                                                            }}
+                                                        >
+                                                            {selectedWallet?.address}
+                                                        </Typography>
+                                                    </Box>
+                                                </Stack>
+                                            </Box>
+
+                                            <Alert severity="warning" sx={{ mb: 2 }}>
+                                                <AlertTitle>Important Notice</AlertTitle>
+                                                <Typography variant="body2">
+                                                    • Make sure you're sending {selectedChain_Token?.token} on the {selectedChain_Token?.chain} network.<br/>
+                                                    • Sending from the wrong network may result in permanent loss of funds.<br/>
+                                                    • The deposit will be processed after network confirmation.
+                                                </Typography>
+                                            </Alert>
                                         </Box>
                                     </DialogContent>
 
@@ -635,7 +646,7 @@ export default function DepositPage() {
                                         <Button
                                             variant="contained"
                                             onClick={handleSubmitDeposit}
-                                            disabled={!transactionId.trim() || isSubmitting}
+                                            disabled={isSubmitting}
                                             sx={{
                                                 minWidth: 120,
                                                 px: 3,
@@ -655,11 +666,10 @@ export default function DepositPage() {
                                             {isSubmitting ? (
                                                 <CircularProgress size={22} color="inherit" />
                                             ) : (
-                                                'Submit'
+                                                'Confirm'
                                             )}
                                         </Button>
                                     </DialogActions>
-
                                 </Dialog>
 
                             </Paper>
