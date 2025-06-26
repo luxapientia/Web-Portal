@@ -6,7 +6,6 @@ import { getServerSession } from 'next-auth';
 import { walletService } from '@/services/Wallet';
 import { UserModel } from '@/models/User';
 import { User } from '@/models/User';
-import { CryptoPriceModel } from '@/models/CryptoPrice';
 
 export async function POST(request: NextRequest) {
     try {
