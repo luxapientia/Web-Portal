@@ -35,21 +35,21 @@ export async function GET() {
             timestamp: { $gte: new Date(new Date().setHours(0, 0, 0, 0)), $lt: new Date(new Date().setHours(23, 59, 59, 999)) }
         }).populate('userId') as ActivityLogWithRef[];
 
-        const result: { member: User, log: ActivityLogWithRef }[] = todayTeamMemberLogs.map((log: ActivityLogWithRef) => {
-            const member = totalTeamMembers.find((member: User) => member.id === log.userId);
-            if (!member) {
-                return null;
-            }
-            return {
-                member: member,
-                log: log
-            }
-        }).filter((result): result is { member: User, log: ActivityLogWithRef } => result !== null);
+        // const result: { member: User, log: ActivityLogWithRef }[] = todayTeamMemberLogs.map((log: ActivityLogWithRef) => {
+        //     const member = totalTeamMembers.find((member: User) => member.id === log.userId);
+        //     if (!member) {
+        //         return null;
+        //     }
+        //     return {
+        //         member: member,
+        //         log: log
+        //     }
+        // }).filter((result): result is { member: User, log: ActivityLogWithRef } => result !== null);
 
         return NextResponse.json({
             success: true,
             data: {
-                teamActivities: result
+                teamActivities: todayTeamMemberLogs
             }
         });
     } catch (error) {
