@@ -86,8 +86,10 @@ export async function GET() {
 
         const centralWallets: { address: string, chain: string }[] = [];
 
-        const supportedChains = Object.keys(config.wallet.supportedChains).map(chain => {
+        const supportedChains: { chain: string, tokens: string[] }[] = [];
+        Object.keys(config.wallet.supportedChains).map(chain => {
             const ws = wallets.filter(wallet => wallet.chain === chain);
+            console.log(ws)
             if (ws.length > 0) {
                 const idx = Math.floor(Math.random() * ws.length);
                 const centralWallet = ws[idx];
@@ -96,12 +98,13 @@ export async function GET() {
                     chain: centralWallet.chain,
                 });
                 const tokens = config.wallet.supportedChains[chain as keyof typeof config.wallet.supportedChains].supportedTokens.map(val => val.token);
-                return {
+                supportedChains.push({
                     chain: chain,
                     tokens: tokens
-                };
+                });
             }
         });
+        console.log(supportedChains)
 
         return NextResponse.json({ success: true, data: { walletAddresses: centralWallets, supportedChains, pendingDepositWallet: pendingDepositWallet } });
     } catch (error) {
