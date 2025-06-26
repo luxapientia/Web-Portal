@@ -1,5 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import { UserCollection } from './User';
+import { User } from './User';
 
 export const ActivityLogCollection = 'activity_log';
 
@@ -21,7 +22,12 @@ const ActivityLogSchema: Schema = new Schema({
     collection: ActivityLogCollection
 });
 
-export const ActivityLogModel = mongoose.models[ActivityLogCollection] || mongoose.model<ActivityLog>(ActivityLogCollection, ActivityLogSchema);
+export interface ActivityLogWithRef extends Omit<ActivityLog, 'userId' | 'toUserId'> {
+    userId?: User,
+    toUserId?: User,
+}
+
+export const ActivityLogModel = mongoose.models[ActivityLogCollection] || mongoose.model<ActivityLogWithRef>(ActivityLogCollection, ActivityLogSchema);
 
 export type CreateActivityLogInput = Omit<ActivityLog, '_id' | 'createdAt' | 'updatedAt'>;
 export type ActivityLogWithoutId = Omit<ActivityLog, '_id'>;
