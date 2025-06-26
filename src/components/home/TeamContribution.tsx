@@ -81,7 +81,7 @@ export default function TeamContribution({ invitationLink, copied, handleCopy }:
           </Typography>
         </Stack>
         <Typography variant="h6" color="primary" fontWeight={800} mt={1} sx={{ fontSize: { xs: '1.3rem', md: '1.7rem' } }}>
-          ${teamEarnings}
+          ${teamEarnings.toFixed(8)}
         </Typography>
 
         {/* Inline Invitation UI */}
