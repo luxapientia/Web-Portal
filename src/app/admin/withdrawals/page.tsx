@@ -234,9 +234,9 @@ export default function WithdrawalsPage() {
         );
     };
 
-    const formatAddress = (address: string) => {
-        return address.length > 10 ? `${address.slice(0, 6)}...${address.slice(-4)}` : address;
-    };
+    // const formatAddress = (address: string) => {
+    //     return address.length > 10 ? `${address.slice(0, 6)}...${address.slice(-4)}` : address;
+    // };
 
     const handleViewDetails = (tx: TransactionWithRef) => {
         setSelectedWithdrawal(tx);
@@ -405,7 +405,7 @@ export default function WithdrawalsPage() {
                         >
                             <TableHead>
                                 <TableRow>
-                                    <TableCell>
+                                    {/* <TableCell>
                                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
                                             Transaction ID
                                             <IconButton
@@ -421,7 +421,7 @@ export default function WithdrawalsPage() {
                                                 {renderSortIcon('transactionId')}
                                             </IconButton>
                                         </Box>
-                                    </TableCell>
+                                    </TableCell> */}
                                     <TableCell>
                                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
                                             Amount (USD)
@@ -524,7 +524,7 @@ export default function WithdrawalsPage() {
                                                 transition: 'background-color 0.2s ease',
                                             }}
                                         >
-                                            <TableCell>
+                                            {/* <TableCell>
                                                 <Box sx={{
                                                     display: 'flex',
                                                     alignItems: 'center',
@@ -541,11 +541,11 @@ export default function WithdrawalsPage() {
                                                         textOverflow: 'ellipsis',
                                                         maxWidth: '200px',
                                                     }}>
-                                                        {formatAddress(tx.transactionId)}
+                                                        {formatAddress(tx.transactionId || '')}
                                                     </Box>
                                                     <CopyButton text={tx.transactionId} />
                                                 </Box>
-                                            </TableCell>
+                                            </TableCell> */}
                                             <TableCell>
                                                 <Box sx={{
                                                     display: 'flex',

@@ -222,9 +222,9 @@ export default function DepositPage() {
         );
     };
 
-    const formatAddress = (address: string) => {
-        return address.length > 10 ? `${address.slice(0, 6)}...${address.slice(-4)}` : address;
-    };
+    // const formatAddress = (address: string) => {
+    //     return address.length > 10 ? `${address.slice(0, 6)}...${address.slice(-4)}` : address;
+    // };
 
     const handleViewDetails = (tx: TransactionWithRef) => {
         setSelectedDeposit(tx);
@@ -292,7 +292,7 @@ export default function DepositPage() {
                         >
                             <TableHead>
                                 <TableRow>
-                                    <TableCell>
+                                    {/* <TableCell>
                                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
                                             Transaction ID
                                             <IconButton
@@ -308,7 +308,7 @@ export default function DepositPage() {
                                                 {renderSortIcon('transactionId')}
                                             </IconButton>
                                         </Box>
-                                    </TableCell>
+                                    </TableCell> */}
                                     {/* <TableCell>
                                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
                                             From User
@@ -377,7 +377,7 @@ export default function DepositPage() {
                                                 transition: 'background-color 0.2s ease',
                                             }}
                                         >
-                                            <TableCell>
+                                            {/* <TableCell>
                                                 <Box sx={{
                                                     display: 'flex',
                                                     alignItems: 'center',
@@ -394,11 +394,11 @@ export default function DepositPage() {
                                                         textOverflow: 'ellipsis',
                                                         maxWidth: '200px',
                                                     }}>
-                                                        {formatAddress(tx.transactionId)}
+                                                        {formatAddress(tx.transactionId || '')}
                                                     </Box>
                                                     <CopyButton text={tx.transactionId} />
                                                 </Box>
-                                            </TableCell>
+                                            </TableCell> */}
                                             {/* <TableCell>
                                                 <Box sx={{
                                                     display: 'flex',
@@ -527,7 +527,7 @@ export default function DepositPage() {
                                         Transaction Information
                                     </Typography>
                                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-                                        <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
+                                        {/* <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
                                             <Typography variant="subtitle2" color="text.secondary">
                                                 Transaction ID
                                             </Typography>
@@ -553,7 +553,7 @@ export default function DepositPage() {
                                                 </Typography>
                                                 <CopyButton text={selectedDeposit.transactionId} />
                                             </Box>
-                                        </Box>
+                                        </Box> */}
                                         <Box sx={{ flex: '1 1 200px' }}>
                                             <Typography variant="subtitle2" color="text.secondary">
                                                 Amount

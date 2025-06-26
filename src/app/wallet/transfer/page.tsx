@@ -389,7 +389,7 @@ export default function TransferPage() {
                                         variant="contained"
                                         size="large"
                                         type="submit"
-                                        disabled={isLoading || !amount || !recipientEmail || !transferable || calculateTotalAmount() > dailyTransferMaxLimit || calculateTotalAmount() > transferableAmount}
+                                        disabled={isLoading || !amount || !recipientEmail || !transferable || calculateTotalAmount() > dailyTransferMaxLimit || calculateTotalAmount() >= transferableAmount}
                                         sx={{
                                             py: 1.5,
                                             background: 'linear-gradient(90deg, #1976D2, #2E7D32)',

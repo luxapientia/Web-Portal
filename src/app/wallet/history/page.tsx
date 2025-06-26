@@ -320,7 +320,7 @@ export default function HistoryPage() {
                                 <TableHead>
                                     <TableRow>
                                         <TableCell align="center">Type</TableCell>
-                                        <TableCell align="center">Transaction ID</TableCell>
+                                        {/* <TableCell align="center">Transaction ID</TableCell> */}
                                         <TableCell align="center">
                                             <Box
                                                 sx={{
@@ -381,7 +381,7 @@ export default function HistoryPage() {
                                                         {transaction.type.replace('_', ' ')}
                                                     </Typography>
                                                 </TableCell>
-                                                <TableCell align="center">
+                                                {/* <TableCell align="center">
                                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'center' }}>
                                                         <Typography
                                                             sx={{
@@ -397,7 +397,7 @@ export default function HistoryPage() {
                                                             size="small"
                                                         />
                                                     </Box>
-                                                </TableCell>
+                                                </TableCell> */}
                                                 <TableCell align="center">
                                                     <Typography
                                                         sx={{
@@ -480,7 +480,7 @@ export default function HistoryPage() {
                 <DialogContent dividers>
                     {selectedTransaction && (
                         <Stack spacing={2}>
-                            <Box>
+                            {/* <Box>
                                 <Typography variant="subtitle2" color="text.secondary">
                                     Transaction ID
                                 </Typography>
@@ -493,7 +493,7 @@ export default function HistoryPage() {
                                         size="small"
                                     />
                                 </Box>
-                            </Box>
+                            </Box> */}
 
                             <Stack direction="row" spacing={2}>
                                 <Box flex={1}>
