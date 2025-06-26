@@ -2,6 +2,8 @@ import cron from 'node-cron';
 import { Transaction, TransactionModel } from '../models/Transaction';
 import { walletService } from '../services/Wallet';
 import { CentralWallet, CentralWalletModel } from '../models/CentralWallet';
+import { CryptoPriceModel } from '@/models/CryptoPrice';
+import { deposit } from '@/controllers';
 
 // Function to check transaction status
 async function checkPendingTransactions() {
@@ -25,12 +27,16 @@ async function checkPendingTransactions() {
                 const tokenAmount = await walletService.getBalance(wallet.address, wallet.chain as 'Binance' | 'Ethereum' | 'Tron', transaction.token);
 
                 if (tokenAmount > wallet.startAmount) {
+                    const cryptoPrice = await CryptoPriceModel.find({ symbol: transaction.token || 'USDT' }).sort({ timestamp: -1 }).limit(1);
                     transaction.status = 'success';
                     transaction.releaseDate = new Date();
+                    transaction.amount = tokenAmount - wallet.startAmount;
+                    transaction.amountInUSD = transaction.amount * (cryptoPrice[0]?.price || 1);
                     await transaction.save();
                     wallet.isInUse = false;
                     wallet.startAmount = tokenAmount;
                     await wallet.save();
+                    await deposit(transaction.fromUserId as string, transaction.amountInUSD);
                 }
 
                 if (transaction.startDate && transaction.startDate.getTime() + 1000 * 60 * 30 < new Date().getTime()) {
