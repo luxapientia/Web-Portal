@@ -79,10 +79,7 @@ export default function TeamContributionPage() {
     level: number;
     earnings: number;
   }[]>([]);
-  const [teamActivities, setTeamActivities] = useState<{
-    member: User;
-    log: ActivityLogWithRef ;
-  }[]>([]);
+  const [teamActivities, setTeamActivities] = useState<ActivityLogWithRef[]>([]);
 
   useEffect(() => {
     fetchTeamMembers();
@@ -616,15 +613,15 @@ export default function TeamContributionPage() {
                   >
                     <TableCell>
                       <Typography fontWeight={600} sx={{ textDecoration: 'underline' }}>
-                        {activity.member.email.slice(0, 3) + '*.com'}
+                        {activity.userId?.email?.slice(0, 3) + '*.com'}
                       </Typography>
                     </TableCell>
 
                     <TableCell>
                       <Chip
-                        label={activity.log.type}
+                        label={activity.type}
                         size="small"
-                        color={activity.log.type === 'deposit' ? 'success' : 'primary'}
+                        color={activity.type === 'deposit' ? 'success' : 'primary'}
                         sx={{
                           fontWeight: 500,
                           height: 22,
@@ -635,13 +632,13 @@ export default function TeamContributionPage() {
 
                     <TableCell align="right">
                       <Typography fontWeight={600} color="primary">
-                        USD {activity.log.amount.toFixed(8)}
+                        USD {activity.amount.toFixed(8)}
                       </Typography>
                     </TableCell>
 
                     <TableCell>
                       <Typography variant="caption" color="text.secondary">
-                        {getFormattedDateTime(new Date(activity.log.timestamp))}
+                        {getFormattedDateTime(new Date(activity.timestamp.toLocaleString()))}
                       </Typography>
                     </TableCell>
                   </TableRow>
