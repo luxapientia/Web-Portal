@@ -1,19 +1,28 @@
 import { useState, useEffect } from 'react';
-import { Box, Typography, CircularProgress } from '@mui/material';
+import {
+    Box,
+    Typography,
+    CircularProgress,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper,
+    Chip,
+    useTheme,
+    useMediaQuery
+} from '@mui/material';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
-
-interface ActivityLog {
-    userId: string;
-    userEmail: string;
-    type: 'deposit' | 'withdraw' | 'transfer' | 'earn' | 'team_earn';
-    amount: number;
-    timestamp: Date;
-}
+import { ActivityLogWithoutId } from '@/models/ActivityLog';
 
 export default function LiveActivity() {
-    const [activities, setActivities] = useState<ActivityLog[]>([]);
+    const [activities, setActivities] = useState<ActivityLogWithoutId[]>([]);
     const [loading, setLoading] = useState(true);
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     useEffect(() => {
         fetchActivities();
@@ -38,37 +47,37 @@ export default function LiveActivity() {
         }
     };
 
-    const getActionText = (activity: ActivityLog) => {
-        switch (activity.type) {
+    const getTypeLabel = (type: ActivityLogWithoutId['type']) => {
+        switch (type) {
             case 'deposit':
-                return `Deposited USD ${activity.amount.toFixed(8)}`;
+                return 'Deposit';
             case 'withdraw':
-                return `Withdrew USD ${activity.amount.toFixed(8)}`;
+                return 'Withdraw';
             case 'transfer':
-                return `Transferred USD ${activity.amount.toFixed(8)}`;
-            case 'earn':
-                return `Earned USD ${activity.amount.toFixed(8)}`;
-            case 'team_earn':
-                return `Team Earned USD ${activity.amount.toFixed(8)}`;
+                return 'Transfer';
+            case 'daily_task':
+                return 'Daily Task';
+            case 'trust_fund':
+                return 'Trust Fund';
             default:
-                return `USD ${activity.amount.toFixed(8)}`;
+                return type;
         }
     };
 
-    const getActivityColor = (type: ActivityLog['type']) => {
+    const getTypeColor = (type: ActivityLogWithoutId['type']) => {
         switch (type) {
             case 'deposit':
-                return 'success.main';
+                return 'success';
             case 'withdraw':
-                return 'warning.main';
+                return 'warning';
             case 'transfer':
-                return 'info.main';
-            case 'earn':
-                return 'primary.main';
-            case 'team_earn':
-                return 'secondary.main';
+                return 'info';
+            case 'daily_task':
+                return 'primary';
+            case 'trust_fund':
+                return 'secondary';
             default:
-                return 'text.primary';
+                return 'default';
         }
     };
 
@@ -81,63 +90,86 @@ export default function LiveActivity() {
     }
 
     return (
-        <>
+        <Box sx={{ width: '100%' }}>
             <Typography variant="h6" fontWeight={700} mb={2}>Live Activity</Typography>
-            <Box
-                sx={{
-                    mt: 1,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 2,
+            <TableContainer 
+                component={Paper} 
+                sx={{ 
+                    borderRadius: 2,
+                    boxShadow: 2,
+                    backgroundColor: 'background.paper',
+                    overflow: 'auto'
                 }}
             >
-                {activities.length === 0 ? (
-                    <Typography variant="body1" textAlign="center" color="text.secondary">
-                        No recent activities
-                    </Typography>
-                ) : (
-                    activities.map((activity, idx) => (
-                        <Box
-                            key={idx}
+                <Table sx={{ minWidth: isMobile ? 'auto' : 650 }}>
+                    <TableHead>
+                        <TableRow
                             sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 2,
-                                p: 2,
-                                bgcolor: 'background.paper',
-                                borderRadius: 2,
-                                width: '100%',
-                                boxShadow: 1,
+                                backgroundColor: 'background.neutral',
+                                '& th': { fontWeight: 700 }
                             }}
                         >
-                            <Box
-                                sx={{
-                                    width: 10,
-                                    height: 10,
-                                    bgcolor: getActivityColor(activity.type),
-                                    borderRadius: '50%',
-                                    flexShrink: 0,
-                                }}
-                            />
-                            <Box sx={{ flexGrow: 1 }}>
-                                <Typography variant="body1" fontWeight={700}>
-                                    {activity.userEmail.replace(/(?<=.{3}).(?=.*@)/g, '*')}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                    {getActionText(activity)}
-                                </Typography>
-                            </Box>
-                            <Typography
-                                variant="caption"
-                                color="text.secondary"
-                                sx={{ whiteSpace: 'nowrap' }}
-                            >
-                                {format(new Date(activity.timestamp), 'MM/dd HH:mm')}
-                            </Typography>
-                        </Box>
-                    ))
-                )}
-            </Box>
-        </>
+                            <TableCell>Time</TableCell>
+                            <TableCell>Type</TableCell>
+                            <TableCell align="right">Amount (USD)</TableCell>
+                            {!isMobile && <TableCell>User ID</TableCell>}
+                            {!isMobile && activities.some(a => a.toUserId) && (
+                                <TableCell>To User</TableCell>
+                            )}
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {activities.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={isMobile ? 3 : 5} align="center">
+                                    <Typography color="text.secondary">
+                                        No activities today
+                                    </Typography>
+                                </TableCell>
+                            </TableRow>
+                        ) : (
+                            activities.map((activity, index) => (
+                                <TableRow
+                                    key={index}
+                                    sx={{
+                                        '&:last-child td, &:last-child th': { border: 0 },
+                                        '&:hover': { backgroundColor: 'action.hover' }
+                                    }}
+                                >
+                                    <TableCell>
+                                        {format(new Date(activity.timestamp), 'HH:mm:ss')}
+                                    </TableCell>
+                                    <TableCell>
+                                        <Chip
+                                            label={getTypeLabel(activity.type)}
+                                            color={getTypeColor(activity.type)}
+                                            size="small"
+                                            sx={{ minWidth: 80 }}
+                                        />
+                                    </TableCell>
+                                    <TableCell align="right" sx={{ 
+                                        color: activity.type === 'withdraw' ? 'error.main' : 'success.main',
+                                        fontWeight: 600
+                                    }}>
+                                        {activity.type === 'withdraw' ? '-' : '+'}
+                                        {activity.amount.toFixed(2)}
+                                    </TableCell>
+                                    {!isMobile && (
+                                        <TableCell>
+                                            {activity.userId}
+                                        </TableCell>
+                                    )}
+                                    {!isMobile && activities.some(a => a.toUserId) && (
+                                        <TableCell>
+                                            {activity.toUserId || '-'}
+                                        </TableCell>
+                                    )}
+                                </TableRow>
+                            ))
+                        )}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+        </Box>
     );
 } 
