@@ -5,11 +5,15 @@ export const CentralWalletCollection = 'central_wallet';
 export interface CentralWallet extends Document {
   address: string;
   chain: string;
+  isInUse: boolean;
+  startAmount: number;
 }
 
 const CentralWalletSchema: Schema = new Schema({
   address: { type: String, required: true },
   chain: { type: String, required: true },
+  isInUse: { type: Boolean, default: false },
+  startAmount: { type: Number, default: 0 },
 }, {
   collection: CentralWalletCollection,
   timestamps: true
