@@ -88,7 +88,7 @@ export default function TasksForToday({ onAccountValueChange }: TasksForTodayPro
 
       // Start the 20-second animation
       const startTime = Date.now();
-      const duration = 20000; // 20 seconds
+      const duration = Number(process.env.NEXT_PUBLIC_TASK_DURATION) || 120000; // 2 minutes
 
       const animateProgress = () => {
         const elapsed = Date.now() - startTime;
