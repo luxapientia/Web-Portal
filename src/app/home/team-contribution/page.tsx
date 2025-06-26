@@ -86,6 +86,7 @@ export default function TeamContributionPage() {
     fetchTeamCommisionLevels();
     fetchTeamEarnings();
     fetchTeamActivities();
+    console.log(levelEarnings)
   }, []);
 
   const fetchTeamMembers = async () => {
