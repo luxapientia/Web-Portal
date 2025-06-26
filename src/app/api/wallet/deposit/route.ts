@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { CentralWalletModel } from '@/models/CentralWallet';
+import { CentralWallet, CentralWalletModel } from '@/models/CentralWallet';
 import { Transaction, TransactionModel } from '@/models/Transaction';
-import { authOptions } from '@/config';
+import { authOptions, config } from '@/config';
 import { getServerSession } from 'next-auth';
 import { walletService } from '@/services/Wallet';
 import { UserModel } from '@/models/User';
@@ -15,49 +15,95 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const user = await UserModel.findOne({ email: session.user.email }) as User;    
+        const user = await UserModel.findOne({ email: session.user.email }) as User;
         if (!user) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
-        const { chain, token, transactionId, toAddress } = await request.json();
+        const { chain, token, toAddress } = await request.json();
 
-        const wallet = await CentralWalletModel.findOne({ address: toAddress, chain });
+        const wallet = await CentralWalletModel.findOne({ address: toAddress, chain }) as CentralWallet;
 
         if (!wallet) {
             return NextResponse.json({ error: 'Wallet not found' }, { status: 404 });
         }
 
-        if (await TransactionModel.findOne({ transactionId })) {
-            return NextResponse.json({ error: 'Transaction already exists' }, { status: 400 });
+        if (wallet.isInUse) {
+            return NextResponse.json({ error: 'Wallet is already in use' }, { status: 400 });
         }
 
-        const txDetails = await walletService.getTxDetails(transactionId, chain);
-
-        if (txDetails.status === 'notStarted') {
-            return NextResponse.json({ error: 'Transaction not started' }, { status: 400 });
-        }
-
-        const cryptoPrice = await CryptoPriceModel.find({ symbol: token }).sort({ timestamp: -1 }).limit(1);
+        const startAmount = await walletService.getBalance(toAddress, chain, token);
+        wallet.startAmount = startAmount;
+        wallet.isInUse = true;
+        await wallet.save();
 
         const newTransaction: Partial<Transaction> = {
-            transactionId,
             toAddress: toAddress,
             type: 'deposit',
             startDate: new Date(),
-            remarks: `${user.name} deposited ${txDetails.amount} ${token} from ${txDetails.fromAddress} to ${txDetails.toAddress}`,
             token: token,
             chain: chain,
             fromUserId: user._id,
         }
 
-        if (txDetails.amount) {
-            newTransaction.amountInUSD = txDetails.amount * (cryptoPrice[0]?.price || 1);
-        }
-
         const transaction = await TransactionModel.create(newTransaction);
 
         return NextResponse.json({ success: true, data: { transaction } });
+    } catch (error) {
+        console.error('Error fetching wallet:', error);
+        return NextResponse.json({ error: 'Failed to fetch wallet' }, { status: 500 });
+    }
+}
+
+export async function GET() {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user?.email) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const user = await UserModel.findOne({ email: session.user.email }) as User;
+        if (!user) {
+            return NextResponse.json({ error: 'User not found' }, { status: 404 });
+        }
+
+        const pendingDepositTransactions = await TransactionModel.findOne({
+            fromUserId: user._id,
+            status: 'pending',
+            type: 'deposit'
+        }) as Transaction
+
+        let pendingDepositWallet: CentralWallet | null = null;
+
+        if (pendingDepositTransactions) {
+            pendingDepositWallet = await CentralWalletModel.findOne({
+                address: pendingDepositTransactions.toAddress,
+                chain: pendingDepositTransactions.chain
+            }) as CentralWallet;
+        }
+
+        const wallets = await CentralWalletModel.find({ isInUse: false }) as CentralWallet[];
+
+        const centralWallets: { address: string, chain: string }[] = [];
+
+        const supportedChains = Object.keys(config.wallet.supportedChains).map(chain => {
+            const ws = wallets.filter(wallet => wallet.chain === chain);
+            if (ws.length > 0) {
+                const idx = Math.floor(Math.random() * ws.length);
+                const centralWallet = ws[idx];
+                centralWallets.push({
+                    address: centralWallet.address,
+                    chain: centralWallet.chain,
+                });
+                const tokens = config.wallet.supportedChains[chain as keyof typeof config.wallet.supportedChains].supportedTokens.map(val => val.token);
+                return {
+                    chain: chain,
+                    tokens: tokens
+                };
+            }
+        });
+
+        return NextResponse.json({ success: true, data: { walletAddresses: centralWallets, supportedChains, pendingDepositWallet: pendingDepositWallet } });
     } catch (error) {
         console.error('Error fetching wallet:', error);
         return NextResponse.json({ error: 'Failed to fetch wallet' }, { status: 500 });
