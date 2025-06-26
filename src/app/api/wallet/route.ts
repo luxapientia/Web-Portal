@@ -29,12 +29,11 @@ export async function GET() {
                 chain: chain,
                 tokens: tokens
             };
-
-            
-
         });
 
-        return NextResponse.json({ success: true, data: { walletAddresses: centralWallets, supportedChains } });
+        console.log(supportedChains)
+
+        return NextResponse.json({ success: true, data: { walletAddresses: centralWallets, supportedChains: [{ chain: 'Tron', tokens: ['USDT', 'USDC'] }] } });
     } catch (error) {
         console.error('Error fetching wallet:', error);
         return NextResponse.json({ error: 'Failed to fetch wallet' }, { status: 500 });
