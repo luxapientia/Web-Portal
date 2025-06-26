@@ -481,9 +481,9 @@ export default function TeamContributionPage() {
                       <Typography variant="body2">
                         Members: {teamMembers.find(member => member.level === TeamCommisionLevel.level)?.members.length}
                       </Typography>
-                      <Typography variant="body2" color="primary" fontWeight={600}>
-                        ${levelEarnings.find(earning => earning.level === TeamCommisionLevel.level)?.earnings}
-                      </Typography>
+                      {/* <Typography variant="body2" color="primary" fontWeight={600}>
+                        ${levelEarnings.find(earning => earning.level === TeamCommisionLevel.level)?.earnings.toFixed(2)}
+                      </Typography> */}
                     </Stack>
                   </Box>
                 </CardContent>
