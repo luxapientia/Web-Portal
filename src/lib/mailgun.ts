@@ -12,14 +12,14 @@ if (!process.env.MAILGUN_DOMAIN) {
 const mailgun = new Mailgun(formData);
 
 // Initialize the client with proper typing
-const client = mailgun.client({
-  username: 'api',
-  key: process.env.MAILGUN_API_KEY,
-  url: 'https://api.mailgun.net', // Use EU endpoint if your domain is in EU region
-});
+// const client = mailgun.client({
+//   username: 'api',
+//   key: process.env.MAILGUN_API_KEY,
+//   url: 'https://api.mailgun.net', // Use EU endpoint if your domain is in EU region
+// });
 
 const DOMAIN = process.env.MAILGUN_DOMAIN;
-const FROM_EMAIL = `DoubleBubble <noreply@${DOMAIN}>`;
+// const FROM_EMAIL = `DoubleBubble <noreply@${DOMAIN}>`;
 
 export interface EmailData {
   to: string;
