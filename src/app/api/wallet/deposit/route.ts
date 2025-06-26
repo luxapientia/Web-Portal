@@ -67,19 +67,24 @@ export async function GET() {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
-        const pendingDepositTransactions = await TransactionModel.findOne({
+        const pendingDepositTransaction = await TransactionModel.findOne({
             fromUserId: user._id,
             status: 'pending',
             type: 'deposit'
         }) as Transaction
 
-        let pendingDepositWallet: CentralWallet | null = null;
+        let pendingDeposit: { wallet: CentralWallet, transaction: Transaction } | null = null;
 
-        if (pendingDepositTransactions) {
-            pendingDepositWallet = await CentralWalletModel.findOne({
-                address: pendingDepositTransactions.toAddress,
-                chain: pendingDepositTransactions.chain
+        if (pendingDepositTransaction) {
+            const pendingDepositWallet = await CentralWalletModel.findOne({
+                address: pendingDepositTransaction.toAddress,
+                chain: pendingDepositTransaction.chain
             }) as CentralWallet;
+
+            pendingDeposit = {
+                wallet: pendingDepositWallet,
+                transaction: pendingDepositTransaction
+            }
         }
 
         const wallets = await CentralWalletModel.find({ isInUse: false }) as CentralWallet[];
@@ -89,7 +94,6 @@ export async function GET() {
         const supportedChains: { chain: string, tokens: string[] }[] = [];
         Object.keys(config.wallet.supportedChains).map(chain => {
             const ws = wallets.filter(wallet => wallet.chain === chain);
-            console.log(ws)
             if (ws.length > 0) {
                 const idx = Math.floor(Math.random() * ws.length);
                 const centralWallet = ws[idx];
@@ -104,9 +108,8 @@ export async function GET() {
                 });
             }
         });
-        console.log(supportedChains)
 
-        return NextResponse.json({ success: true, data: { walletAddresses: centralWallets, supportedChains, pendingDepositWallet: pendingDepositWallet } });
+        return NextResponse.json({ success: true, data: { walletAddresses: centralWallets, supportedChains, pendingDeposit } });
     } catch (error) {
         console.error('Error fetching wallet:', error);
         return NextResponse.json({ error: 'Failed to fetch wallet' }, { status: 500 });
