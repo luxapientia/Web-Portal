@@ -348,7 +348,7 @@ export default function TeamContributionPage() {
 
                 {!card.splitView && (
                   <>
-                    <Typography variant="h4">{card.value}</Typography>
+                    <Typography variant="h5">{card.value}</Typography>
                     {card.subtitle && (
                       <Typography variant="body2" sx={{ opacity: 0.72 }}>
                         {card.subtitle}
