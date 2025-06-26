@@ -333,6 +333,78 @@ export class WalletService {
                 throw new Error(`Unsupported chain type: ${walletConfig.type}`);
         }
     }
+
+    public async getEvmBalance(address: string, chain: 'Binance' | 'Ethereum', token?: string): Promise<number> {
+        const walletConfig = config.wallet.supportedChains[chain];
+        if (!walletConfig) throw new Error(`Unsupported chain: ${chain}`);
+        const provider = new ethers.providers.JsonRpcProvider(walletConfig.rpcUrl);
+        if (!token) {
+            const balance = await provider.getBalance(address);
+            return parseFloat(ethers.utils.formatEther(balance));
+        }
+        const tokenAddress = walletConfig.supportedTokens.find((t) => t.token === token)?.contractAddress;
+        if (!tokenAddress) throw new Error(`Token ${token} not found for chain ${chain}`);
+
+        // ERC20 Token balance
+        const tokenAbi = [
+            "function balanceOf(address) view returns (uint256)",
+            "function decimals() view returns (uint8)",
+        ];
+        const contract = new ethers.Contract(tokenAddress, tokenAbi, provider);
+        const [rawBalance, decimals] = await Promise.all([
+            contract.balanceOf(address),
+            contract.decimals()
+        ]);
+
+        return parseFloat(ethers.utils.formatUnits(rawBalance, decimals));
+    }
+
+    public async getTronBalance(address: string, token?: string) {
+        try {
+            const walletConfig = config.wallet.supportedChains['Tron' as keyof typeof config.wallet.supportedChains];
+            if (!walletConfig) throw new Error(`Unsupported chain: Tron`);
+
+            const tronWeb = new TronWeb({
+                fullHost: 'https://api.trongrid.io',
+            });
+
+            if (!token) {
+                const balance = await tronWeb.trx.getBalance(address);
+                const decimals = 6;
+                const readableBalance = parseFloat(balance.toString()) / (10 ** decimals);
+                return readableBalance;
+            }
+
+            const tokenAddress = walletConfig.supportedTokens.find((t) => t.token === token)?.contractAddress;
+            if (!tokenAddress) throw new Error(`Token ${token} not found for chain Tron`);
+
+
+            const contract = await tronWeb.contract().at(tokenAddress);
+
+            const balance = await contract.methods.balanceOf(address).call({ from: address });
+            const decimals = await contract.methods.decimals().call({ from: address });
+            const readableBalance = parseFloat(balance.toString()) / (10 ** parseInt(decimals.toString()));
+
+            return readableBalance;
+        } catch (error) {
+            console.error(error);
+            return 0;
+        }
+    }
+
+    public async getBalance(address: string, chain: 'Binance' | 'Ethereum' | 'Tron', token?: string) {
+        const walletConfig = config.wallet.supportedChains[chain as keyof typeof config.wallet.supportedChains];
+        if (!walletConfig) throw new Error(`Unsupported chain: ${chain}`);
+
+        switch (walletConfig.type) {
+            case 'EVM':
+                return this.getEvmBalance(address, chain as 'Binance' | 'Ethereum', token);
+            case 'TRON':
+                return this.getTronBalance(address, token);
+            default:
+                throw new Error(`Unsupported chain type: ${walletConfig.type}`);
+        }
+    }
 }
 
 export const walletService = new WalletService();
