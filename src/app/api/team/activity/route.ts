@@ -30,10 +30,12 @@ export async function GET() {
         }) as User[];
 
         const totalTeamMembers: User[] = [...level1Team, ...level2Team, ...level3Team];
+        console.log(totalTeamMembers);
         const todayTeamMemberLogs = await ActivityLogModel.find({
             userId: { $in: totalTeamMembers.map(member => member._id) },
             timestamp: { $gte: new Date(new Date().setHours(0, 0, 0, 0)), $lt: new Date(new Date().setHours(23, 59, 59, 999)) }
         }).populate('userId') as ActivityLogWithRef[];
+        console.log(todayTeamMemberLogs);
 
         const result: { member: User, log: ActivityLogWithRef }[] = todayTeamMemberLogs.map((log: ActivityLogWithRef) => {
             const member = totalTeamMembers.find((member: User) => member.id === log.userId);
