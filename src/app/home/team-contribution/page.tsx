@@ -157,7 +157,8 @@ export default function TeamContributionPage() {
         throw new Error(data.error || 'Failed to fetch team activities');
       }
       if (data.success) {
-        setTeamActivities(data.teamActivities);
+        console.log(data)
+        setTeamActivities(data.data.teamActivities);
       }
     } catch (error) {
       console.error('Error fetching team activities:', error);
