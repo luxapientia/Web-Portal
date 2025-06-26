@@ -32,7 +32,6 @@ export async function GET() {
         const totalTeamMembers: User[] = [...level1Team, ...level2Team, ...level3Team];
         const todayTeamMemberLogs = await ActivityLogModel.find({
             userId: { $in: totalTeamMembers.map(member => member._id) },
-            type: 'deposit',
             timestamp: { $gte: new Date(new Date().setHours(0, 0, 0, 0)), $lt: new Date(new Date().setHours(23, 59, 59, 999)) }
         }).populate('userId') as ActivityLogWithRef[];
 
