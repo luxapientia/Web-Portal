@@ -19,12 +19,7 @@ export async function GET() {
 
         // Fetch today's activity logs
         const activityLogs = await ActivityLogModel
-            .find({
-                timestamp: {
-                    $gte: today,
-                    $lt: tomorrow
-                }
-            })
+            .find({})
             .sort({ timestamp: -1 })
             .limit(10)
             .lean()
