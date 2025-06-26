@@ -208,14 +208,14 @@ export default function TeamContributionPage() {
     {
       icon: <TrendingUpIcon sx={{ fontSize: 28 }} />,
       title: "Total Earnings",
-      value: `$${totalEarning}`,
+      value: `$${totalEarning.toFixed(9)}`,
       subtitle: ``,
       gradient: 'linear-gradient(135deg, #28a745 0%, #20c997 100%)'
     },
     {
       icon: <AccountBalanceWalletIcon sx={{ fontSize: 28 }} />,
       title: "Today's Earnings",
-      value: `$${todayEarning}`,
+      value: `$${todayEarning.toFixed(9)}`,
       subtitle: `From ${teamMembers.reduce((acc, team) => acc + team.members.filter(member => member.status === 'active').length, 0)} active members`,
       gradient: 'linear-gradient(135deg, #007bff 0%, #17a2b8 100%)'
     },
