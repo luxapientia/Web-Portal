@@ -112,10 +112,6 @@ export default function LiveActivity() {
                             <TableCell>Time</TableCell>
                             <TableCell>Type</TableCell>
                             <TableCell align="right">Amount (USD)</TableCell>
-                            {!isMobile && <TableCell>User ID</TableCell>}
-                            {!isMobile && activities.some(a => a.toUserId) && (
-                                <TableCell>To User</TableCell>
-                            )}
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -154,16 +150,6 @@ export default function LiveActivity() {
                                         {activity.type === 'withdraw' ? '-' : '+'}
                                         {activity.amount.toFixed(2)}
                                     </TableCell>
-                                    {!isMobile && (
-                                        <TableCell>
-                                            {activity.userId}
-                                        </TableCell>
-                                    )}
-                                    {!isMobile && activities.some(a => a.toUserId) && (
-                                        <TableCell>
-                                            {activity.toUserId || '-'}
-                                        </TableCell>
-                                    )}
                                 </TableRow>
                             ))
                         )}
