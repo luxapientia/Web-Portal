@@ -5,9 +5,9 @@ if (!process.env.POSTAL_API_KEY) {
   throw new Error('POSTAL_API_KEY is not set in environment variables');
 }
 
-// if (!process.env.MAILGUN_DOMAIN) {
-//   throw new Error('MAILGUN_DOMAIN is not set in environment variables');
-// }
+if (!process.env.POSTAL_DOMAIN) {
+  throw new Error('POSTAL_DOMAIN is not set in environment variables');
+}
 
 // const mailgun = new Mailgun(formData);
 
@@ -18,7 +18,7 @@ if (!process.env.POSTAL_API_KEY) {
 //   url: 'https://api.mailgun.net', // Use EU endpoint if your domain is in EU region
 // });
 
-// const DOMAIN = process.env.MAILGUN_DOMAIN;
+const DOMAIN = process.env.POSTAL_DOMAIN;
 // const FROM_EMAIL = `DoubleBubble <noreply@${DOMAIN}>`;
 
 export interface EmailData {
@@ -51,7 +51,7 @@ export async function sendEmail({ to, subject, text, html }: EmailData) {
       },
       body: JSON.stringify({
         to: to,
-        from: 'OTP <otp@bubble2025.com>',
+        from: DOMAIN,
         subject: subject,
         text: text,
         html_body: html
