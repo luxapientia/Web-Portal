@@ -5,8 +5,6 @@ import {
     Paper,
     Typography,
     Stack,
-    IconButton,
-    Tooltip,
     Table,
     TableHead,
     TableBody,
@@ -14,14 +12,10 @@ import {
     TableCell,
     Avatar,
     Chip,
-    useTheme,
-    useMediaQuery,
     Skeleton,
     TablePagination,
-    Menu,
     MenuItem,
     Button,
-    TextField,
     Dialog,
     DialogTitle,
     DialogContent,
@@ -34,7 +28,6 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import AdminLayout from '@/components/admin/AdminLayout';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import CircleIcon from '@mui/icons-material/Circle';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
@@ -74,8 +67,6 @@ interface Statistics {
 }
 
 export default function AdminPage() {
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const [loading, setLoading] = useState(true);
     const [statsLoading, setStatsLoading] = useState(true);
     const [statistics, setStatistics] = useState<Statistics | null>(null);

@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { ActivityLogModel, ActivityLogWithRef } from "@/models/ActivityLog";
+import { ActivityLogModel } from "@/models/ActivityLog";
 import { authOptions } from '@/config';
+import { FilterQuery } from "mongoose";
+import { ActivityLog } from "@/models/ActivityLog";
 
 export async function GET(req: NextRequest) {
     try {
@@ -19,7 +21,7 @@ export async function GET(req: NextRequest) {
         const endDate = searchParams.get('endDate') || undefined;
 
         // Build query
-        const query: any = {};
+        const query: FilterQuery<ActivityLog> = {};
         if (type) query.type = type;
         if (startDate || endDate) {
             query.timestamp = {};
