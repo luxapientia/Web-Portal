@@ -267,18 +267,59 @@ export default function DepositPage() {
                                     borderRadius: 4,
                                 }}
                             >
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                                    <WarningAmberIcon sx={{ color: 'warning.main' }} />
-                                    <Typography variant="h6" color="warning.main" sx={{ fontWeight: 600 }}>
-                                        Pending Deposit
-                                    </Typography>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                                    <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                                        <CircularProgress
+                                            variant="determinate"
+                                            value={100}
+                                            size={40}
+                                            thickness={4}
+                                            sx={{ color: 'warning.light' }}
+                                        />
+                                        <CircularProgress
+                                            variant="indeterminate"
+                                            disableShrink
+                                            size={40}
+                                            thickness={4}
+                                            sx={{
+                                                color: 'warning.main',
+                                                position: 'absolute',
+                                                left: 0,
+                                                '& .MuiCircularProgress-circle': {
+                                                    strokeLinecap: 'round',
+                                                },
+                                            }}
+                                        />
+                                        <Box
+                                            sx={{
+                                                top: 0,
+                                                left: 0,
+                                                bottom: 0,
+                                                right: 0,
+                                                position: 'absolute',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                            }}
+                                        >
+                                            <WarningAmberIcon sx={{ color: 'warning.main', fontSize: 20 }} />
+                                        </Box>
+                                    </Box>
+                                    <Box>
+                                        <Typography variant="h6" color="warning.main" sx={{ fontWeight: 600 }}>
+                                            Pending Deposit
+                                        </Typography>
+                                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                                            Waiting for network confirmation
+                                        </Typography>
+                                    </Box>
                                 </Box>
 
                                 <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
                                     You have a pending deposit transaction. Please wait for it to be processed before making a new deposit.
                                 </Typography>
 
-                                <Box sx={{ 
+                                <Box sx={{
                                     background: 'rgba(255, 255, 255, 0.05)',
                                     borderRadius: 2,
                                     p: 2
@@ -324,10 +365,10 @@ export default function DepositPage() {
                                                     </Typography>
                                                 </Box>
                                             </Box>
-                                            
-                                            <Box sx={{ 
-                                                display: 'flex', 
-                                                flexDirection: 'column', 
+
+                                            <Box sx={{
+                                                display: 'flex',
+                                                flexDirection: 'column',
                                                 alignItems: 'center',
                                                 background: 'white',
                                                 p: 2,
@@ -572,7 +613,7 @@ export default function DepositPage() {
                                             <Typography variant="subtitle1" fontWeight={600} gutterBottom>
                                                 Please confirm your deposit details:
                                             </Typography>
-                                            
+
                                             <Box sx={{ mt: 2, mb: 3, p: 2, bgcolor: 'rgba(0, 0, 0, 0.02)', borderRadius: 2 }}>
                                                 <Stack spacing={1.5}>
                                                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -585,11 +626,11 @@ export default function DepositPage() {
                                                     </Box>
                                                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                                         <Typography variant="body2" color="text.secondary">Address:</Typography>
-                                                        <Typography 
-                                                            variant="body2" 
-                                                            fontWeight={500} 
-                                                            sx={{ 
-                                                                maxWidth: '60%', 
+                                                        <Typography
+                                                            variant="body2"
+                                                            fontWeight={500}
+                                                            sx={{
+                                                                maxWidth: '60%',
                                                                 textAlign: 'right',
                                                                 wordBreak: 'break-all'
                                                             }}
@@ -597,14 +638,24 @@ export default function DepositPage() {
                                                             {selectedWallet?.address}
                                                         </Typography>
                                                     </Box>
+                                                    <Box sx={{
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        alignItems: 'center',
+                                                        background: 'white',
+                                                        p: 2,
+                                                        borderRadius: 1,
+                                                    }}>
+                                                        <QRCodeComponent address={selectedWallet?.address || ''} />
+                                                    </Box>
                                                 </Stack>
                                             </Box>
 
                                             <Alert severity="warning" sx={{ mb: 2 }}>
                                                 <AlertTitle>Important Notice</AlertTitle>
                                                 <Typography variant="body2">
-                                                    • Make sure you're sending {selectedChain_Token?.token} on the {selectedChain_Token?.chain} network.<br/>
-                                                    • Sending from the wrong network may result in permanent loss of funds.<br/>
+                                                    • Make sure you're sending {selectedChain_Token?.token} on the {selectedChain_Token?.chain} network.<br />
+                                                    • Sending from the wrong network may result in permanent loss of funds.<br />
                                                     • The deposit will be processed after network confirmation.
                                                 </Typography>
                                             </Alert>
@@ -695,13 +746,13 @@ const QRCodeComponent = ({ address }: { address: string }) => {
     if (!qrUrl) return null;
 
     return (
-        <img 
-            src={qrUrl} 
-            alt="Wallet Address QR Code" 
-            style={{ 
-                width: '120px', 
+        <img
+            src={qrUrl}
+            alt="Wallet Address QR Code"
+            style={{
+                width: '120px',
                 height: '120px',
-            }} 
+            }}
         />
     );
 }; 
