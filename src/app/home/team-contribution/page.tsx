@@ -75,10 +75,10 @@ export default function TeamContributionPage() {
   const [teamCommisionLevels, setTeamCommisionLevels] = useState<TeamCommisionLevel[]>([]);
   const [totalEarning, setTotalEarning] = useState<number>(0);
   const [todayEarning, setTodayEarning] = useState<number>(0);
-  const [levelEarnings, setLevelEarnings] = useState<{
-    level: number;
-    earnings: number;
-  }[]>([]);
+  // const [levelEarnings, setLevelEarnings] = useState<{
+  //   level: number;
+  //   earnings: number;
+  // }[]>([]);
   const [teamActivities, setTeamActivities] = useState<ActivityLogWithRef[]>([]);
 
   useEffect(() => {
@@ -86,7 +86,7 @@ export default function TeamContributionPage() {
     fetchTeamCommisionLevels();
     fetchTeamEarnings();
     fetchTeamActivities();
-    console.log(levelEarnings)
+    // console.log(levelEarnings)
   }, []);
 
   const fetchTeamMembers = async () => {
@@ -138,7 +138,7 @@ export default function TeamContributionPage() {
       if (data.success) {
         setTotalEarning(data.data.teamEarnings);
         setTodayEarning(data.data.todayTeamEarnings);
-        setLevelEarnings(data.data.levelTeamEarnings);
+        // setLevelEarnings(data.data.levelTeamEarnings);
       }
     } catch (error) {
       console.error('Error fetching team earnings:', error);
