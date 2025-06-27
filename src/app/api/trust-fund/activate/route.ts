@@ -32,7 +32,8 @@ export async function POST(request: NextRequest) {
         const trustFund = await TrustFundModel.create({
             userId: user.id,
             trustPlanId: trustPlan.id,
-            amount: fundValue + trustFundInterest,
+            reward: trustFundInterest,
+            amount: fundValue,
             startDate: new Date(),
             endDate: new Date(new Date().getTime() + trustPlan.duration * 24 * 60 * 60 * 1000),
             dailyInterestRate: trustPlan.dailyInterestRate,
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest) {
         }) as TrustFund;
 
         user.accountValue.totalWithdrawable -= fundValue;
-        user.accountValue.totalAssetValue -= fundValue;
+        user.accountValue.totalInTrustFund += fundValue;
         await user.save();
         return NextResponse.json({ success: true, data: { trustFund } });
     } catch (error) {
