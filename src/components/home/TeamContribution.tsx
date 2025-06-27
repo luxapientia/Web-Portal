@@ -17,6 +17,7 @@ export default function TeamContribution({ invitationLink, copied, handleCopy }:
   const router = useRouter();
   const [teamEarnings, setTeamEarnings] = useState<number>(0);
   const [shareLink, setShareLink] = useState<string>('');
+  const [qrCode, setQrCode] = useState<string>('');
 
   const handleViewTeamStatus = () => {
     router.push('/home/team-contribution');
@@ -45,14 +46,15 @@ export default function TeamContribution({ invitationLink, copied, handleCopy }:
 
   const fetchQrCodeUrl = async () => {
     try {
-      // const response = await fetch('/api/app-config');
-      // const data = await response.json();
-      // if (!response.ok) {
-      //   toast.error('Failed to fetch domain');
-      // }
-      // const domain = data.domain;
-      QRCode.toDataURL(invitationLink)
-        .then(url => setShareLink(url))
+      const response = await fetch('/api/app-config');
+      const data = await response.json();
+      if (!response.ok) {
+        toast.error('Failed to fetch domain');
+      }
+      const domain = data.domain
+      setShareLink(domain + '/auth/register?invitationCode=' + invitationLink);
+      QRCode.toDataURL(domain + '/auth/register?invitationCode=' + invitationLink)
+        .then(url => setQrCode(url))
         .catch(err => console.error('Error generating QR code:', err));
     } catch {
       toast.error('Failed to fetch domain');
@@ -108,6 +110,34 @@ export default function TeamContribution({ invitationLink, copied, handleCopy }:
             sx={{ bgcolor: '#fff', borderRadius: 2 }}
           />
         </Stack>
+
+        {/* QR Code Display */}
+        {qrCode && (
+          <Box 
+            sx={{ 
+              display: 'flex', 
+              justifyContent: 'center',
+              mb: 2,
+              p: 2,
+              bgcolor: '#fff',
+              borderRadius: 2,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+            }}
+          >
+            <Box
+              component="img"
+              src={qrCode}
+              alt="Invitation QR Code"
+              sx={{
+                width: 150,
+                height: 150,
+                objectFit: 'contain',
+                borderRadius: 1
+              }}
+            />
+          </Box>
+        )}
+
         <Stack direction="row" spacing={1} alignItems="center">
           <Typography variant="body1" color="text.secondary">
             Invitation Code :

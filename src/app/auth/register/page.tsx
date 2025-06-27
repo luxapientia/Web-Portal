@@ -9,7 +9,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+
 export default function RegisterPage() {
+
+  const searchParams = useSearchParams();
+  const invitationCode = searchParams.get('invitationCode');
 
   const router = useRouter();
   const [isVerifying, setIsVerifying] = useState(false);
@@ -351,6 +356,7 @@ export default function RegisterPage() {
               error={!!errors.invitationCode}
               helperText={errors.invitationCode?.message}
               sx={inputStyle}
+              defaultValue={invitationCode}
             />
           </Box>
 

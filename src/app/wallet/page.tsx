@@ -49,8 +49,8 @@ export default function WalletPage() {
                 return;
             }
             const data = await response.json();
-            if (data.doubleBubbleAmount) {
-                const releaseDate = new Date(data.doubleBubbleAmount.releaseDate);
+            if (data.doubleBubble) {
+                const releaseDate = new Date(data.doubleBubble.releaseDate);
                 const today = new Date();
                 const diffTime = releaseDate.getTime() - today.getTime();
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
