@@ -2,11 +2,13 @@
 
 import { Box, Container, Typography, Paper, TextField, Button, InputAdornment, MenuItem, useTheme, IconButton, FormControl, InputLabel, Select, CircularProgress } from '@mui/material';
 import Layout from '@/components/layout/Layout';
-import { 
-    MoneyOff as WithdrawIcon, 
+import {
+    MoneyOff as WithdrawIcon,
     ArrowBack as ArrowBackIcon,
     AccountBalance as BalanceIcon,
-    AccessTime as TimeIcon 
+    AccessTime as TimeIcon,
+    MonetizationOn as MaxAmountIcon,
+    AttachMoney as FeeIcon
 } from '@mui/icons-material';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -432,10 +434,22 @@ export default function WithdrawPage() {
                                             <strong>Withdrawable balance:</strong> ${withdrawableBalance.toFixed(8)}
                                         </Typography>
                                     </Box>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                                        <MaxAmountIcon  sx={{ color: 'primary.main', fontSize: 20 }} />
+                                        <Typography variant="body2" color="text.secondary">
+                                            <strong>Max Withdraw Amount</strong> $2,000,000.
+                                        </Typography>
+                                    </Box>
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                         <TimeIcon sx={{ color: 'primary.main', fontSize: 20 }} />
                                         <Typography variant="body2" color="text.secondary">
                                             <strong>Processing time:</strong> 3 working days
+                                        </Typography>
+                                    </Box>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <FeeIcon  sx={{ color: 'primary.main', fontSize: 20 }} />
+                                        <Typography variant="body2" color="text.secondary">
+                                            <strong>Withdraw Fee:</strong> 5%
                                         </Typography>
                                     </Box>
                                 </Paper>
