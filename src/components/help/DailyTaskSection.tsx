@@ -153,7 +153,6 @@ export default function DailyTaskSection() {
                 <li>Level 3 Upline: 3% of your task reward</li>
                 <li>Level 2 Upline: 7% of your task reward</li>
                 <li>Level 1 Upline: 18% of your task reward</li>
-                <li>You receive: 72% of your task reward</li>
               </Box>
             </Box>
 
@@ -184,9 +183,6 @@ export default function DailyTaskSection() {
                   </TableBody>
                 </Table>
               </TableContainer>
-              <Typography variant="body2" color="primary">
-                Note: If any upline level doesn't exist, you receive their share of the reward.
-              </Typography>
             </Box>
           </Box>
         </Box>
