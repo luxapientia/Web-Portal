@@ -15,15 +15,16 @@ import Layout from "@/components/layout/Layout";
 // import RewardReceiveSection from '@/components/home/RewardReceiveSection';
 import TrustFundSection from '@/components/home/TrustFundSection';
 import LiveActivity from '@/components/home/LiveActivity';
+import { useSession } from "next-auth/react";
 
 export default function HomePage() {
     const theme = useTheme();
     const [copied, setCopied] = useState(false);
     const [tab, setTab] = useState(0);
-    const invitationLink = "https://yourapp.com/invite/aeryyeu76";
     const [loading, setLoading] = useState(true);
     const [assetValueKey, setAssetValueKey] = useState(0);
     const [vipLevelKey, setVipLevelKey] = useState(0);
+    const user = useSession();
     useEffect(() => {
         setTimeout(() => setLoading(false), 800);
     }, []);
@@ -63,7 +64,7 @@ export default function HomePage() {
                     <Stack direction={{ xs: 'column', md: 'row' }} spacing={3}>
                         <AssetAccountValue key={assetValueKey} />
                         <TeamContribution
-                            invitationLink={invitationLink}
+                            invitationLink={user.data?.user?.myInvitationCode || ''}
                             copied={copied}
                             handleCopy={handleCopy}
                         />
