@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { TextField, Button, Stack, Box, Typography, CircularProgress } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import AuthCard from '@/components/auth/AuthCard';
@@ -8,11 +8,10 @@ import { registrationSchema, type RegistrationFormData } from '@/schemas/auth.sc
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import { useRouter } from 'next/navigation';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function RegisterPage() {
-
+// Create a separate client component for the registration form
+function RegistrationForm() {
   const searchParams = useSearchParams();
   const invitationCode = searchParams.get('invitationCode');
 
@@ -23,7 +22,6 @@ export default function RegisterPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [timer, setTimer] = useState(0);
   const [hasCodeBeenSent, setHasCodeBeenSent] = useState(false);
-  // const [invitationCode, setInvitationCode] = useState('');
   const [fileMaxSize, setFileMaxSize] = useState(2 * 1024 * 1024); // 2MB
 
   useEffect(() => {
@@ -511,5 +509,18 @@ export default function RegisterPage() {
         </Stack>
       </Box>
     </AuthCard>
+  );
+}
+
+// Main page component with Suspense boundary
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+        <CircularProgress />
+      </Box>
+    }>
+      <RegistrationForm />
+    </Suspense>
   );
 } 
