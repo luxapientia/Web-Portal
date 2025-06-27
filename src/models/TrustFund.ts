@@ -8,6 +8,7 @@ export interface TrustFund extends Document {
   userId: string;
   trustPlanId: string;
   amount: number;
+  reward: number;
   startDate: Date;
   endDate: Date;
   released: boolean;
@@ -18,6 +19,7 @@ const TrustFundSchema: Schema = new Schema({
   userId: { type: String, required: true, ref: UserCollection },
   trustPlanId: { type: String, required: true, ref: TrustPlanCollection },
   amount: { type: Number, required: true },
+  reward: { type: Number, required: true },
   startDate: { type: Date, required: true },
   endDate: { type: Date, required: true },
   released: { type: Boolean, required: true, default: false },
