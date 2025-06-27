@@ -195,24 +195,24 @@ export const getDailyTaskReward = async (userId: string, rewardPercentage: numbe
 
         if (level1InvitingUser) {
             const teamCommisionLevel1 = await TeamCommisionLevelModel.findOne({ level: 1 }) as TeamCommisionLevel;
-            await getTeamCommisionReward(level1InvitingUser.id, user.accountValue.totalAssetValue * teamCommisionLevel1.percentage / 100 * rewardPercentage / 100);
+            await getTeamCommisionReward(level1InvitingUser.id, user.accountValue.totalWithdrawable * teamCommisionLevel1.percentage / 100 * rewardPercentage / 100);
 
             const level2InvitingUser = await UserModel.findOne({ myInvitationCode: level1InvitingUser.invitationCode }) as User;
             if (level2InvitingUser) {
                 const teamCommisionLevel2 = await TeamCommisionLevelModel.findOne({ level: 2 }) as TeamCommisionLevel;
-                await getTeamCommisionReward(level2InvitingUser.id, user.accountValue.totalAssetValue * teamCommisionLevel2.percentage / 100 * rewardPercentage / 100);
+                await getTeamCommisionReward(level2InvitingUser.id, user.accountValue.totalWithdrawable * teamCommisionLevel2.percentage / 100 * rewardPercentage / 100);
 
                 const level3InvitingUser = await UserModel.findOne({ myInvitationCode: level2InvitingUser.invitationCode }) as User;
                 if (level3InvitingUser) {
                     const teamCommisionLevel3 = await TeamCommisionLevelModel.findOne({ level: 3 }) as TeamCommisionLevel;
-                    await getTeamCommisionReward(level3InvitingUser.id, user.accountValue.totalAssetValue * teamCommisionLevel3.percentage / 100 * rewardPercentage / 100);
+                    await getTeamCommisionReward(level3InvitingUser.id, user.accountValue.totalWithdrawable * teamCommisionLevel3.percentage / 100 * rewardPercentage / 100);
                 }
             }
 
         }
     }
 
-    const rewardAmount = user.accountValue.totalAssetValue * rewardPercentage / 100;
+    const rewardAmount = user.accountValue.totalWithdrawable * rewardPercentage / 100;
     user.accountValue.totalAssetValue += rewardAmount;
     user.accountValue.totalReleasedInterest += rewardAmount;
     await user.save();
