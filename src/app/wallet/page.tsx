@@ -19,7 +19,7 @@ export default function WalletPage() {
     const theme = useTheme();
     const router = useRouter();
     const [user, setUser] = useState<User | null>(null);
-    const [doubleBubbleAmount, setDoubleBubbleAmount] = useState(0);
+    const [doubleBubble, setDoubleBubble] = useState<{amount:number, releaseDate:Date, daysToRelease:number} | null>(null);
 
     useEffect(() => {
         fetchUser();
@@ -49,12 +49,23 @@ export default function WalletPage() {
                 return;
             }
             const data = await response.json();
-            setDoubleBubbleAmount(data.doubleBubbleAmount);
+            if (data.doubleBubbleAmount) {
+                const releaseDate = new Date(data.doubleBubbleAmount.releaseDate);
+                const today = new Date();
+                const diffTime = releaseDate.getTime() - today.getTime();
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                setDoubleBubble({
+                    amount: data.doubleBubbleAmount.amount,
+                    releaseDate: releaseDate,
+                    daysToRelease: diffDays
+                });
+            }
         } catch (error) {
-            console.error('Error fetching user:', error);
+            console.error('Error fetching double bubble:', error);
             toast.error('Failed to fetch double bubble');
         }
-    }
+    };
 
     const actions = [
         {
@@ -178,11 +189,11 @@ export default function WalletPage() {
                     </Box>
 
                     {/* Double Bubble Section */}
-                    {doubleBubbleAmount > 0 && (
+                    {doubleBubble && (
                         <Box 
                             sx={{
                                 mb: 4,
-                                p: 2,
+                                p: 3,
                                 borderRadius: 3,
                                 background: 'linear-gradient(135deg, rgba(76, 175, 80, 0.15), rgba(76, 175, 80, 0.3))',
                                 border: '1px solid rgba(76, 175, 80, 0.2)',
@@ -190,7 +201,19 @@ export default function WalletPage() {
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 flexDirection: 'column',
-                                textAlign: 'center'
+                                textAlign: 'center',
+                                position: 'relative',
+                                overflow: 'hidden',
+                                '&::before': {
+                                    content: '""',
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    height: '100%',
+                                    background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%)',
+                                    zIndex: 0,
+                                }
                             }}
                         >
                             <Typography 
@@ -198,20 +221,66 @@ export default function WalletPage() {
                                 sx={{ 
                                     color: 'success.main',
                                     fontWeight: 600,
-                                    mb: 1
+                                    mb: 2,
+                                    position: 'relative'
                                 }}
                             >
                                 Double Bubble Bonus Available!
                             </Typography>
-                            <Typography 
-                                variant="h4" 
-                                sx={{ 
-                                    color: 'success.main',
-                                    fontWeight: 700
-                                }}
-                            >
-                                ${doubleBubbleAmount.toFixed(8)}
-                            </Typography>
+
+                            <Box sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                gap: 1,
+                                position: 'relative'
+                            }}>
+                                <Typography 
+                                    variant="body1" 
+                                    sx={{ 
+                                        color: 'success.dark',
+                                        fontWeight: 500,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 1
+                                    }}
+                                >
+                                    <Box component="span" sx={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        bgcolor: 'success.main',
+                                        color: 'white',
+                                        width: 24,
+                                        height: 24,
+                                        borderRadius: '50%',
+                                        fontSize: '0.875rem',
+                                        fontWeight: 'bold'
+                                    }}>
+                                        {doubleBubble.daysToRelease}
+                                    </Box>
+                                    {doubleBubble.daysToRelease === 1 ? 'Day' : 'Days'} until release
+                                </Typography>
+
+                                <Box sx={{
+                                    mt: 1,
+                                    p: 2,
+                                    borderRadius: 2,
+                                    bgcolor: 'rgba(255, 255, 255, 0.2)',
+                                    border: '1px dashed rgba(76, 175, 80, 0.3)',
+                                }}>
+                                    <Typography 
+                                        variant="h4" 
+                                        sx={{ 
+                                            color: 'success.main',
+                                            fontWeight: 700,
+                                            textShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                        }}
+                                    >
+                                        ${doubleBubble.amount.toFixed(8)}
+                                    </Typography>
+                                </Box>
+                            </Box>
                         </Box>
                     )}
 
