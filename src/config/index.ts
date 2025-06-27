@@ -181,6 +181,14 @@ export const config = {
     symbols: (process.env.SYMBOLS || 'bitcoin,ethereum,tether,usd-coin,binancecoin,tron,litecoin,solana')
       .split(',')
       .map(s => s.trim()),
+  },
+
+  //Postal Email Configuration
+  email: {
+    apiKey: process.env.POSTAL_API_KEY || 'csRyC066osGApoUm844JWkjc',
+    domain: process.env.POSTAL_DOMAIN || 'OTP<otp@bubble2025.com>',
+    fromEmail: process.env.EMAIL_FROM || 'OTP<otp@bubble2025.com>',
+    apiUrl: process.env.POSTAL_API_URL || 'https://postal.bubble2025.com/api/v1/send/message',
   }
 };
 

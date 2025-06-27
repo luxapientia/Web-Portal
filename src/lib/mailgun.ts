@@ -1,3 +1,4 @@
+import { config } from '../config';
 // import formData from 'form-data';
 // import Mailgun from 'mailgun.js';
 
@@ -18,8 +19,6 @@ if (!process.env.POSTAL_DOMAIN) {
 //   url: 'https://api.mailgun.net', // Use EU endpoint if your domain is in EU region
 // });
 
-const DOMAIN = process.env.POSTAL_DOMAIN;
-// const FROM_EMAIL = `DoubleBubble <noreply@${DOMAIN}>`;
 
 export interface EmailData {
   to: string;
@@ -43,15 +42,15 @@ export async function sendEmail({ to, subject, text, html }: EmailData) {
     // };
 
     // const response = await client.messages.create(DOMAIN, messageData);
-    const response = await fetch("https://postal.bubble2025.com/api/v1/send/message", {
+    const response = await fetch(config.email.apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Server-API-Key': process.env.POSTAL_API_KEY as string
+        'X-Server-API-Key': config.email.apiKey as string
       },
       body: JSON.stringify({
         to: to,
-        from: DOMAIN,
+        from: config.email.fromEmail,
         subject: subject,
         text: text,
         html_body: html
