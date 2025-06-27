@@ -17,7 +17,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { Menu as MenuIcon } from "@mui/icons-material";
+import { Menu as MenuIcon, AdminPanelSettings as AdminIcon } from "@mui/icons-material";
 import Logo from "@/components/common/Logo";
 import UserMenu from "@/components/common/UserMenu";
 import { useSession } from "next-auth/react";
@@ -33,7 +33,7 @@ const privateNavItems = [
   { label: "Home", path: "/home" },
   { label: "Wallet", path: "/wallet" },
   { label: "Help", path: "/help" },
-  { label: "Support", path: "/support" },
+  // { label: "Support", path: "/support" },
 ];
 
 interface HeaderProps {
@@ -46,6 +46,8 @@ export default function Header({ className }: HeaderProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const { status } = useSession();
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.role === 'admin';
 
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -107,6 +109,25 @@ export default function Header({ className }: HeaderProps) {
             <ListItemText primary={item.label} sx={{ textAlign: "center" }} />
           </ListItem>
         ))}
+
+        {/* Admin Menu Items for Mobile */}
+        {isAdmin && (
+          <>
+            <Divider sx={{ borderColor: "rgba(255, 255, 255, 0.08)", my: 2 }} />
+            <ListItem sx={{ justifyContent: "center", mb: 1 }}>
+              <ListItemText 
+                primary="Admin Menu" 
+                sx={{ 
+                  textAlign: "center",
+                  color: "primary.light",
+                  "& .MuiTypography-root": {
+                    fontWeight: 700,
+                  }
+                }} 
+              />
+            </ListItem>
+          </>
+        )}
   
         {/* Auth Buttons */}
         {status !== "authenticated" ? (
@@ -174,7 +195,6 @@ export default function Header({ className }: HeaderProps) {
       </List>
     </Box>
   );
-  
 
   return (
     <AppBar
@@ -240,6 +260,37 @@ export default function Header({ className }: HeaderProps) {
                 {item.label}
               </Button>
             ))}
+
+            {/* Admin Menu Button for Desktop */}
+            {isAdmin && (
+              <>
+                <Button
+                  onClick={() => router.push("/admin")}
+                  startIcon={<AdminIcon />}
+                  sx={{
+                    my: 2,
+                    color: pathname.includes('/admin') ? "primary.main" : "rgba(30, 41, 59, 0.85)",
+                    display: "flex",
+                    alignItems: "center",
+                    fontWeight: pathname.includes('/admin') ? "bold" : 500,
+                    borderBottom: pathname.includes('/admin') ? "2.5px solid" : "none",
+                    borderColor: "primary.main",
+                    borderRadius: 0,
+                    mx: 1.5,
+                    fontSize: '1.1rem',
+                    letterSpacing: 0.5,
+                    transition: 'all 0.2s cubic-bezier(.4,0,.2,1)',
+                    '&:hover': {
+                      backgroundColor: 'rgba(140,217,133,0.10)',
+                      color: 'primary.main',
+                      transform: 'translateY(-2px) scale(1.04)',
+                    }
+                  }}
+                >
+                  Admin
+                </Button>
+              </>
+            )}
           </Box>
 
           {/* Auth buttons or User Menu */}
