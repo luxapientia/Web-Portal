@@ -56,7 +56,7 @@ export default function WalletPage() {
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 
                 setDoubleBubble({
-                    amount: data.doubleBubbleAmount.amount,
+                    amount: data.doubleBubble.amount,
                     releaseDate: releaseDate,
                     daysToRelease: diffDays
                 });
