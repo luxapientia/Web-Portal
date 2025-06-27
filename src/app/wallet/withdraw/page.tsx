@@ -435,7 +435,7 @@ export default function WithdrawPage() {
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                         <TimeIcon sx={{ color: 'primary.main', fontSize: 20 }} />
                                         <Typography variant="body2" color="text.secondary">
-                                            <strong>Processing time:</strong> 1-2 business days
+                                            <strong>Processing time:</strong> 3 working days
                                         </Typography>
                                     </Box>
                                 </Paper>
