@@ -292,28 +292,11 @@ export default function DepositPage() {
                         >
                             <TableHead>
                                 <TableRow>
-                                    {/* <TableCell>
+                                    <TableCell>
                                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
-                                            Transaction ID
-                                            <IconButton
-                                                size="small"
-                                                onClick={(e) => handleFilterClick(e, 'transactionId')}
-                                            >
-                                                <FilterIcon fontSize="small" />
-                                            </IconButton>
-                                            <IconButton
-                                                size="small"
-                                                onClick={() => handleSort('transactionId')}
-                                            >
-                                                {renderSortIcon('transactionId')}
-                                            </IconButton>
+                                            User
                                         </Box>
-                                    </TableCell> */}
-                                    {/* <TableCell>
-                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
-                                            From User
-                                        </Box>
-                                    </TableCell> */}
+                                    </TableCell>
                                     <TableCell>
                                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
                                             Amount (USD)
@@ -356,7 +339,7 @@ export default function DepositPage() {
                                 ) : transactions.length === 0 ? (
                                     <TableRow>
                                         <TableCell
-                                            colSpan={8}
+                                            colSpan={4}
                                             align="center"
                                             sx={{
                                                 py: 8,
@@ -377,52 +360,18 @@ export default function DepositPage() {
                                                 transition: 'background-color 0.2s ease',
                                             }}
                                         >
-                                            {/* <TableCell>
-                                                <Box sx={{
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    gap: 1,
-                                                }}>
-                                                    <Box sx={{
-                                                        fontFamily: 'monospace',
-                                                        fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.875rem' },
-                                                        bgcolor: 'grey.50',
-                                                        p: 0.5,
-                                                        borderRadius: 0.5,
-                                                        overflow: 'hidden',
-                                                        textOverflow: 'ellipsis',
-                                                        maxWidth: '200px',
-                                                    }}>
-                                                        {formatAddress(tx.transactionId || '')}
-                                                    </Box>
-                                                    <CopyButton text={tx.transactionId} />
-                                                </Box>
-                                            </TableCell> */}
-                                            {/* <TableCell>
+                                            <TableCell>
                                                 <Box sx={{
                                                     display: 'flex',
                                                     flexDirection: 'column',
                                                     alignItems: 'center',
                                                     justifyContent: 'center',
-                                                    gap: 0.5,
                                                 }}>
-                                                    {tx.fromUser ? (
-                                                        <>
-                                                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                                                                {tx.fromUser.name}
-                                                            </Typography>
-                                                            <Typography variant="caption" color="text.secondary">
-                                                                {tx.fromUser.email}
-                                                            </Typography>
-                                                        </>
-                                                    ) : (
-                                                        <Typography variant="body2" color="text.secondary">
-                                                            Unknown User
-                                                        </Typography>
-                                                    )}
+                                                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                                                        {tx.fromUserId?.email}
+                                                    </Typography>
                                                 </Box>
-                                            </TableCell> */}
+                                            </TableCell>
                                             <TableCell>
                                                 <Box sx={{
                                                     display: 'flex',

@@ -405,23 +405,11 @@ export default function WithdrawalsPage() {
                         >
                             <TableHead>
                                 <TableRow>
-                                    {/* <TableCell>
+                                    <TableCell>
                                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
-                                            Transaction ID
-                                            <IconButton
-                                                size="small"
-                                                onClick={(e) => handleFilterClick(e, 'transactionId')}
-                                            >
-                                                <FilterIcon fontSize="small" />
-                                            </IconButton>
-                                            <IconButton
-                                                size="small"
-                                                onClick={() => handleSort('transactionId')}
-                                            >
-                                                {renderSortIcon('transactionId')}
-                                            </IconButton>
+                                            User
                                         </Box>
-                                    </TableCell> */}
+                                    </TableCell>
                                     <TableCell>
                                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
                                             Amount (USD)
@@ -524,28 +512,18 @@ export default function WithdrawalsPage() {
                                                 transition: 'background-color 0.2s ease',
                                             }}
                                         >
-                                            {/* <TableCell>
+                                            <TableCell>
                                                 <Box sx={{
                                                     display: 'flex',
+                                                    flexDirection: 'column',
                                                     alignItems: 'center',
                                                     justifyContent: 'center',
-                                                    gap: 1,
                                                 }}>
-                                                    <Box sx={{
-                                                        fontFamily: 'monospace',
-                                                        fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.875rem' },
-                                                        bgcolor: 'grey.50',
-                                                        p: 0.5,
-                                                        borderRadius: 0.5,
-                                                        overflow: 'hidden',
-                                                        textOverflow: 'ellipsis',
-                                                        maxWidth: '200px',
-                                                    }}>
-                                                        {formatAddress(tx.transactionId || '')}
-                                                    </Box>
-                                                    <CopyButton text={tx.transactionId} />
+                                                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                                                        {tx.fromUserId?.email}
+                                                    </Typography>
                                                 </Box>
-                                            </TableCell> */}
+                                            </TableCell>
                                             <TableCell>
                                                 <Box sx={{
                                                     display: 'flex',
