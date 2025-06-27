@@ -10,6 +10,8 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
 
+const verificationCodeExpiry = process.env.NEXT_PUBLIC_VERIFICATION_CODE_EXPIRY || 60;
+
 // Create a separate client component for the registration form
 function RegistrationForm() {
   const searchParams = useSearchParams();
@@ -108,7 +110,7 @@ function RegistrationForm() {
         throw new Error(data.error || 'Failed to send verification code');
       }
 
-      setTimer(30); // Start 30 second countdown
+      setTimer(Number(verificationCodeExpiry)); // Start 30 second countdown
       setHasCodeBeenSent(true); // Mark that code has been sent
       toast.success('Verification code sent successfully!', { id: toastId });
     } catch (error) {

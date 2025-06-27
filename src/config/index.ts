@@ -189,6 +189,7 @@ export const config = {
     domain: process.env.POSTAL_DOMAIN || 'OTP<otp@bubble2025.com>',
     fromEmail: process.env.EMAIL_FROM || 'OTP<otp@bubble2025.com>',
     apiUrl: process.env.POSTAL_API_URL || 'https://postal.bubble2025.com/api/v1/send/message',
+    verificationCodeExpiry: Number(process.env.NEXT_PUBLIC_VERIFICATION_CODE_EXPIRY) || 60,
   }
 };
 

@@ -3,8 +3,7 @@ import { generateVerificationEmailContent, sendEmail } from '@/lib/mailgun';
 import { emailVerificationSchema } from '@/schemas/auth.schema';
 import redis from '@/lib/redis';
 import { generateVerificationCode } from '@/utils/generate-code';
-
-const VERIFICATION_CODE_EXPIRY = 30; // 30 seconds
+import { config } from '@/config';
 
 export async function POST(request: Request) {
   try {
@@ -41,11 +40,11 @@ export async function POST(request: Request) {
       `email_verification:${email}`,
       code,
       'EX',
-      VERIFICATION_CODE_EXPIRY
+      config.email.verificationCodeExpiry
     );
 
     // Generate email content with updated expiration time
-    const { text, html } = generateVerificationEmailContent(code, VERIFICATION_CODE_EXPIRY);
+    const { text, html } = generateVerificationEmailContent(code, config.email.verificationCodeExpiry);
 
     // Send email
     const emailResult = await sendEmail({
@@ -67,7 +66,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { 
         message: 'Verification code sent successfully',
-        expiresIn: VERIFICATION_CODE_EXPIRY
+        expiresIn: config.email.verificationCodeExpiry
       },
       { status: 200 }
     );
