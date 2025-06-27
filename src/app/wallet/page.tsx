@@ -251,10 +251,10 @@ export default function WalletPage() {
                                         justifyContent: 'center',
                                         bgcolor: 'success.main',
                                         color: 'white',
-                                        width: 24,
-                                        height: 24,
+                                        width: 32,
+                                        height: 32,
                                         borderRadius: '50%',
-                                        fontSize: '0.875rem',
+                                        fontSize: '1rem',
                                         fontWeight: 'bold'
                                     }}>
                                         {doubleBubble.daysToRelease}

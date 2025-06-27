@@ -72,7 +72,6 @@ export default function DailyTaskSection() {
   // Calculate example reward distribution for a $100 task reward
   const exampleReward = 100;
   const rewardDistribution = [
-    { recipient: 'You', percentage: 72, amount: exampleReward * 0.72 },
     { recipient: 'Level 1 Upline', percentage: 18, amount: exampleReward * 0.18 },
     { recipient: 'Level 2 Upline', percentage: 7, amount: exampleReward * 0.07 },
     { recipient: 'Level 3 Upline', percentage: 3, amount: exampleReward * 0.03 },
