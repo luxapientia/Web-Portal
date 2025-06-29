@@ -16,6 +16,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { CentralWalletWithoutId } from '@/models/CentralWallet';
 import { Transaction } from '@/models/Transaction';
+import CopyButton from '@/components/common/CopyButton';
 
 export default function DepositPage() {
     const theme = useTheme();
@@ -23,7 +24,6 @@ export default function DepositPage() {
     const [walletAddresses, setWalletAddresses] = useState<CentralWalletWithoutId[]>([]);
     const [pendingDeposit, setPendingDeposit] = useState<{ wallet: CentralWalletWithoutId, transaction: Transaction } | null>(null);
     const [selectedWallet, setSelectedWallet] = useState<CentralWalletWithoutId | null>(null);
-    const [qrUrl, setQrUrl] = useState<string | null>(null);
     const [supportedChain_Tokens, setSupportedChain_Tokens] = useState<{ chain: string, token: string }[]>([]);
     const [selectedChain_Token, setSelectedChain_Token] = useState<{ chain: string, token: string } | null>(null);
     const [copied, setCopied] = useState(false);
@@ -33,15 +33,6 @@ export default function DepositPage() {
     useEffect(() => {
         fetchWalletAddresses();
     }, []);
-
-    useEffect(() => {
-        if (!selectedWallet) setQrUrl(null);
-        else {
-            QRCode.toDataURL(selectedWallet.address)
-                .then(url => setQrUrl(url))
-                .catch(err => console.error('Error generating QR code:', err));
-        }
-    }, [selectedWallet]);
 
     const handleCopyAddress = async () => {
         if (pendingDeposit?.wallet?.address) {
@@ -356,20 +347,7 @@ export default function DepositPage() {
                                                     <Typography variant="body2" fontFamily="monospace" sx={{ wordBreak: 'break-all' }}>
                                                         {pendingDeposit.wallet.address}
                                                     </Typography>
-                                                    <IconButton
-                                                        onClick={handleCopyAddress}
-                                                        size="small"
-                                                        sx={{
-                                                            backgroundColor: copied ? 'success.main' : 'rgba(255, 255, 255, 0.1)',
-                                                            '&:hover': {
-                                                                backgroundColor: copied ? 'success.dark' : 'rgba(255, 255, 255, 0.2)',
-                                                            },
-                                                            transition: 'all 0.2s ease',
-                                                            color: copied ? 'white' : 'inherit'
-                                                        }}
-                                                    >
-                                                        {copied ? <CheckCircleOutlineIcon /> : <ContentCopyIcon />}
-                                                    </IconButton>
+                                                    <CopyButton text={pendingDeposit.wallet.address} />
                                                 </Paper>
                                                 <Box sx={{ mt: 2 }}>
                                                     <Typography variant="body2" color="text.secondary">Started At</Typography>
@@ -461,7 +439,7 @@ export default function DepositPage() {
                                         ))}
                                     </Select>
                                 </FormControl>
-                                {/* {selectedWallet && (
+                                {selectedWallet && (
                                     <Box sx={{ mt: 3 }}>
                                         <Typography
                                             variant="subtitle2"
@@ -499,28 +477,13 @@ export default function DepositPage() {
                                             >
                                                 {selectedWallet.address}
                                             </Typography>
-                                            <IconButton
-                                                onClick={handleCopyAddress}
-                                                size="small"
-                                                sx={{
-                                                    backgroundColor: copied ? 'success.main' : 'rgba(255, 255, 255, 0.1)',
-                                                    '&:hover': {
-                                                        backgroundColor: copied ? 'success.dark' : 'rgba(255, 255, 255, 0.2)',
-                                                    },
-                                                    transition: 'all 0.2s ease',
-                                                    color: copied ? 'white' : 'inherit'
-                                                }}
-                                            >
-                                                {copied ? <CheckCircleOutlineIcon /> : <ContentCopyIcon />}
-                                            </IconButton>
+                                            <CopyButton text={selectedWallet.address} />
                                         </Paper>
+                                        <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
+                                            <QRCodeComponent address={selectedWallet?.address || ''} />
+                                        </Box>
                                     </Box>
                                 )}
-                                {qrUrl && (
-                                    <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
-                                        <img src={qrUrl} alt="Deposit QR Code" />
-                                    </Box>
-                                )} */}
 
                                 {/* Deposit Button */}
                                 {selectedWallet && (
@@ -546,7 +509,7 @@ export default function DepositPage() {
                                             }
                                         }}
                                     >
-                                        Next to Deposit
+                                        Deposit
                                     </Button>
                                 )}
 
