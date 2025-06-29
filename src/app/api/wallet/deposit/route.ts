@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
-        const { chain, token, toAddress } = await request.json();
+        const { chain, token, toAddress, txid } = await request.json();
 
         const wallet = await CentralWalletModel.findOne({ address: toAddress, chain }) as CentralWallet;
 
@@ -27,25 +27,37 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Wallet not found' }, { status: 404 });
         }
 
-        if (wallet.isInUse) {
-            return NextResponse.json({ error: 'Wallet is already in use' }, { status: 400 });
-        }
-
-        const startAmount = await walletService.getBalance(toAddress, chain, token);
-        wallet.startAmount = startAmount;
-        wallet.isInUse = true;
-        await wallet.save();
-
-        const newTransaction: Partial<Transaction> = {
+        const transaction = await TransactionModel.findOne({
             toAddress: toAddress,
-            type: 'deposit',
-            startDate: new Date(),
-            token: token,
             chain: chain,
+            token: token,
+            type: 'deposit',
             fromUserId: user._id,
+        }) as Transaction;
+
+        if (!transaction) {
+            return NextResponse.json({ error: 'Deposit is not applied' }, { status: 404 });
         }
 
-        const transaction = await TransactionModel.create(newTransaction);
+        transaction.transactionId = txid;
+        transaction.status = 'pending';
+        await transaction.save();
+
+        // const startAmount = await walletService.getBalance(toAddress, chain, token);
+        // wallet.startAmount = startAmount;
+        // wallet.isInUse = true;
+        // await wallet.save();
+
+        // const newTransaction: Partial<Transaction> = {
+        //     toAddress: toAddress,
+        //     type: 'deposit',
+        //     startDate: new Date(),
+        //     token: token,
+        //     chain: chain,
+        //     fromUserId: user._id,
+        // }
+
+        // const transaction = await TransactionModel.create(newTransaction);
 
         return NextResponse.json({ success: true, data: { transaction } });
     } catch (error) {
@@ -86,7 +98,8 @@ export async function GET() {
             }
         }
 
-        const wallets = await CentralWalletModel.find({ isInUse: false }) as CentralWallet[];
+        const wallets = await CentralWalletModel.find({}) as CentralWallet[];
+        // const wallets = await CentralWalletModel.find({ isInUse: false }) as CentralWallet[];
 
         const centralWallets: { address: string, chain: string }[] = [];
 
