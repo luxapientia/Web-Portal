@@ -48,8 +48,6 @@ async function checkPendingTransactions() {
                 //     await wallet.save();
                 // }
                 // Check transaction status on blockchain
-                const wallet = await CentralWalletModel.findOne({ address: transaction.toAddress, chain: transaction.chain }) as CentralWallet;
-
                 const txDetails = await walletService.getTxDetails(
                     transaction.transactionId,
                     transaction.chain as 'Binance' | 'Ethereum' | 'Tron'

@@ -3,7 +3,7 @@ import { CentralWallet, CentralWalletModel } from '@/models/CentralWallet';
 import { Transaction, TransactionModel } from '@/models/Transaction';
 import { authOptions, config } from '@/config';
 import { getServerSession } from 'next-auth';
-import { walletService } from '@/services/Wallet';
+import { WalletService, walletService } from '@/services/Wallet';
 import { UserModel } from '@/models/User';
 import { User } from '@/models/User';
 
@@ -33,10 +33,24 @@ export async function POST(request: NextRequest) {
             token: token,
             type: 'deposit',
             fromUserId: user._id,
+            status: 'pending'
         }) as Transaction;
 
         if (!transaction) {
             return NextResponse.json({ error: 'Deposit is not applied' }, { status: 404 });
+        }
+
+        const txDetails = await walletService.getTxDetails(txid, chain as 'Binance' | 'Ethereum' | 'Tron');
+        if (txDetails.status === 'notStarted') {
+            return NextResponse.json({ error: 'Transaction not started' }, { status: 404 });
+        }
+
+        const existingTransaction = await TransactionModel.findOne({
+            transactionId: txid,
+        }) as Transaction;
+
+        if (existingTransaction) {
+            return NextResponse.json({ error: 'Transaction already exists' }, { status: 400 });
         }
 
         transaction.transactionId = txid;
