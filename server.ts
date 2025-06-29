@@ -10,16 +10,14 @@ import withdrawCron from './src/cron-job/withdraw';
 import trustFundCron from './src/cron-job/trustFund';
 import priceSyncCron from './src/cron-job/priceSync';
 import releaseInterestRewardCron from './src/cron-job/releaseInterestReward';
+import { SocketService } from './src/services/SocketService';
 
 // Load environment variables from .env.local
 dotenv.config({ path: '.env.local' });
 
 const dev = config.server.nodeEnv !== 'production';
-
 const app = next({ dev, hostname: config.server.hostname, port: parseInt(config.server.port as string) });
 const handle = app.getRequestHandler();
-
-
 
 async function startServer() {
   try {
@@ -44,6 +42,10 @@ async function startServer() {
       }
     });
 
+    // Initialize Socket.IO
+    const socketService = SocketService.getInstance();
+    socketService.initialize(server);
+
     server.once('error', (err) => {
       console.error(err);
       process.exit(1);
@@ -52,7 +54,6 @@ async function startServer() {
     server.listen(config.server.port, () => {
       console.log(`> Ready on http://${config.server.hostname}:${config.server.port}`);
     });
-
 
     depositCron.start();
     priceSyncCron.start();
