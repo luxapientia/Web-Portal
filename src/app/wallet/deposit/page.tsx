@@ -43,11 +43,10 @@ export default function DepositPage() {
         }
     }, [selectedWallet]);
 
-
     const handleCopyAddress = async () => {
-        if (selectedWallet?.address) {
+        if (pendingDeposit?.wallet?.address) {
             try {
-                await navigator.clipboard.writeText(selectedWallet.address);
+                await navigator.clipboard.writeText(pendingDeposit.wallet.address);
                 setCopied(true);
                 toast.success('Address copied to clipboard!');
                 setTimeout(() => setCopied(false), 2000);
@@ -357,6 +356,20 @@ export default function DepositPage() {
                                                     <Typography variant="body2" fontFamily="monospace" sx={{ wordBreak: 'break-all' }}>
                                                         {pendingDeposit.wallet.address}
                                                     </Typography>
+                                                    <IconButton
+                                                        onClick={handleCopyAddress}
+                                                        size="small"
+                                                        sx={{
+                                                            backgroundColor: copied ? 'success.main' : 'rgba(255, 255, 255, 0.1)',
+                                                            '&:hover': {
+                                                                backgroundColor: copied ? 'success.dark' : 'rgba(255, 255, 255, 0.2)',
+                                                            },
+                                                            transition: 'all 0.2s ease',
+                                                            color: copied ? 'white' : 'inherit'
+                                                        }}
+                                                    >
+                                                        {copied ? <CheckCircleOutlineIcon /> : <ContentCopyIcon />}
+                                                    </IconButton>
                                                 </Paper>
                                                 <Box sx={{ mt: 2 }}>
                                                     <Typography variant="body2" color="text.secondary">Started At</Typography>
@@ -448,7 +461,7 @@ export default function DepositPage() {
                                         ))}
                                     </Select>
                                 </FormControl>
-                                {selectedWallet && (
+                                {/* {selectedWallet && (
                                     <Box sx={{ mt: 3 }}>
                                         <Typography
                                             variant="subtitle2"
@@ -507,7 +520,7 @@ export default function DepositPage() {
                                     <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
                                         <img src={qrUrl} alt="Deposit QR Code" />
                                     </Box>
-                                )}
+                                )} */}
 
                                 {/* Deposit Button */}
                                 {selectedWallet && (
@@ -533,7 +546,7 @@ export default function DepositPage() {
                                             }
                                         }}
                                     >
-                                        Deposit
+                                        Next to Deposit
                                     </Button>
                                 )}
 
@@ -610,46 +623,6 @@ export default function DepositPage() {
 
                                     <DialogContent sx={{ pt: 1, px: 4 }}>
                                         <Box sx={{ mt: 2 }}>
-                                            <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-                                                Please confirm your deposit details:
-                                            </Typography>
-
-                                            <Box sx={{ mt: 2, mb: 3, p: 2, bgcolor: 'rgba(0, 0, 0, 0.02)', borderRadius: 2 }}>
-                                                <Stack spacing={1.5}>
-                                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                                        <Typography variant="body2" color="text.secondary">Network:</Typography>
-                                                        <Typography variant="body2" fontWeight={500}>{selectedChain_Token?.chain}</Typography>
-                                                    </Box>
-                                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                                        <Typography variant="body2" color="text.secondary">Token:</Typography>
-                                                        <Typography variant="body2" fontWeight={500}>{selectedChain_Token?.token}</Typography>
-                                                    </Box>
-                                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                                        <Typography variant="body2" color="text.secondary">Address:</Typography>
-                                                        <Typography
-                                                            variant="body2"
-                                                            fontWeight={500}
-                                                            sx={{
-                                                                maxWidth: '60%',
-                                                                textAlign: 'right',
-                                                                wordBreak: 'break-all'
-                                                            }}
-                                                        >
-                                                            {selectedWallet?.address}
-                                                        </Typography>
-                                                    </Box>
-                                                    <Box sx={{
-                                                        display: 'flex',
-                                                        flexDirection: 'column',
-                                                        alignItems: 'center',
-                                                        background: 'white',
-                                                        p: 2,
-                                                        borderRadius: 1,
-                                                    }}>
-                                                        <QRCodeComponent address={selectedWallet?.address || ''} />
-                                                    </Box>
-                                                </Stack>
-                                            </Box>
 
                                             <Alert severity="warning" sx={{ mb: 2 }}>
                                                 <AlertTitle>Important Notice</AlertTitle>
