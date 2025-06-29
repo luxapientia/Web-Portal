@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
 
         const { chain, token } = await request.json();
 
-        const wallets = await CentralWalletModel.find({ isInUse: false, chain }) as CentralWallet[];
+        const wallets = await CentralWalletModel.find({ chain }) as CentralWallet[];
 
         if (wallets.length === 0) {
             return NextResponse.json({ error: 'No wallet found with this chain' }, { status: 404 });
