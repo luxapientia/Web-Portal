@@ -1,6 +1,4 @@
 import { config } from '../config';
-// import formData from 'form-data';
-// import Mailgun from 'mailgun.js';
 
 if (!process.env.POSTAL_API_KEY) {
   throw new Error('POSTAL_API_KEY is not set in environment variables');
@@ -9,16 +7,6 @@ if (!process.env.POSTAL_API_KEY) {
 if (!process.env.POSTAL_DOMAIN) {
   throw new Error('POSTAL_DOMAIN is not set in environment variables');
 }
-
-// const mailgun = new Mailgun(formData);
-
-// Initialize the client with proper typing
-// const client = mailgun.client({
-//   username: 'api',
-//   key: process.env.MAILGUN_API_KEY,
-//   url: 'https://api.mailgun.net', // Use EU endpoint if your domain is in EU region
-// });
-
 
 export interface EmailData {
   to: string;
@@ -29,19 +17,6 @@ export interface EmailData {
 
 export async function sendEmail({ to, subject, text, html }: EmailData) {
   try {
-    // if (!DOMAIN || !process.env.MAILGUN_API_KEY) {
-    //   throw new Error('Mailgun configuration is missing');
-    // }
-
-    // const messageData = {
-    //   from: FROM_EMAIL,
-    //   to,
-    //   subject,
-    //   text,
-    //   html,
-    // };
-
-    // const response = await client.messages.create(DOMAIN, messageData);
     const response = await fetch(config.email.apiUrl, {
       method: 'POST',
       headers: {
