@@ -1,7 +1,6 @@
 import cron from 'node-cron';
 import { Transaction, TransactionModel } from '../models/Transaction';
 import { walletService } from '../services/Wallet';
-import { CentralWallet, CentralWalletModel } from '../models/CentralWallet';
 import { CryptoPriceModel } from '../models/CryptoPrice';
 import { deposit } from '../controllers';
 
