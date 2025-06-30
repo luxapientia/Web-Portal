@@ -8,7 +8,7 @@ import Layout from '@/components/layout/Layout';
 import {
     AccountBalance as AccountBalanceIcon,
     ArrowBack as ArrowBackIcon,
-    Send as SendIcon
+    Send as SendIcon,
 } from '@mui/icons-material';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -516,18 +516,94 @@ export default function DepositPage() {
                                         severity="info" 
                                         sx={{ 
                                             mb: 3,
-                                            backgroundColor: 'rgba(25, 118, 210, 0.1)',
+                                            backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                                            backdropFilter: 'blur(10px)',
+                                            border: '1px solid rgba(25, 118, 210, 0.2)',
+                                            borderRadius: 2,
+                                            boxShadow: '0 4px 12px rgba(25, 118, 210, 0.08)',
+                                            transition: 'all 0.3s ease',
+                                            overflow: 'hidden',
+                                            '&:hover': {
+                                                backgroundColor: 'rgba(25, 118, 210, 0.12)',
+                                                transform: 'translateY(-2px)',
+                                                boxShadow: '0 6px 16px rgba(25, 118, 210, 0.12)',
+                                            },
                                             '& .MuiAlert-icon': {
-                                                color: '#1976d2'
+                                                color: '#1976d2',
+                                                fontSize: '28px'
                                             }
                                         }}
                                     >
-                                        <AlertTitle sx={{ color: '#1976d2', fontWeight: 600 }}>
+                                        <AlertTitle sx={{ 
+                                            color: '#1976d2', 
+                                            fontWeight: 600,
+                                            fontSize: { xs: '1rem', sm: '1.1rem' },
+                                            mb: 1,
+                                            whiteSpace: 'nowrap',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis'
+                                        }}>
                                             Transaction Submitted
                                         </AlertTitle>
-                                        <Typography variant="body2" sx={{ color: '#0d47a1' }}>
-                                            Your transaction has been submitted and is being processed. Transaction ID: {pendingDeposit.transaction.transactionId}
-                                        </Typography>
+                                        <Box sx={{ 
+                                            color: '#0d47a1',
+                                            maxWidth: '100%'
+                                        }}>
+                                            <Typography variant="body1" sx={{ 
+                                                mb: 2,
+                                                fontSize: { xs: '0.875rem', sm: '1rem' },
+                                                whiteSpace: 'nowrap',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis'
+                                            }}>
+                                                Your transaction has been submitted and is being processed.
+                                            </Typography>
+                                            <Box sx={{ 
+                                                display: 'flex',
+                                                flexDirection: { xs: 'column', sm: 'row' },
+                                                alignItems: { xs: 'flex-start', sm: 'center' },
+                                                gap: 1,
+                                                p: 1.5,
+                                                borderRadius: 1,
+                                                backgroundColor: 'rgba(25, 118, 210, 0.04)',
+                                                border: '1px solid rgba(25, 118, 210, 0.1)',
+                                                maxWidth: '100%',
+                                                overflow: 'hidden'
+                                            }}>
+                                                <Typography variant="subtitle2" sx={{ 
+                                                    color: '#1976d2',
+                                                    minWidth: { sm: '120px' },
+                                                    fontWeight: 600,
+                                                    whiteSpace: 'nowrap'
+                                                }}>
+                                                    Transaction ID:
+                                                </Typography>
+                                                <Box sx={{ 
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: 1,
+                                                    flex: 1,
+                                                    minWidth: 0,
+                                                    width: '100%'
+                                                }}>
+                                                    <Typography variant="body2" sx={{ 
+                                                        fontFamily: 'monospace',
+                                                        backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                                                        p: 1,
+                                                        borderRadius: 1,
+                                                        flex: 1,
+                                                        overflow: 'hidden',
+                                                        textOverflow: 'ellipsis',
+                                                        whiteSpace: 'nowrap',
+                                                        fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                                                        minWidth: 0
+                                                    }}>
+                                                        {pendingDeposit.transaction.transactionId}
+                                                    </Typography>
+                                                    <CopyButton text={pendingDeposit.transaction.transactionId} />
+                                                </Box>
+                                            </Box>
+                                        </Box>
                                     </Alert>
                                 )}
                             </Box>
