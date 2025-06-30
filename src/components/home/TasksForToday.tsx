@@ -1,4 +1,4 @@
-import { Card, CardContent, Typography, Divider, Stack, Box, Button, Modal, List, ListItem, ListItemIcon, Paper, Chip } from '@mui/material';
+import { Card, CardContent, Typography, Divider, Stack, Box, Button, Modal, List, ListItem, ListItemIcon, Paper, Chip, CircularProgress } from '@mui/material';
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
@@ -22,7 +22,7 @@ export default function TasksForToday({ onAccountValueChange }: TasksForTodayPro
   const [displayedPercent, setDisplayedPercent] = useState<number>(0);
   const [pulse, setPulse] = useState<boolean>(false);
   const [progressTarget, setProgressTarget] = useState<number>(0);
-  const [reward, setReward] = useState<number>(0);
+  // const [reward, setReward] = useState<number>(0);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -57,7 +57,7 @@ export default function TasksForToday({ onAccountValueChange }: TasksForTodayPro
   const startTask = useCallback(async () => {
     if (isTaskRunning || remainingTasks === 0 || loading) return;
 
-    if ( curTask ) {
+    if (curTask) {
       toast.error('You have already started a task');
       return;
     }
@@ -75,7 +75,7 @@ export default function TasksForToday({ onAccountValueChange }: TasksForTodayPro
       setCurTask(result.data.task);
       setTaskLimit(result.data.taskLimit);
       setRemainingTasks(result.data.remainingTasks);
-      setTasks(result.data.tasks);  
+      setTasks(result.data.tasks);
       if (!task) {
         toast.error('No available tasks for today');
         return;
@@ -106,7 +106,7 @@ export default function TasksForToday({ onAccountValueChange }: TasksForTodayPro
       };
 
       requestAnimationFrame(animateProgress);
-      
+
     } catch {
       toast.error('Failed to start task');
       setIsTaskRunning(false);
@@ -114,7 +114,15 @@ export default function TasksForToday({ onAccountValueChange }: TasksForTodayPro
       setLoading(false);
     }
   }, [isTaskRunning, remainingTasks, loading]);
-  
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
   const completeTask = async (task: DailyTask) => {
     try {
       setLoading(true);
@@ -130,7 +138,7 @@ export default function TasksForToday({ onAccountValueChange }: TasksForTodayPro
 
       setPulse(true);
       toast.success('Task completed successfully!');
-      setReward(result.data.reward);
+      // setReward(result.data.reward);
       setTasks(result.data.tasks);
 
       if (onAccountValueChange) {
@@ -147,15 +155,69 @@ export default function TasksForToday({ onAccountValueChange }: TasksForTodayPro
       setLoading(false);
     }
   };
-  console.log(reward)
-  
-  const handleOpenModal = () => {
-    setIsModalOpen(true);
-  };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
+  const restartTask = useCallback(async (taskId: string) => {
+    console.log(taskId);
+    if (isTaskRunning || loading) {
+      toast.error('A task is already in progress');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await fetch('/api/daily-task/restart-task', {
+        method: 'POST',
+        body: JSON.stringify({ taskId }),
+      });
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to restart task');
+      }
+
+      console.log(result.data);
+      
+      // Set the current task
+      setCurTask(result.data);
+      
+      // Start the task animation and process
+      setIsTaskRunning(true);
+      setDisplayedPercent(0);
+      setProgressTarget(0);
+      setPulse(false);
+
+      // Start the animation
+      const startTime = Date.now();
+      const duration = Number(process.env.NEXT_PUBLIC_TASK_DURATION) || 120000; // 2 minutes
+
+      const animateProgress = () => {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min((elapsed / duration) * 100, 100);
+
+        setDisplayedPercent(Math.round(progress));
+        setProgressTarget(progress);
+
+        if (progress < 100) {
+          requestAnimationFrame(animateProgress);
+        } else {
+          // Task completed
+          completeTask(result.data);
+        }
+      };
+
+      requestAnimationFrame(animateProgress);
+      handleCloseModal();
+      toast.success('Task restarted successfully!');
+
+    } catch (error) {
+      console.error('Error restarting task:', error);
+      toast.error('Failed to restart task');
+      setIsTaskRunning(false);
+      setCurTask(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [isTaskRunning, loading, handleCloseModal, completeTask]);
 
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('en-US', {
@@ -389,7 +451,7 @@ export default function TasksForToday({ onAccountValueChange }: TasksForTodayPro
           <Typography id="tasks-modal-title" variant="h5" component="h2" fontWeight={700} mb={1}>
             Daily Tasks Overview
           </Typography>
-          
+
           {/* Date and Stats Section */}
           <Box sx={{ mb: 3, mt: 2 }}>
             {/* Date Header */}
@@ -401,11 +463,11 @@ export default function TasksForToday({ onAccountValueChange }: TasksForTodayPro
                 </Typography>
               </Stack>
             </Paper>
-            
+
             {/* Stats Cards */}
-            <Stack 
-              direction={{ xs: 'column', sm: 'row' }} 
-              spacing={2} 
+            <Stack
+              direction={{ xs: 'column', sm: 'row' }}
+              spacing={2}
               sx={{ width: '100%' }}
             >
               <Paper sx={{ p: 2, bgcolor: '#e8f5e9', flex: 1 }}>
@@ -438,7 +500,7 @@ export default function TasksForToday({ onAccountValueChange }: TasksForTodayPro
           <Divider sx={{ mb: 3 }} />
 
           {/* Tasks List */}
-          <List sx={{ 
+          <List sx={{
             bgcolor: 'background.paper',
             borderRadius: 2,
             '& .MuiListItem-root': {
@@ -448,20 +510,22 @@ export default function TasksForToday({ onAccountValueChange }: TasksForTodayPro
               transition: 'all 0.2s',
               '&:hover': {
                 bgcolor: '#eeeeee',
-                transform: 'translateX(4px)'
               }
             }
           }}>
             {Array.from({ length: taskLimit }).map((_, index) => {
               const task = tasks.find(t => t.taskIndex === index + 1);
+              const isCurrentTask = curTask && curTask.taskIndex === index + 1;
+
               return (
-                <ListItem 
-                  key={index} 
-                  sx={{ 
+                <ListItem
+                  key={index}
+                  sx={{
                     py: 2,
                     px: 3,
                     border: 1,
-                    borderColor: 'divider',
+                    borderColor: isCurrentTask ? 'primary.main' : 'divider',
+                    bgcolor: isCurrentTask ? 'rgba(25, 118, 210, 0.08)' : undefined,
                   }}
                 >
                   <Box sx={{ width: '100%' }}>
@@ -469,6 +533,8 @@ export default function TasksForToday({ onAccountValueChange }: TasksForTodayPro
                       <ListItemIcon sx={{ minWidth: 40 }}>
                         {task?.isCompleted ? (
                           <CheckCircleIcon color="success" />
+                        ) : isCurrentTask ? (
+                          <CircularProgress size={24} color="primary" />
                         ) : (
                           <RadioButtonUncheckedIcon color="disabled" />
                         )}
@@ -477,20 +543,117 @@ export default function TasksForToday({ onAccountValueChange }: TasksForTodayPro
                         Task {index + 1}
                       </Typography>
                       <Box flexGrow={1} />
-                      <Chip 
-                        label={task ? (task.isCompleted ? 'Completed' : 'Not Completed') : 'Not Started'}
-                        color={task ? (task.isCompleted ? 'success' : 'warning') : 'default'}
-                        size="small"
-                        sx={{ minWidth: 100 }}
-                      />
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        {task && !task.isCompleted && !isCurrentTask && (
+                          <Button
+                            variant="contained"
+                            onClick={() => {
+                              if (typeof task._id === 'string') {
+                                restartTask(task._id);
+                              } else if (task._id && typeof task._id.toString === 'function') {
+                                restartTask(task._id.toString());
+                              } else {
+                                toast.error('Invalid task ID');
+                              }
+                            }}
+                            disabled={loading || isTaskRunning}
+                            sx={{
+                              minWidth: { xs: '36px', sm: '120px' },
+                              height: '32px',
+                              backgroundColor: 'primary.main',
+                              color: 'white',
+                              borderRadius: '16px',
+                              textTransform: 'none',
+                              fontWeight: 600,
+                              fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                              transition: 'all 0.3s ease',
+                              boxShadow: '0 2px 8px rgba(25, 118, 210, 0.25)',
+                              overflow: 'hidden',
+                              position: 'relative',
+                              '&:hover': {
+                                backgroundColor: 'primary.dark',
+                                transform: 'translateY(-2px)',
+                                boxShadow: '0 4px 12px rgba(25, 118, 210, 0.35)',
+                                '&::before': {
+                                  transform: 'translateX(100%)'
+                                }
+                              },
+                              '&:active': {
+                                transform: 'translateY(0)',
+                                boxShadow: '0 2px 4px rgba(25, 118, 210, 0.25)'
+                              },
+                              '&.Mui-disabled': {
+                                backgroundColor: 'rgba(0, 0, 0, 0.12)',
+                                color: 'rgba(0, 0, 0, 0.26)',
+                                boxShadow: 'none'
+                              },
+                              '&::before': {
+                                content: '""',
+                                position: 'absolute',
+                                top: 0,
+                                left: '-100%',
+                                width: '100%',
+                                height: '100%',
+                                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
+                                transition: 'transform 0.6s ease'
+                              },
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '4px'
+                            }}
+                          >
+                            {loading ? (
+                              <CircularProgress size={16} color="inherit" />
+                            ) : (
+                              <>
+                                <RocketLaunchIcon sx={{
+                                  fontSize: { xs: '16px', sm: '18px' },
+                                  animation: isTaskRunning ? 'none' : 'pulse 2s infinite',
+                                  transform: 'rotate(-45deg)',
+                                  transition: 'transform 0.3s ease'
+                                }} />
+                                <Box
+                                  component="span"
+                                  sx={{
+                                    display: { xs: 'none', sm: 'inline' },
+                                    opacity: 1,
+                                    transform: 'translateY(0)',
+                                    transition: 'all 0.3s ease'
+                                  }}
+                                >
+                                  Restart Task
+                                </Box>
+                              </>
+                            )}
+                          </Button>
+                        )}
+                        <Chip
+                          label={
+                            isCurrentTask ? 'In Progress' :
+                              (task ? (task.isCompleted ? 'Completed' : 'Not Completed') : 'Not Started')
+                          }
+                          color={
+                            isCurrentTask ? 'primary' :
+                              (task ? (task.isCompleted ? 'success' : 'warning') : 'default')
+                          }
+                          size="small"
+                          sx={{
+                            minWidth: 100,
+                            '& .MuiChip-label': {
+                              fontWeight: isCurrentTask ? 600 : undefined
+                            }
+                          }}
+                        />
+                      </Stack>
                     </Stack>
-                    
+
                     {task && (
-                      <Stack 
-                        direction={{ xs: 'column', sm: 'row' }} 
+                      <Stack
+                        direction={{ xs: 'column', sm: 'row' }}
                         spacing={2}
                         ml={7}
-                        sx={{ 
+                        sx={{
                           typography: 'body2',
                           color: 'text.secondary'
                         }}
@@ -518,14 +681,14 @@ export default function TasksForToday({ onAccountValueChange }: TasksForTodayPro
           </List>
 
           {/* Footer Actions */}
-          <Box sx={{ 
-            mt: 3, 
+          <Box sx={{
+            mt: 3,
             pt: 2,
             borderTop: 1,
             borderColor: 'divider',
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center' 
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
           }}>
             <Button
               variant="outlined"
@@ -552,6 +715,21 @@ export default function TasksForToday({ onAccountValueChange }: TasksForTodayPro
           </Box>
         </Box>
       </Modal>
+
+      {/* Add keyframes for pulse animation */}
+      <style jsx global>{`
+          @keyframes pulse {
+            0% {
+              transform: scale(1);
+            }
+            50% {
+              transform: scale(1.2);
+            }
+            100% {
+              transform: scale(1);
+            }
+          }
+        `}</style>
     </motion.div>
   );
 } 
