@@ -70,7 +70,7 @@ export class SocketService {
         } else {
           next(new Error('Unauthorized'));
         }
-      } catch (error) {
+      } catch {
         next(new Error('Authentication failed'));
       }
     });
@@ -117,13 +117,13 @@ export class SocketService {
   }
 
   // Market data updates
-  public emitMarketUpdate(data: any) {
+  public emitMarketUpdate(data: object) {
     if (!this.io) return;
     this.io.to('market-updates').emit('market:update', data);
   }
 
   // Transaction updates for specific user
-  public async emitTransactionUpdate(userId: string, data: any) {
+  public async emitTransactionUpdate(userId: string, data: object) {
     if (!this.io) return;
     
     try {
@@ -137,13 +137,13 @@ export class SocketService {
   }
 
   // Live activity updates
-  public emitActivityUpdate(data: any) {
+  public emitActivityUpdate(data: object) {
     if (!this.io) return;
     this.io.to('live-activities').emit('activity:update', data);
   }
 
   // User-specific notifications
-  public async emitUserNotification(userId: string, data: any) {
+  public async emitUserNotification(userId: string, data: object) {
     if (!this.io) return;
     
     try {
@@ -157,7 +157,7 @@ export class SocketService {
   }
 
   // Global broadcast (use sparingly)
-  public emitGlobalEvent(eventName: string, data: any) {
+  public emitGlobalEvent(eventName: string, data: object) {
     if (!this.io) return;
     this.io.emit(eventName, data);
   }

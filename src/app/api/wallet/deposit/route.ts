@@ -3,7 +3,7 @@ import { CentralWallet, CentralWalletModel } from '@/models/CentralWallet';
 import { Transaction, TransactionModel } from '@/models/Transaction';
 import { authOptions, config } from '@/config';
 import { getServerSession } from 'next-auth';
-import { WalletService, walletService } from '@/services/Wallet';
+import { walletService } from '@/services/Wallet';
 import { UserModel } from '@/models/User';
 import { User } from '@/models/User';
 
